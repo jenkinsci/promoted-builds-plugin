@@ -1,0 +1,3 @@
+<div>
+  This plugin implements a "promoted build" job that consists of stable good builds of another job.
+</div>
