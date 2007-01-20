@@ -1,7 +1,7 @@
 package hudson.plugins.promoted_builds;
 
-import hudson.model.Jobs;
 import hudson.Plugin;
+import hudson.model.Items;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -9,6 +9,6 @@ import hudson.Plugin;
  */
 public class PluginImpl extends Plugin {
     public void start() throws Exception {
-        Jobs.JOBS.add(PromotedJob.DESCRIPTOR);
+        Items.LIST.add(PromotedJob.DESCRIPTOR);
     }
 }

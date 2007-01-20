@@ -1,11 +1,11 @@
 package hudson.plugins.promoted_builds;
 
-import hudson.model.Descriptor;
-import hudson.model.Hudson;
+import hudson.model.Items;
 import hudson.model.Job;
-import hudson.model.JobDescriptor;
 import hudson.model.RunMap;
 import hudson.model.RunMap.Constructor;
+import hudson.model.TopLevelItem;
+import hudson.model.TopLevelItemDescriptor;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,19 +17,19 @@ import java.util.logging.Logger;
  * (AKA promoted builds.)
  *
  */
-public class PromotedJob extends Job<PromotedJob, PromotedBuild> {
+public class PromotedJob extends Job<PromotedJob, PromotedBuild> implements TopLevelItem {
 
     /**
      * All the promoted builds keyed by their build number.
      */
     private transient /*almost final*/ RunMap<PromotedBuild> builds = new RunMap<PromotedBuild>();
 
-    public PromotedJob(Hudson parent, String name) {
-        super(parent, name);
+    public PromotedJob(String name) {
+        super(name);
     }
 
-
-    protected void onLoad(Hudson root, String name) throws IOException {
+    @Override
+    public void onLoad(String name) throws IOException {
         this.builds = new RunMap<PromotedBuild>();
         this.builds.load(this,new Constructor<PromotedBuild>() {
             public PromotedBuild create(File dir) throws IOException {
@@ -52,22 +52,22 @@ public class PromotedJob extends Job<PromotedJob, PromotedBuild> {
         builds.remove(run);
     }
 
-    public Descriptor<Job<PromotedJob, PromotedBuild>> getDescriptor() {
+    public TopLevelItemDescriptor getDescriptor() {
         return DESCRIPTOR;
     }
 
-    static final JobDescriptor<PromotedJob, PromotedBuild> DESCRIPTOR = new JobDescriptor<PromotedJob, PromotedBuild>(PromotedJob.class) {
+    static final TopLevelItemDescriptor DESCRIPTOR = new TopLevelItemDescriptor(PromotedJob.class) {
         public String getDisplayName() {
             return "Managing promotion of another job";
         }
 
         public PromotedJob newInstance(String name) {
-            return new PromotedJob(Hudson.getInstance(),name);
+            return new PromotedJob(name);
         }
     };
 
     static {
-        Job.XSTREAM.alias("promotedJob",PromotedJob.class);
+        Items.XSTREAM.alias("promotedJob",PromotedJob.class);
     }
 
     private static final Logger logger = Logger.getLogger(PromotedJob.class.getName());
