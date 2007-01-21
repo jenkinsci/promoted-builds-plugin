@@ -6,6 +6,9 @@ import hudson.model.RunMap;
 import hudson.model.RunMap.Constructor;
 import hudson.model.TopLevelItem;
 import hudson.model.TopLevelItemDescriptor;
+import hudson.model.Item;
+import hudson.model.ItemGroup;
+import hudson.model.Hudson;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,11 +28,16 @@ public class PromotedJob extends Job<PromotedJob, PromotedBuild> implements TopL
     private transient /*almost final*/ RunMap<PromotedBuild> builds = new RunMap<PromotedBuild>();
 
     public PromotedJob(String name) {
-        super(name);
+        super(Hudson.getInstance(),name);
     }
 
     @Override
-    public void onLoad(String name) throws IOException {
+    public Hudson getParent() {
+        return (Hudson)super.getParent();
+    }
+
+    @Override
+    public void onLoad(ItemGroup<? extends Item> parent, String name) throws IOException {
         this.builds = new RunMap<PromotedBuild>();
         this.builds.load(this,new Constructor<PromotedBuild>() {
             public PromotedBuild create(File dir) throws IOException {
