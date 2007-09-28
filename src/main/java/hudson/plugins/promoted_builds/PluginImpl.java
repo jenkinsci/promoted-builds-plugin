@@ -1,7 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.Plugin;
-import hudson.model.Items;
+import hudson.tasks.BuildStep;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -9,6 +9,6 @@ import hudson.model.Items;
  */
 public class PluginImpl extends Plugin {
     public void start() throws Exception {
-        Items.LIST.add(PromotedJob.DESCRIPTOR);
+        BuildStep.PUBLISHERS.addRecorder(PublisherImpl.DescriptorImpl.INSTANCE);
     }
 }
