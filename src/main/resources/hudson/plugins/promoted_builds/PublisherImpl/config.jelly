@@ -1,20 +1,26 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:repeatable var="s" items="${it.criterias}">
-    <table width="100%">
-      <f:entry title="Name">
-        <f:textbox name="promotion.name" value="${s.name}" />
-      </f:entry>
-      <f:block>
-        Promote a build when all of the following conditions are met:
-      </f:block>
+  <f:entry>
+    <f:repeatable var="s" items="${it.criterias}" noAddButton="true" minimum="1">
+      <table width="100%">
+        <f:entry title="Name">
+          <f:textbox name="promotion.name" value="${s.name}" />
+        </f:entry>
+        <f:block>
+          Promote a build when all of the following conditions are met:
+        </f:block>
+        <f:entry>
+          <table>
+            <f:descriptorList var="criteria" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions}" />
+          </table>
+        </f:entry>
 
-      <f:descriptorList var="criteria" title="Criteria" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions}" />
-
-      <f:entry title="">
-        <div align="right">
-          <f:repeatableDeleteButton />
-        </div>
-      </f:entry>
-    </table>
-  </f:repeatable>
+        <f:entry>
+          <div align="right">
+            <input type="button" value="Add another promotion level..." class="repeatable-add show-if-last" />
+            <input type="button" value="Delete" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
+          </div>
+        </f:entry>
+      </table>
+    </f:repeatable>
+  </f:entry>
 </j:jelly>
