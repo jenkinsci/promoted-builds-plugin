@@ -1,5 +1,5 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:entry>
+  <f:block>
     <f:repeatable var="s" items="${it.criterias}" noAddButton="true" minimum="1">
       <table width="100%">
         <f:entry title="Name">
@@ -22,5 +22,5 @@
         </f:entry>
       </table>
     </f:repeatable>
-  </f:entry>
+  </f:block>
 </j:jelly>
