@@ -10,6 +10,19 @@ import net.sf.json.JSONObject;
  * @author Kohsuke Kawaguchi
  */
 public class DownstreamPassCondition extends PromotionCondition {
+    /**
+     *
+     */
+    private final String jobs;
+
+    public DownstreamPassCondition(String jobs) {
+        this.jobs = jobs;
+    }
+
+    public String getJobs() {
+        return jobs;
+    }
+
     public boolean isMet(AbstractBuild<?, ?> build) {
         // TODO
         throw new UnsupportedOperationException();
@@ -33,7 +46,7 @@ public class DownstreamPassCondition extends PromotionCondition {
         }
 
         public PromotionCondition newInstance(JSONObject formData) throws FormException {
-            return new DownstreamPassCondition();
+            return new DownstreamPassCondition(formData.getString("jobs"));
         }
 
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();

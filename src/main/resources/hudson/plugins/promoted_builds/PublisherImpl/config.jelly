@@ -10,7 +10,7 @@
         </f:block>
         <f:entry>
           <table>
-            <f:descriptorList varName="criteria" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions}" />
+            <f:descriptorList varName="condition" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions}" />
           </table>
         </f:entry>
 
