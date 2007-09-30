@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:block>
-    <f:repeatable var="s" items="${it.criterias}" noAddButton="true" minimum="1">
+  <f:nested>
+    <f:repeatable var="s" items="${it.criterias}" noAddButton="true" minimum="1" name="criteria">
       <table width="100%">
         <f:entry title="Name">
           <f:textbox name="promotion.name" value="${s.name}" />
@@ -10,7 +10,7 @@
         </f:block>
         <f:entry>
           <table>
-            <f:descriptorList var="criteria" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions}" />
+            <f:descriptorList varName="criteria" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions}" />
           </table>
         </f:entry>
 
@@ -22,5 +22,5 @@
         </f:entry>
       </table>
     </f:repeatable>
-  </f:block>
+  </f:nested>
 </j:jelly>
