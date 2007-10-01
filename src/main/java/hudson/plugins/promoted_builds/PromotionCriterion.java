@@ -12,7 +12,7 @@ import java.io.IOException;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class PromotionCriteria implements DescribableList.Owner {
+public final class PromotionCriterion implements DescribableList.Owner {
     private final String name;
 
     /**
@@ -21,7 +21,7 @@ public final class PromotionCriteria implements DescribableList.Owner {
     private final DescribableList<PromotionCondition,PromotionConditionDescriptor> conditions =
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
 
-    /*package*/ PromotionCriteria(StaplerRequest req, JSONObject c) throws FormException {
+    /*package*/ PromotionCriterion(StaplerRequest req, JSONObject c) throws FormException {
         this.name = c.getString("name");
         conditions.rebuild(req,c,PromotionConditions.CONDITIONS,"condition");
     }

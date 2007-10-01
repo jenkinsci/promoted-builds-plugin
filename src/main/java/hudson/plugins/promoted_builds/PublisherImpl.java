@@ -27,11 +27,11 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 public class PublisherImpl extends Publisher {
-    private final List<PromotionCriteria> criteria = new ArrayList<PromotionCriteria>();
+    private final List<PromotionCriterion> criteria = new ArrayList<PromotionCriterion>();
 
     private PublisherImpl(StaplerRequest req, JSONObject json) throws FormException {
         for( JSONObject c : (List<JSONObject>)JSONArray.fromObject(json.get("criteria")) )
-            criteria.add(new PromotionCriteria(req,c));
+            criteria.add(new PromotionCriterion(req,c));
     }
 
     /**
@@ -40,7 +40,7 @@ public class PublisherImpl extends Publisher {
      * @return
      *      non-null and non-empty. Read-only.
      */
-    public List<PromotionCriteria> getCriteria() {
+    public List<PromotionCriterion> getCriteria() {
         return criteria;
     }
 
