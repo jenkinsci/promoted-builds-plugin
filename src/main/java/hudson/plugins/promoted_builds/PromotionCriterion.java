@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.model.Descriptor.FormException;
+import hudson.model.AbstractBuild;
 import hudson.util.DescribableList;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
@@ -25,6 +26,17 @@ public final class PromotionCriterion implements DescribableList.Owner {
         this.name = c.getString("name");
         conditions.rebuild(req,c,PromotionConditions.CONDITIONS,"condition");
     }
+
+    /**
+     * Checks if all the conditions to promote a build is met.
+     */
+    public boolean isMet(AbstractBuild<?,?> build) {
+        for (PromotionCondition cond : conditions)
+            if(!cond.isMet(build))
+                return false;
+        return true;
+    }
+
 
     /**
      * Gets the human readable name set by the user. 
