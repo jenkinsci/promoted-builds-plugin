@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.Plugin;
+import hudson.model.Jobs;
 import hudson.tasks.BuildStep;
 
 /**
@@ -8,7 +9,9 @@ import hudson.tasks.BuildStep;
  * @plugin
  */
 public class PluginImpl extends Plugin {
+    @Override
     public void start() throws Exception {
-        BuildStep.PUBLISHERS.addRecorder(PublisherImpl.DescriptorImpl.INSTANCE);
+        new RunListenerImpl().register();
+        Jobs.PROPERTIES.add(JobPropertyImpl.DescriptorImpl.INSTANCE);
     }
 }

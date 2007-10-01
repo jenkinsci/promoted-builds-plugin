@@ -1,0 +1,26 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:nested>
+    <f:repeatable var="s" items="${instance.criteria}" noAddButton="true" minimum="1" name="criteria">
+      <table width="100%">
+        <f:entry title="Name">
+          <f:textbox name="criteria.name" value="${s.name}" />
+        </f:entry>
+        <f:block>
+          Promote a build when all of the following conditions are met:
+        </f:block>
+        <f:entry>
+          <table>
+            <f:descriptorList varName="condition" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
+          </table>
+        </f:entry>
+
+        <f:entry>
+          <div align="right">
+            <input type="button" value="Add another promotion level..." class="repeatable-add show-if-last" />
+            <input type="button" value="Delete" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
+          </div>
+        </f:entry>
+      </table>
+    </f:repeatable>
+  </f:nested>
+</j:jelly>
