@@ -17,23 +17,6 @@ public abstract class PromotionConditionDescriptor extends Descriptor<PromotionC
     }
 
     /**
-     * @deprecated
-     *      This method is not used. Use {@link #newInstance(JSONObject)}  instead.
-     */
-    public final PromotionCondition newInstance(StaplerRequest req) throws FormException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Creates a configured instance from the submitted form.
-     *
-     * @param formData
-     *      JSON object that contains the submitted form.
-     *      See http://hudson.gotdns.com/wiki/display/HUDSON/Structured+Form+Submission
-     */
-    public abstract PromotionCondition newInstance(JSONObject formData) throws FormException;
-
-    /**
      * Returns true if this condition is applicable to the given project.
      *
      * @return

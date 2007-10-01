@@ -5,6 +5,7 @@ import hudson.model.AbstractProject;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -45,7 +46,7 @@ public class DownstreamPassCondition extends PromotionCondition {
             return "When the following downstream projects build successfully";
         }
 
-        public PromotionCondition newInstance(JSONObject formData) throws FormException {
+        public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return new DownstreamPassCondition(formData.getString("jobs"));
         }
 
