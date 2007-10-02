@@ -3,6 +3,9 @@ package hudson.plugins.promoted_builds;
 import hudson.ExtensionPoint;
 import hudson.model.AbstractBuild;
 import hudson.model.Describable;
+import hudson.model.AbstractProject;
+
+import java.util.Set;
 
 /**
  * Extension point for defining a promotion criteria.

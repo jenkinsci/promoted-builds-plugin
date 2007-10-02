@@ -1,12 +1,12 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
+import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
-import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.model.Job;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @author Kohsuke Kawaguchi
  */
-public class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
+public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
     private final List<PromotionCriterion> criteria = new ArrayList<PromotionCriterion>();
 
     private JobPropertyImpl(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
@@ -45,7 +45,15 @@ public class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
         return DescriptorImpl.INSTANCE;
     }
 
+    /**
+     * Called when a build on the the project is completed.
+     *
+     * @param build
+     *      A build that happened somewhere.
+     */
     public void onCompleted(AbstractBuild<?,?> build, TaskListener listener) {
+        // TODO: implement this method later
+        throw new UnsupportedOperationException();
     }
 
     public static final class DescriptorImpl extends JobPropertyDescriptor {
