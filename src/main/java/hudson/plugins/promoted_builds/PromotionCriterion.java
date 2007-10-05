@@ -37,6 +37,23 @@ public final class PromotionCriterion implements DescribableList.Owner {
         return true;
     }
 
+    /**
+     * Checks if the build is promotable, and if so, promote it.
+     */
+    public void considerPromotion(AbstractBuild<?,?> build) throws IOException {
+        if(!isMet(build))
+            return; // not this time
+
+        // promote it
+        PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
+        if(a!=null) {
+            if(a.add(this))
+                build.save();
+        } else {
+            build.addAction(new PromotedBuildAction(this));
+            build.save();
+        }
+    }
 
     /**
      * Gets the human readable name set by the user. 

@@ -21,11 +21,11 @@ public final class PromotedBuildAction implements Action {
     /**
      * Called when the build passes another promotion criterion.
      */
-    public synchronized void add(PromotionCriterion criterion) {
+    public synchronized boolean add(PromotionCriterion criterion) {
         String n = criterion.getName();
         for (String p : promotions)
             if(n.equals(p))
-                return; // noop
+                return false; // noop
 
         String[] r = new String[promotions.length+1];
         System.arraycopy(promotions,0,r,0,promotions.length);
@@ -33,6 +33,7 @@ public final class PromotedBuildAction implements Action {
 
         // atomically replace it
         this.promotions = r;
+        return true;
     }
 
     public String getIconFileName() {

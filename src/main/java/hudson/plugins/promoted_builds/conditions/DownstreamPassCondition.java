@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Collections;
 import java.util.HashSet;
+import java.io.IOException;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -113,12 +114,19 @@ public class DownstreamPassCondition extends PromotionCondition {
                 JobPropertyImpl p = j.getProperty(JobPropertyImpl.class);
                 if(p!=null) {
                     for (PromotionCriterion c : p.getCriteria()) {
+                        boolean considerPromotion = false;
                         for (PromotionCondition cond : c.getConditions()) {
                             if (cond instanceof DownstreamPassCondition) {
                                 DownstreamPassCondition dpcond = (DownstreamPassCondition) cond;
                                 if(dpcond.contains(build.getParent()))
-                                    // TODO: implement this method later
-                                    throw new UnsupportedOperationException();
+                                    considerPromotion = true;
+                            }
+                        }
+                        if(considerPromotion) {
+                            try {
+                                c.considerPromotion(build);
+                            } catch (IOException e) {
+                                e.printStackTrace(listener.error("Failed to promote a build"));
                             }
                         }
                     }
