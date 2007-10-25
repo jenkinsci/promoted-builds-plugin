@@ -139,7 +139,9 @@ public class DownstreamPassCondition extends PromotionCondition {
                         }
                         if(considerPromotion) {
                             try {
-                                c.considerPromotion(build.getUpstreamRelationshipBuild(j));
+                                AbstractBuild<?,?> u = build.getUpstreamRelationshipBuild(j);
+                                if(u!=null)
+                                    c.considerPromotion(u);
                             } catch (IOException e) {
                                 e.printStackTrace(listener.error("Failed to promote a build"));
                             }
