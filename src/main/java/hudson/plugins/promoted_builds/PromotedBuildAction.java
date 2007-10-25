@@ -19,6 +19,15 @@ public final class PromotedBuildAction implements Action {
     }
 
     /**
+     * Checks if the given criterion is already promoted.
+     */
+    public synchronized boolean contains(PromotionCriterion criterion) {
+        for (String p : promotions)
+            if(p.equals(criterion.getName()))
+                return true;
+        return false;
+    }
+    /**
      * Called when the build passes another promotion criterion.
      */
     public synchronized boolean add(PromotionCriterion criterion) {

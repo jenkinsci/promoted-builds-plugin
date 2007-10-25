@@ -1,32 +1,35 @@
 package hudson.plugins.promoted_builds.conditions;
 
-import hudson.Util;
 import hudson.CopyOnWrite;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
+import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
-import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotionCriterion;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.Collections;
 import java.util.HashSet;
-import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 public class DownstreamPassCondition extends PromotionCondition {
     /**
-     *
+     * List of downstream jobs that are used as the promotion criteria.
+     * 
+     * Every job has to have at least one successful build for us to promote a build.
      */
     private final String jobs;
 
@@ -38,9 +41,21 @@ public class DownstreamPassCondition extends PromotionCondition {
         return jobs;
     }
 
-    public boolean isMet(AbstractBuild<?, ?> build) {
-        // TODO
-        throw new UnsupportedOperationException();
+    @Override
+    public boolean isMet(AbstractBuild<?,?> build) {
+        for (AbstractProject<?,?> j : getJobList()) {
+            boolean passed = false;
+            for( AbstractBuild<?,?> b : build.getDownstreamBuilds(j) ) {
+                if(b.getResult()== Result.SUCCESS) {
+                    passed = true;
+                    break;
+                }
+            }
+
+            if(!passed) // none of the builds of this job passed.
+                return false;
+        }
+        return true;
     }
 
     public PromotionConditionDescriptor getDescriptor() {
@@ -124,7 +139,7 @@ public class DownstreamPassCondition extends PromotionCondition {
                         }
                         if(considerPromotion) {
                             try {
-                                c.considerPromotion(build);
+                                c.considerPromotion(build.getUpstreamRelationshipBuild(j));
                             } catch (IOException e) {
                                 e.printStackTrace(listener.error("Failed to promote a build"));
                             }

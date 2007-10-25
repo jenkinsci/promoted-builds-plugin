@@ -13,6 +13,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
 
 /**
  * This doesn't really publish anything, but we want the configuration to show
@@ -43,17 +44,6 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
 
     public DescriptorImpl getDescriptor() {
         return DescriptorImpl.INSTANCE;
-    }
-
-    /**
-     * Called when a build on the the project is completed.
-     *
-     * @param build
-     *      A build that happened somewhere.
-     */
-    public void onCompleted(AbstractBuild<?,?> build, TaskListener listener) {
-        // TODO: implement this method later
-        throw new UnsupportedOperationException();
     }
 
     public static final class DescriptorImpl extends JobPropertyDescriptor {
