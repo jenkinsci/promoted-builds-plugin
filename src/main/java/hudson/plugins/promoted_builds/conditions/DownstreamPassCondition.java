@@ -133,14 +133,21 @@ public class DownstreamPassCondition extends PromotionCondition {
                         for (PromotionCondition cond : c.getConditions()) {
                             if (cond instanceof DownstreamPassCondition) {
                                 DownstreamPassCondition dpcond = (DownstreamPassCondition) cond;
-                                if(dpcond.contains(build.getParent()))
+                                if(dpcond.contains(build.getParent())) {
                                     considerPromotion = true;
+                                    break;
+                                }
                             }
                         }
                         if(considerPromotion) {
                             try {
                                 AbstractBuild<?,?> u = build.getUpstreamRelationshipBuild(j);
-                                if(u!=null && c.considerPromotion(u))
+                                if(u==null) {
+                                    // no upstream build. perhaps a configuration problem?
+                                    if(build.getResult()==Result.SUCCESS)
+                                        listener.getLogger().println("WARNING: "+j.getFullDisplayName()+" appears to use this job as a promotion criteria, but no fingerprint is recorded.");
+                                } else
+                                if(c.considerPromotion(u))
                                     listener.getLogger().println("Promoted "+u);
                             } catch (IOException e) {
                                 e.printStackTrace(listener.error("Failed to promote a build"));
