@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * {@link PromotionCondition} that tests if certain downstream projects have passed.
+ * 
  * @author Kohsuke Kawaguchi
  */
 public class DownstreamPassCondition extends PromotionCondition {
