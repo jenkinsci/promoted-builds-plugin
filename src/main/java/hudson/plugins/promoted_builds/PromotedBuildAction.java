@@ -5,6 +5,8 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.util.CopyOnWriteList;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -59,6 +61,22 @@ public final class PromotedBuildAction implements Action {
      */
     public List<PromotionBadgeList> getPromotions() {
         return promotions.getView();
+    }
+
+    /**
+     * Gets list of {@link PromotionCriterion}s that are not yet attained.
+     * @return can be empty but never null.
+     */
+    public List<PromotionCriterion> getPendingPromotions() {
+        JobPropertyImpl pp = getProject().getProperty(JobPropertyImpl.class);
+        if(pp==null)        return Collections.emptyList();
+
+        List<PromotionCriterion> r = new ArrayList<PromotionCriterion>();
+        for (PromotionCriterion c : pp.getCriteria()) {
+            if(!contains(c))    r.add(c);
+        }
+
+        return r;
     }
 
     public String getIconFileName() {
