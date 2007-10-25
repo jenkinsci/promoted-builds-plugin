@@ -21,6 +21,10 @@ public final class PromotionBadgeList extends AbstractList<PromotionBadge> {
         this.badges = badges.toArray(new PromotionBadge[badges.size()]);
     }
 
+    public String getName() {
+        return criterion;
+    }
+
     public boolean isFor(PromotionCriterion criterion) {
         return criterion.getName().equals(this.criterion);
     }

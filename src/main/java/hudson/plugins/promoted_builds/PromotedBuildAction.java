@@ -5,6 +5,8 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.util.CopyOnWriteList;
 
+import java.util.List;
+
 /**
  * {@link Action} for {@link AbstractBuild} indicating that it's promoted.
  *
@@ -34,7 +36,7 @@ public final class PromotedBuildAction implements Action {
     /**
      * Checks if the given criterion is already promoted.
      */
-    public synchronized boolean contains(PromotionCriterion criterion) {
+    public boolean contains(PromotionCriterion criterion) {
         for (PromotionBadgeList p : promotions)
             if(p.isFor(criterion))
                 return true;
@@ -50,6 +52,13 @@ public final class PromotedBuildAction implements Action {
 
         this.promotions.add(badgeList);
         return true;
+    }
+
+    /**
+     * Gets the read-only view of all the promotions that this build achieved.
+     */
+    public List<PromotionBadgeList> getPromotions() {
+        return promotions.getView();
     }
 
     public String getIconFileName() {

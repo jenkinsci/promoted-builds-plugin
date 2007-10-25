@@ -19,7 +19,7 @@ public final class PromotionCriterion implements DescribableList.Owner {
     private final String name;
 
     /**
-     * {@link PromotionCondition}s.
+     * {@link PromotionCondition}s. All have to be met for a build to be promoted.
      */
     private final DescribableList<PromotionCondition,PromotionConditionDescriptor> conditions =
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
