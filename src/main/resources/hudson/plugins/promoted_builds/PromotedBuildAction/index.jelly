@@ -5,7 +5,8 @@
       <h1>Promotions</h1>
       <j:forEach var="p" items="${it.promotions}">
         <div style="float:right">
-          (promoted ${p.getTimestampString()} ago)
+          <div>(promoted ${p.getTimestampString()} ago)</div>
+          <div>(${p.getDelayString(it.owner)} after build)</div>
         </div>
         <h2>
           <img src="${imagesURL}/32x32/blue.gif"/> ${p.getName()}

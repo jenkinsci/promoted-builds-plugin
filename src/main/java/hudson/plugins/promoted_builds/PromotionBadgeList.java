@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.Util;
+import hudson.model.AbstractBuild;
 
 import java.util.AbstractList;
 import java.util.Calendar;
@@ -42,6 +43,14 @@ public final class PromotionBadgeList extends AbstractList<PromotionBadge> {
      */
     public String getTimestampString() {
         long duration = new GregorianCalendar().getTimeInMillis()-timestamp.getTimeInMillis();
+        return Util.getTimeSpanString(duration);
+    }
+
+    /**
+     * Gets the string that says how long did it toook for this build to be promoted.
+     */
+    public String getDelayString(AbstractBuild<?,?> owner) {
+        long duration = timestamp.getTimeInMillis() - owner.getTimestamp().getTimeInMillis() - owner.getDuration();
         return Util.getTimeSpanString(duration);
     }
 
