@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Action;
 
 /**
@@ -9,13 +10,24 @@ import hudson.model.Action;
  * @author Kohsuke Kawaguchi
  */
 public final class PromotedBuildAction implements Action {
+    public final AbstractBuild<?,?> owner;
+
     /**
      * List of promotion criteria names that this build qualified.
      */
     private volatile String[] promotions;
 
-    public PromotedBuildAction(PromotionCriterion criterion) {
+    public PromotedBuildAction(AbstractBuild<?,?> owner, PromotionCriterion criterion) {
+        assert owner!=null;
+        this.owner = owner;
         promotions = new String[]{criterion.getName()};
+    }
+
+    /**
+     * Gets the owning project.
+     */
+    public AbstractProject<?,?> getProject() {
+        return owner.getProject();
     }
 
     /**
