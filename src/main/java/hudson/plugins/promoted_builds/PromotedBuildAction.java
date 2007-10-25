@@ -5,8 +5,6 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.util.CopyOnWriteList;
 
-import java.util.List;
-
 /**
  * {@link Action} for {@link AbstractBuild} indicating that it's promoted.
  *
