@@ -18,9 +18,12 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
      *
      * @param build
      *      The build for which the promotion is considered.
-     * @return true if so.
+     * @return
+     *      non-null if the promotion condition is met. This object is then recorded so that
+     *      we know how a build was promoted.
+     *      Null if otherwise, meaning it shouldn't be promoted.
      */
-    public abstract boolean isMet(AbstractBuild<?,?> build);
+    public abstract PromotionBadge isMet(AbstractBuild<?,?> build);
 
     public abstract PromotionConditionDescriptor getDescriptor();
 }

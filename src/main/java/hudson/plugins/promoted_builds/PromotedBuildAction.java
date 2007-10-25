@@ -3,6 +3,9 @@ package hudson.plugins.promoted_builds;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.util.CopyOnWriteList;
+
+import java.util.List;
 
 /**
  * {@link Action} for {@link AbstractBuild} indicating that it's promoted.
@@ -15,12 +18,12 @@ public final class PromotedBuildAction implements Action {
     /**
      * List of promotion criteria names that this build qualified.
      */
-    private volatile String[] promotions;
+    private final CopyOnWriteList<PromotionBadgeList> promotions = new CopyOnWriteList<PromotionBadgeList>();
 
-    public PromotedBuildAction(AbstractBuild<?,?> owner, PromotionCriterion criterion) {
+    public PromotedBuildAction(AbstractBuild<?,?> owner, PromotionBadgeList badgeList) {
         assert owner!=null;
         this.owner = owner;
-        promotions = new String[]{criterion.getName()};
+        promotions.add(badgeList);
     }
 
     /**
@@ -34,26 +37,20 @@ public final class PromotedBuildAction implements Action {
      * Checks if the given criterion is already promoted.
      */
     public synchronized boolean contains(PromotionCriterion criterion) {
-        for (String p : promotions)
-            if(p.equals(criterion.getName()))
+        for (PromotionBadgeList p : promotions)
+            if(p.isFor(criterion))
                 return true;
         return false;
     }
     /**
      * Called when the build passes another promotion criterion.
      */
-    public synchronized boolean add(PromotionCriterion criterion) {
-        String n = criterion.getName();
-        for (String p : promotions)
-            if(n.equals(p))
-                return false; // noop
+    public synchronized boolean add(PromotionBadgeList badgeList) {
+        for (PromotionBadgeList p : promotions)
+            if(p.criterion.equals(badgeList.criterion))
+                return false; // already promoted. noop
 
-        String[] r = new String[promotions.length+1];
-        System.arraycopy(promotions,0,r,0,promotions.length);
-        r[promotions.length] = n;
-
-        // atomically replace it
-        this.promotions = r;
+        this.promotions.add(badgeList);
         return true;
     }
 

@@ -4,11 +4,13 @@ import hudson.CopyOnWrite;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Fingerprint;
 import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
+import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionCriterion;
@@ -42,20 +44,23 @@ public class DownstreamPassCondition extends PromotionCondition {
     }
 
     @Override
-    public boolean isMet(AbstractBuild<?,?> build) {
+    public PromotionBadge isMet(AbstractBuild<?,?> build) {
+        Badge badge = new Badge();
+
+        OUTER:
         for (AbstractProject<?,?> j : getJobList()) {
-            boolean passed = false;
             for( AbstractBuild<?,?> b : build.getDownstreamBuilds(j) ) {
                 if(b.getResult()== Result.SUCCESS) {
-                    passed = true;
-                    break;
+                    badge.add(b);
+                    continue OUTER;
                 }
             }
 
-            if(!passed) // none of the builds of this job passed.
-                return false;
+            // none of the builds of this job passed.
+            return null;
         }
-        return true;
+        
+        return badge;
     }
 
     public PromotionConditionDescriptor getDescriptor() {
@@ -87,6 +92,17 @@ public class DownstreamPassCondition extends PromotionCondition {
                 return true;
         }
         return false;
+    }
+
+    public static final class Badge extends PromotionBadge {
+        /**
+         * Downstream builds that certified this build. Should be considered read-only.
+         */
+        public final List<Fingerprint.BuildPtr> builds = new ArrayList<Fingerprint.BuildPtr>();
+
+        void add(AbstractBuild<?,?> b) {
+           builds.add(new Fingerprint.BuildPtr(b));
+        }
     }
 
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
