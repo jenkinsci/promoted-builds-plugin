@@ -85,7 +85,7 @@ public final class PromotedBuildAction implements Action {
     }
 
     public String getIconFileName() {
-        return "star-gold.gif";
+        return "star.gif";
     }
 
     public String getDisplayName() {
