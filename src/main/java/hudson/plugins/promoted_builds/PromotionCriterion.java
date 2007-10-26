@@ -66,8 +66,7 @@ public final class PromotionCriterion implements DescribableList.Owner {
 
         // promote it
         if(a!=null) {
-            if(a.add(badges))
-                build.save();
+            a.add(badges);
         } else {
             build.addAction(new PromotedBuildAction(build,badges));
             build.save();

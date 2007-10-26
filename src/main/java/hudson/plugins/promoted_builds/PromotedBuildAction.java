@@ -4,16 +4,14 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.util.CopyOnWriteList;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.QueryParameter;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * {@link Action} for {@link AbstractBuild} indicating that it's promoted.
@@ -53,12 +51,13 @@ public final class PromotedBuildAction implements Action {
     /**
      * Called when the build passes another promotion criterion.
      */
-    public synchronized boolean add(PromotionBadgeList badgeList) {
+    public synchronized boolean add(PromotionBadgeList badgeList) throws IOException {
         for (PromotionBadgeList p : promotions)
             if(p.criterion.equals(badgeList.criterion))
                 return false; // already promoted. noop
 
         this.promotions.add(badgeList);
+        owner.save();
         return true;
     }
 
@@ -101,7 +100,7 @@ public final class PromotedBuildAction implements Action {
     /**
      * Force a promotion.
      */
-    public void doForcePromotion(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name) {
+    public void doForcePromotion(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name) throws IOException {
 //        if(!req.getMethod().equals("POST")) {// require post,
 //            rsp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 //            return;
@@ -115,5 +114,8 @@ public final class PromotedBuildAction implements Action {
         if(c==null)
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
         promotions.add(new PromotionBadgeList(c,Collections.singleton(new ManualPromotionBadge())));
+        owner.save();
+
+        rsp.sendRedirect2(".");
     }
 }
