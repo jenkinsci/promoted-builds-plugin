@@ -11,7 +11,7 @@
           <div>(${p.getDelayString(it.owner)} after build)</div>
         </div>
         <h2>
-          <img src="${imagesURL}/32x32/blue.gif"/> ${p.getName()}
+          <img src="${imagesURL}/32x32/star-gold.gif"/> ${p.getName()}
         </h2>
         <j:forEach var="b" items="${p}">
           <st:include it="${b}" page="index.jelly" />
@@ -26,8 +26,11 @@
           </form>
         </l:isAdmin>
         <h2>
-          <img src="${imagesURL}/32x32/grey.gif"/> ${p.getName()}
+          <img src="${imagesURL}/32x32/star.gif"/> ${p.getName()}
         </h2>
+        <div>
+          This promotion hasn't happened.
+        </div>
       </j:forEach>
     </l:main-panel>
   </l:layout>

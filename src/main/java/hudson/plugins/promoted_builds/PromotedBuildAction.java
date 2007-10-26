@@ -85,8 +85,7 @@ public final class PromotedBuildAction implements Action {
     }
 
     public String getIconFileName() {
-        // TODO: fix this
-        return "health-80plus.gif";
+        return "star-gold.gif";
     }
 
     public String getDisplayName() {
