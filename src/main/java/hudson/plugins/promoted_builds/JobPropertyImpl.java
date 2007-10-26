@@ -42,6 +42,17 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
         return criteria;
     }
 
+    /**
+     * Finds a criterion by name.
+     */
+    public PromotionCriterion getCriterion(String name) {
+        for (PromotionCriterion c : criteria) {
+            if(c.getName().equals(name))
+                return c;
+        }
+        return null;
+    }
+
     public DescriptorImpl getDescriptor() {
         return DescriptorImpl.INSTANCE;
     }

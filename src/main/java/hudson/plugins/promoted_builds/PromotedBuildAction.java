@@ -9,6 +9,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.QueryParameter;
+
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * {@link Action} for {@link AbstractBuild} indicating that it's promoted.
  *
@@ -90,5 +96,24 @@ public final class PromotedBuildAction implements Action {
 
     public String getUrlName() {
         return "promoted";
+    }
+
+    /**
+     * Force a promotion.
+     */
+    public void doForcePromotion(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name) {
+//        if(!req.getMethod().equals("POST")) {// require post,
+//            rsp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+//            return;
+//        }
+
+        JobPropertyImpl pp = getProject().getProperty(JobPropertyImpl.class);
+        if(pp==null)
+            throw new IllegalStateException("This project doesn't have any promotion criteria set");
+
+        PromotionCriterion c = pp.getCriterion(name);
+        if(c==null)
+            throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
+        promotions.add(new PromotionBadgeList(c,Collections.singleton(new ManualPromotionBadge())));
     }
 }

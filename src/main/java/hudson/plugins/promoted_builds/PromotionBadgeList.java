@@ -5,7 +5,7 @@ import hudson.model.AbstractBuild;
 
 import java.util.AbstractList;
 import java.util.Calendar;
-import java.util.List;
+import java.util.Collection;
 import java.util.GregorianCalendar;
 
 /**
@@ -26,7 +26,7 @@ public final class PromotionBadgeList extends AbstractList<PromotionBadge> {
      */
     public final Calendar timestamp = new GregorianCalendar();
 
-    public PromotionBadgeList(PromotionCriterion criterion, List<PromotionBadge> badges) {
+    public PromotionBadgeList(PromotionCriterion criterion, Collection<? extends PromotionBadge> badges) {
         this.criterion = criterion.getName();
         this.badges = badges.toArray(new PromotionBadge[badges.size()]);
     }

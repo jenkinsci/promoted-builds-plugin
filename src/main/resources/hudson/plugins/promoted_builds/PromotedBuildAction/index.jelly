@@ -6,7 +6,7 @@
 
       <!-- list promotions that are already attained -->
       <j:forEach var="p" items="${it.promotions}">
-        <div style="float:right">
+        <div style="float:right" align="right">
           <div>(promoted ${p.getTimestampString()} ago)</div>
           <div>(${p.getDelayString(it.owner)} after build)</div>
         </div>
@@ -20,6 +20,11 @@
 
       <!-- list promotions that are not yet attained -->
       <j:forEach var="p" items="${it.pendingPromotions}">
+        <l:isAdmin>
+          <form style="float:right" method="post" action="forcePromotion?name=${p.getName()}">
+            <input type="submit" value="Force promotion"/>
+          </form>
+        </l:isAdmin>
         <h2>
           <img src="${imagesURL}/32x32/grey.gif"/> ${p.getName()}
         </h2>
