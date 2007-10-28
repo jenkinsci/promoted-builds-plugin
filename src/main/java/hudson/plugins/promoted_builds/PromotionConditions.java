@@ -3,6 +3,7 @@ package hudson.plugins.promoted_builds;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
+import hudson.plugins.promoted_builds.conditions.ManualCondition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +14,9 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 public class PromotionConditions {
-    public static final List<PromotionConditionDescriptor> CONDITIONS = Descriptor.<PromotionConditionDescriptor>toList(
-        DownstreamPassCondition.DescriptorImpl.INSTANCE
+    public static final List<PromotionConditionDescriptor> CONDITIONS = Descriptor.toList(
+        DownstreamPassCondition.DescriptorImpl.INSTANCE,
+        ManualCondition.DescriptorImpl.INSTANCE
     );
 
     /**
