@@ -1,4 +1,4 @@
-<a href="${link}promoted/">
+<a href="${link}promotion/">
   <img width="16" height="16"
     title="Promoted build"
     src="${imagesURL}/16x16/star-gold.gif"/>

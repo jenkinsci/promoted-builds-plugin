@@ -94,7 +94,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     }
 
     public String getUrlName() {
-        return "promoted";
+        return "promotion";
     }
 
     /**
