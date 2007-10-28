@@ -1,5 +1,5 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:optionalBlock name="promotions" title="Promote builds when..." check="${!empty(instance.criteria)}">
+  <f:optionalBlock name="promotions" title="Promote builds when..." checked="${!empty(instance.criteria)}" help="/plugin/promoted-builds/help.html">
     <f:block><div style="padding-left:2em">
       <f:repeatable var="s" items="${instance.criteria}" noAddButton="true" minimum="1" name="criteria">
         <table width="100%">
