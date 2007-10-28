@@ -41,6 +41,10 @@ public class ManualCondition extends PromotionCondition {
             return new ManualCondition();
         }
 
+        public String getHelpFile() {
+            return "/plugin/promoted-builds/conditions/manual.html";
+        }
+
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();
     }
 }
