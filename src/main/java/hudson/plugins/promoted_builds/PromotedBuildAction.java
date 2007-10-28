@@ -3,6 +3,7 @@ package hudson.plugins.promoted_builds;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.BuildBadgeAction;
 import hudson.util.CopyOnWriteList;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -18,7 +19,7 @@ import java.util.List;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class PromotedBuildAction implements Action {
+public final class PromotedBuildAction implements BuildBadgeAction {
     public final AbstractBuild<?,?> owner;
 
     /**
