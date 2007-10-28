@@ -121,6 +121,10 @@ public class DownstreamPassCondition extends PromotionCondition {
             return "When the following downstream projects build successfully";
         }
 
+        public String getHelpFile() {
+            return "/plugin/promoted-builds/conditions/downstream.html";
+        }
+        
         public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return new DownstreamPassCondition(formData.getString("jobs"));
         }

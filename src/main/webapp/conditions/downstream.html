@@ -1,0 +1,15 @@
+<div>
+    This option requires that a promoted build runs the designated downstream builds successfully.
+    A typical use of this is to nominate downstream test jobs, so that you know a build has
+    good test results before it gets promoted. Multiple jobs can be specified by separating their
+    names by commas.
+  <p>
+    For example, consider a case where job <tt>xyz-test</tt> is set as the promotion criteria of
+      job <tt>xyz</tt>. When <tt>xyz #100</tt> is built, this will not be promoted right away
+    as no <tt>xyz-test</tt> build has run yet. If you configured <tt>xyz-test</tt> as a downstream
+    build of <tt>xyz</tt>, the successful completion of <tt>xyz #100</tt> would trigger a
+    <tt>xyz-test</tt>. When this completes successfully, <tt>xyz #100</tt> will be promoted
+    (even if other <tt>xyz</tt> builds happened since then.)
+  <p>
+
+</div>
