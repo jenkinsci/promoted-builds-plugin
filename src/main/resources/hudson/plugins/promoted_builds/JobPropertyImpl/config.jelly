@@ -6,15 +6,18 @@
           <f:entry title="Name">
             <f:textbox name="config.name" value="${s.name}" />
           </f:entry>
-          <f:block>
-            Promote a build when all of the following conditions are met:
-          </f:block>
-          <f:entry>
-            <table style="width:100%">
-              <f:descriptorList varName="condition" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
-            </table>
-            <f:hetero-list varName="buildStep" descriptors="${descriptor.getApplicableBuildSteps(it)}" instances="${s.buildSteps.toMap()}" />
-          </f:entry>
+          <f:section title="Promotion criteria">
+            <f:nested>
+              <table style="width:100%">
+                <f:descriptorList varName="condition" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
+              </table>
+            </f:nested>
+          </f:section>
+          <f:section title="Post-promotion actions">
+            <f:nested>
+              <f:hetero-list name="buildStep" descriptors="${descriptor.getApplicableBuildSteps(it)}" items="${s.buildSteps}" />
+            </f:nested>
+          </f:section>
 
           <f:entry>
             <div align="right">

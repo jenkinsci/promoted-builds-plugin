@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
 import hudson.tasks.BuildStep;
@@ -31,12 +32,15 @@ public final class PromotionConfig implements DescribableList.Owner {
     /**
      * {@link BuildStep}s to be executed when a build is promoted.
      */
-    public final DescribableList<? extends BuildStep,?> buildSteps = new DescribableList(this);
+    public final BuildStep[] buildSteps;
 
     /*package*/ PromotionConfig(StaplerRequest req, JSONObject c) throws FormException {
         this.name = c.getString("name");
         conditions.rebuild(req,c,PromotionConditions.CONDITIONS,"condition");
-        buildSteps.rebuild(req,c,(List)PostPromotionTask.getAll(),"buildStep");
+
+        List<Describable> steps = Descriptor.newInstancesFromHeteroList(
+                req, c, "buildStep", (List) PostPromotionTask.getAll());
+        buildSteps = steps.toArray(new BuildStep[steps.size()]);
     }
 
     /**
