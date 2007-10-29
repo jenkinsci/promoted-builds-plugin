@@ -43,9 +43,9 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     /**
      * Checks if the given criterion is already promoted.
      */
-    public boolean contains(PromotionCriterion criterion) {
+    public boolean contains(PromotionConfig config) {
         for (PromotionBadgeList p : promotions)
-            if(p.isFor(criterion))
+            if(p.isFor(config))
                 return true;
         return false;
     }
@@ -70,15 +70,15 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     }
 
     /**
-     * Gets list of {@link PromotionCriterion}s that are not yet attained.
+     * Gets list of {@link PromotionConfig}s that are not yet attained.
      * @return can be empty but never null.
      */
-    public List<PromotionCriterion> getPendingPromotions() {
+    public List<PromotionConfig> getPendingPromotions() {
         JobPropertyImpl pp = getProject().getProperty(JobPropertyImpl.class);
         if(pp==null)        return Collections.emptyList();
 
-        List<PromotionCriterion> r = new ArrayList<PromotionCriterion>();
-        for (PromotionCriterion c : pp.getCriteria()) {
+        List<PromotionConfig> r = new ArrayList<PromotionConfig>();
+        for (PromotionConfig c : pp.getConfigs()) {
             if(!contains(c))    r.add(c);
         }
 
@@ -110,7 +110,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         if(pp==null)
             throw new IllegalStateException("This project doesn't have any promotion criteria set");
 
-        PromotionCriterion c = pp.getCriterion(name);
+        PromotionConfig c = pp.getConfig(name);
         if(c==null)
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
         promotions.add(new PromotionBadgeList(c,Collections.singleton(new ManualPromotionBadge())));

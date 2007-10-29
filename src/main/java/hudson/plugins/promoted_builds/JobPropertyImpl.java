@@ -1,19 +1,16 @@
 package hudson.plugins.promoted_builds;
 
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
-import hudson.model.TaskListener;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
 
 /**
  * This doesn't really publish anything, but we want the configuration to show
@@ -25,11 +22,11 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  */
 public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
-    private final List<PromotionCriterion> criteria = new ArrayList<PromotionCriterion>();
+    private final List<PromotionConfig> configs = new ArrayList<PromotionConfig>();
 
     private JobPropertyImpl(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
-        for( JSONObject c : (List<JSONObject>) JSONArray.fromObject(json.get("criteria")) )
-            criteria.add(new PromotionCriterion(req,c));
+        for( JSONObject c : (List<JSONObject>) JSONArray.fromObject(json.get("config")) )
+            configs.add(new PromotionConfig(req,c));
     }
 
     /**
@@ -38,15 +35,15 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
      * @return
      *      non-null and non-empty. Read-only.
      */
-    public List<PromotionCriterion> getCriteria() {
-        return criteria;
+    public List<PromotionConfig> getConfigs() {
+        return configs;
     }
 
     /**
-     * Finds a criterion by name.
+     * Finds a config by name.
      */
-    public PromotionCriterion getCriterion(String name) {
-        for (PromotionCriterion c : criteria) {
+    public PromotionConfig getConfig(String name) {
+        for (PromotionConfig c : configs) {
             if(c.getName().equals(name))
                 return c;
         }

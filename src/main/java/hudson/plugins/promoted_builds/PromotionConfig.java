@@ -11,11 +11,13 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Criteria for a build to be promoted.
+ * Build promotion configuration.
+ *
+ * Criteria for a build to be promoted, as well as what to do when a build is promoted.
  *
  * @author Kohsuke Kawaguchi
  */
-public final class PromotionCriterion implements DescribableList.Owner {
+public final class PromotionConfig implements DescribableList.Owner {
     private final String name;
 
     /**
@@ -24,7 +26,7 @@ public final class PromotionCriterion implements DescribableList.Owner {
     private final DescribableList<PromotionCondition,PromotionConditionDescriptor> conditions =
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
 
-    /*package*/ PromotionCriterion(StaplerRequest req, JSONObject c) throws FormException {
+    /*package*/ PromotionConfig(StaplerRequest req, JSONObject c) throws FormException {
         this.name = c.getString("name");
         conditions.rebuild(req,c,PromotionConditions.CONDITIONS,"condition");
     }

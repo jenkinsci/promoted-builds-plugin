@@ -13,7 +13,7 @@ import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
-import hudson.plugins.promoted_builds.PromotionCriterion;
+import hudson.plugins.promoted_builds.PromotionConfig;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -150,7 +150,7 @@ public class DownstreamPassCondition extends PromotionCondition {
             for(AbstractProject<?,?> j : Hudson.getInstance().getAllItems(AbstractProject.class)) {
                 JobPropertyImpl p = j.getProperty(JobPropertyImpl.class);
                 if(p!=null) {
-                    for (PromotionCriterion c : p.getCriteria()) {
+                    for (PromotionConfig c : p.getConfigs()) {
                         boolean considerPromotion = false;
                         for (PromotionCondition cond : c.getConditions()) {
                             if (cond instanceof DownstreamPassCondition) {

@@ -1,10 +1,10 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:optionalBlock name="promotions" title="Promote builds when..." checked="${!empty(instance.criteria)}" help="/plugin/promoted-builds/help.html">
+  <f:optionalBlock name="promotions" title="Promote builds when..." checked="${!empty(instance.configs)}" help="/plugin/promoted-builds/help.html">
     <f:block><div style="padding-left:2em">
-      <f:repeatable var="s" items="${instance.criteria}" noAddButton="true" minimum="1" name="criteria">
+      <f:repeatable var="s" items="${instance.configs}" noAddButton="true" minimum="1" name="config">
         <table width="100%">
           <f:entry title="Name">
-            <f:textbox name="criteria.name" value="${s.name}" />
+            <f:textbox name="config.name" value="${s.name}" />
           </f:entry>
           <f:block>
             Promote a build when all of the following conditions are met:
