@@ -49,6 +49,17 @@ public final class PromotedBuildAction implements BuildBadgeAction {
                 return true;
         return false;
     }
+
+    /**
+     * Checks if the given criterion is already promoted.
+     */
+    public boolean contains(String name) {
+        for (PromotionBadgeList p : promotions)
+            if(p.criterion.equals(name))
+                return true;
+        return false;
+    }
+
     /**
      * Called when the build passes another promotion criterion.
      */
