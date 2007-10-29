@@ -3,14 +3,12 @@ package hudson.plugins.promoted_builds;
 import hudson.FilePath;
 import hudson.model.AbstractProject;
 import hudson.model.DependencyGraph;
-import hudson.model.Run;
 import hudson.model.Descriptor;
-import hudson.model.ItemGroup;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A dummy {@link AbstractProject} to carry out promotion operations.
