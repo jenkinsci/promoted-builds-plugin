@@ -23,14 +23,14 @@ public class PromotedProjectAction implements ProminentProjectAction {
         return property.getConfigs();
     }
 
-    public AbstractBuild<?,?> getLastPromoted(PromotionConfig config) {
-        return getLastPromoted(config.getName());        
+    public AbstractBuild<?,?> getLatest(PromotionConfig config) {
+        return getLatest(config.getName());        
     }
 
     /**
      * Finds the last promoted build under the given criteria.
      */
-    public AbstractBuild<?,?> getLastPromoted(String name) {
+    public AbstractBuild<?,?> getLatest(String name) {
         for( AbstractBuild<?,?> build : owner.getBuilds() ) {
             PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
             if(a!=null && a.contains(name))

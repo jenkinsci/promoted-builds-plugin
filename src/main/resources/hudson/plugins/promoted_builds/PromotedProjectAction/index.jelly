@@ -10,11 +10,11 @@
           <img src="${imagesURL}/32x32/star-gold.gif"/> ${c.name}
         </h2>
         <p>
-          <j:set var="b" value="${it.getLastPromoted(c)}" />
+          <j:set var="b" value="${it.getLatest(c)}" />
           <j:choose>
             <j:when test="${b!=null}">
               Last promoted build is <t:buildLink job="${b.project}" number="${b.number}" />
-              (<a href="${c.name}/">permalink</a>) 
+              (<a href="latest/${c.name}/">permalink</a>) 
             </j:when>
             <j:otherwise>
               No build promoted so far.
