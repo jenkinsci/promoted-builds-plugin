@@ -27,9 +27,13 @@ public final class PromotedBuildAction implements BuildBadgeAction {
      */
     private final CopyOnWriteList<PromotionBadgeList> promotions = new CopyOnWriteList<PromotionBadgeList>();
 
-    public PromotedBuildAction(AbstractBuild<?,?> owner, PromotionBadgeList badgeList) {
+    public PromotedBuildAction(AbstractBuild<?,?> owner) {
         assert owner!=null;
         this.owner = owner;
+    }
+
+    public PromotedBuildAction(AbstractBuild<?,?> owner, PromotionBadgeList badgeList) {
+        this(owner);
         promotions.add(badgeList);
     }
 

@@ -6,6 +6,8 @@ import hudson.model.Descriptor;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
 import hudson.tasks.BuildStep;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -50,6 +52,12 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
                 return c;
         }
         return null;
+    }
+
+    @Override
+    public boolean prebuild(AbstractBuild<?,?> build, BuildListener listener) {
+        build.addAction(new PromotedBuildAction(build));
+        return true;
     }
 
     @Override
