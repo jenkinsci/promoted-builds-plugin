@@ -13,6 +13,7 @@
             <table style="width:100%">
               <f:descriptorList varName="condition" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
             </table>
+            <f:hetero-list varName="buildStep" descriptors="${descriptor.getApplicableBuildSteps(it)}" instances="${s.buildSteps.toMap()}" />
           </f:entry>
 
           <f:entry>

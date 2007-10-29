@@ -1,14 +1,16 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
+import hudson.tasks.BuildStep;
 import hudson.util.DescribableList;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Build promotion configuration.
@@ -23,12 +25,18 @@ public final class PromotionConfig implements DescribableList.Owner {
     /**
      * {@link PromotionCondition}s. All have to be met for a build to be promoted.
      */
-    private final DescribableList<PromotionCondition,PromotionConditionDescriptor> conditions =
+    public final DescribableList<PromotionCondition,PromotionConditionDescriptor> conditions =
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
+
+    /**
+     * {@link BuildStep}s to be executed when a build is promoted.
+     */
+    public final DescribableList<? extends BuildStep,?> buildSteps = new DescribableList(this);
 
     /*package*/ PromotionConfig(StaplerRequest req, JSONObject c) throws FormException {
         this.name = c.getString("name");
         conditions.rebuild(req,c,PromotionConditions.CONDITIONS,"condition");
+        buildSteps.rebuild(req,c,(List)PostPromotionTask.getAll(),"buildStep");
     }
 
     /**
@@ -90,12 +98,5 @@ public final class PromotionConfig implements DescribableList.Owner {
      */
     public void save() throws IOException {
         // TODO?
-    }
-
-    /**
-     * {@link PromotionCondition}s that constitute this criteria.
-     */
-    public DescribableList<PromotionCondition, PromotionConditionDescriptor> getConditions() {
-        return conditions;
     }
 }

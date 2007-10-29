@@ -5,6 +5,7 @@ import hudson.model.Descriptor;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
+import hudson.tasks.BuildStep;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
@@ -74,6 +75,11 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
         // exposed for Jelly
         public List<PromotionConditionDescriptor> getApplicableConditions(AbstractProject<?,?> p) {
             return PromotionConditions.getApplicableTriggers(p);
+        }
+
+        // exposed for Jelly
+        public List<Descriptor<? extends BuildStep>> getApplicableBuildSteps(AbstractProject<?,?> p) {
+            return PostPromotionTask.getAll();
         }
 
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();

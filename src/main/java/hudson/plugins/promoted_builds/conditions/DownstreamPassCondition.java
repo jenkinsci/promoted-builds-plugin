@@ -152,7 +152,7 @@ public class DownstreamPassCondition extends PromotionCondition {
                 if(p!=null) {
                     for (PromotionConfig c : p.getConfigs()) {
                         boolean considerPromotion = false;
-                        for (PromotionCondition cond : c.getConditions()) {
+                        for (PromotionCondition cond : c.conditions) {
                             if (cond instanceof DownstreamPassCondition) {
                                 DownstreamPassCondition dpcond = (DownstreamPassCondition) cond;
                                 if(dpcond.contains(build.getParent())) {
