@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.Descriptor;
 import hudson.model.Job;
 import hudson.model.JobProperty;
@@ -49,6 +50,11 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
                 return c;
         }
         return null;
+    }
+
+    @Override
+    public Action getJobAction(AbstractProject<?,?> job) {
+        return new PromotedProjectAction(job,this);
     }
 
     public DescriptorImpl getDescriptor() {
