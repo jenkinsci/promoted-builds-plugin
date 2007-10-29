@@ -84,6 +84,10 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         return promotions.getView();
     }
 
+    public boolean hasPromotion() {
+        return !promotions.isEmpty();
+    }
+
     /**
      * Gets list of {@link PromotionConfig}s that are not yet attained.
      * @return can be empty but never null.
