@@ -9,18 +9,22 @@
         <h2>
           <img src="${imagesURL}/32x32/star-gold.gif"/> ${c.name}
         </h2>
-        <p>
-          <j:set var="b" value="${it.getLatest(c)}" />
-          <j:choose>
-            <j:when test="${b!=null}">
-              Last promoted build is <t:buildLink job="${b.project}" number="${b.number}" />
-              (<a href="latest/${c.name}/">permalink</a>) 
-            </j:when>
-            <j:otherwise>
+        
+        <j:set var="b" value="${it.getLatest(c)}" />
+        <j:choose>
+          <j:when test="${b!=null}">
+            <p>
+              Last promoted build is <t:buildLink job="${b.project}" number="${b.number}" />,
+              ${b.timestampString} ago.
+              (<a href="latest/${c.name}/">permalink</a>)
+            </p>
+          </j:when>
+          <j:otherwise>
+            <p>
               No build promoted so far.
-            </j:otherwise>
-          </j:choose>
-        </p>
+            </p>
+          </j:otherwise>
+        </j:choose>
       </j:forEach>
     </l:main-panel>
   </l:layout>
