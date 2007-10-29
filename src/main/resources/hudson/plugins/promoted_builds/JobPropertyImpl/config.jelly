@@ -2,30 +2,33 @@
   <f:optionalBlock name="promotions" title="Promote builds when..." checked="${!empty(instance.configs)}" help="/plugin/promoted-builds/help.html">
     <f:block><div style="padding-left:2em">
       <f:repeatable var="s" items="${instance.configs}" noAddButton="true" minimum="1" name="config">
-        <table width="100%">
-          <f:entry title="Name">
-            <f:textbox name="config.name" value="${s.name}" />
-          </f:entry>
-          <f:section title="Promotion criteria">
-            <f:nested>
-              <table style="width:100%">
-                <f:descriptorList varName="condition" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
-              </table>
-            </f:nested>
-          </f:section>
-          <f:section title="Post-promotion actions">
-            <f:nested>
-              <f:hetero-list name="buildStep" descriptors="${descriptor.getApplicableBuildSteps(it)}" items="${s.buildSteps}" />
-            </f:nested>
-          </f:section>
+        <fieldset style="margin-bottom:1em">
+          <legend>Build promotion configuration</legend>
+          <table width="100%">
+            <f:entry title="Name">
+              <f:textbox name="config.name" value="${s.name}" />
+            </f:entry>
+            <f:section title="Promotion criteria">
+              <f:nested>
+                <table style="width:100%">
+                  <f:descriptorList varName="condition" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
+                </table>
+              </f:nested>
+            </f:section>
+            <f:section title="Post-promotion actions">
+              <f:nested>
+                <f:hetero-list name="buildStep" descriptors="${descriptor.getApplicableBuildSteps(it)}" items="${s.buildSteps}" />
+              </f:nested>
+            </f:section>
 
-          <f:entry>
-            <div align="right">
-              <input type="button" value="Add another promotion level..." class="repeatable-add show-if-last" />
-              <input type="button" value="Delete" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
-            </div>
-          </f:entry>
-        </table>
+            <f:entry>
+              <div align="right">
+                <input type="button" value="Add another promotion level..." class="repeatable-add show-if-last" />
+                <input type="button" value="Delete" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
+              </div>
+            </f:entry>
+          </table>
+        </fieldset>
       </f:repeatable>
     </div></f:block>
   </f:optionalBlock>
