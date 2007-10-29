@@ -10,7 +10,7 @@
             Promote a build when all of the following conditions are met:
           </f:block>
           <f:entry>
-          <table style="width:100%">
+            <table style="width:100%">
               <f:descriptorList varName="condition" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
             </table>
           </f:entry>
