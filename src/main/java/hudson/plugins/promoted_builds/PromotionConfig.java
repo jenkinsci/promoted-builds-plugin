@@ -4,6 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
+import hudson.model.Hudson;
 import hudson.tasks.BuildStep;
 import hudson.util.DescribableList;
 import net.sf.json.JSONObject;
@@ -34,13 +35,27 @@ public final class PromotionConfig implements DescribableList.Owner {
      */
     public final BuildStep[] buildSteps;
 
+    private transient PromotionProcessJob promotionProcessJob;
+
     /*package*/ PromotionConfig(StaplerRequest req, JSONObject c) throws FormException {
         this.name = c.getString("name");
         conditions.rebuild(req,c,PromotionConditions.CONDITIONS,"condition");
 
         List<Describable> steps = Descriptor.newInstancesFromHeteroList(
-                req, c, "buildStep", (List) PostPromotionTask.getAll());
+                req, c, "buildStep", (List) PromotionProcessJob.getAll());
         buildSteps = steps.toArray(new BuildStep[steps.size()]);
+    }
+
+    /*package*/ void init(JobPropertyImpl parent) {
+        promotionProcessJob = new PromotionProcessJob(parent,this);
+    }
+
+    /**
+     * Gets the {@link PromotionProcessJob} associated with this property,
+     * which is used to carry out {@link #buildSteps processing associated to a promotion.}
+     */
+    public PromotionProcessJob getPromotionProcessJob() {
+        return promotionProcessJob;
     }
 
     /**
@@ -79,6 +94,8 @@ public final class PromotionConfig implements DescribableList.Owner {
             return false; // not this time
 
         // promote it
+        promotionProcessJob.scheduleBuild();
+
         if(a!=null) {
             a.add(badges);
         } else {

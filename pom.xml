@@ -26,5 +26,12 @@
       <version>1.150-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+    <!-- for testing purpose -->
+    <dependency>
+      <groupId>org.jvnet.hudson.plugins</groupId>
+      <artifactId>batch-task</artifactId>
+      <version>1.1-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

@@ -5,6 +5,7 @@ import hudson.model.AbstractProject;
 import hudson.model.DependencyGraph;
 import hudson.model.Run;
 import hudson.model.Descriptor;
+import hudson.model.ItemGroup;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 
@@ -12,25 +13,39 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * A dummy {@link AbstractProject} instance so that
- * {@link BuildStepDescriptor#isApplicable(AbstractProject)} can be used
- * to check if the {@link BuildStep} can be used as a post-promotion task.
+ * A dummy {@link AbstractProject} to carry out promotion operations.
  *
  * @author Kohsuke Kawaguchi
  */
-public final class PostPromotionTask extends AbstractProject {
-    private PostPromotionTask() {
-        super(null, null);
+public final class PromotionProcessJob extends AbstractProject<PromotionProcessJob,PromotionProcess> {
+    public final JobPropertyImpl property;
+    public final PromotionConfig config;
+
+    /*package*/ PromotionProcessJob(JobPropertyImpl property, PromotionConfig config) {
+        super(null, property.getOwner().getFullName()+" promotion ("+config.getName()+")");
+        this.property = property;
+        this.config = config;
+    }
+
+    /**
+     * Gets the owner {@link AbstractProject} thta configured {@link #property}
+     */
+    public AbstractProject<?,?> getOwner() {
+        return property.getOwner();
     }
 
     public FilePath getWorkspace() {
-        throw new UnsupportedOperationException();
+        return getOwner().getWorkspace();
     }
 
-    protected Class getBuildClass() {
-        throw new UnsupportedOperationException();
+    protected Class<PromotionProcess> getBuildClass() {
+        return PromotionProcess.class;
     }
 
+//
+// these are dummy implementations to implement abstract methods.
+// need to think about what the implications are.
+//
     public boolean isFingerprintConfigured() {
         throw new UnsupportedOperationException();
     }
@@ -38,12 +53,6 @@ public final class PostPromotionTask extends AbstractProject {
     protected void buildDependencyGraph(DependencyGraph graph) {
         throw new UnsupportedOperationException();
     }
-
-    protected void removeRun(Run run) {
-        throw new UnsupportedOperationException();
-    }
-
-    private static final PostPromotionTask INSTANCE = new PostPromotionTask();
 
     public static List<Descriptor<? extends BuildStep>> getAll() {
         List<Descriptor<? extends BuildStep>> list = new ArrayList<Descriptor<? extends BuildStep>>();
@@ -56,7 +65,7 @@ public final class PostPromotionTask extends AbstractProject {
         for (Descriptor<? extends BuildStep> d : source) {
             if (d instanceof BuildStepDescriptor) {
                 BuildStepDescriptor bsd = (BuildStepDescriptor) d;
-                if(bsd.isApplicable(PostPromotionTask.INSTANCE))
+                if(bsd.isApplicable(PromotionProcessJob.class))
                     list.add(d);
             }
         }

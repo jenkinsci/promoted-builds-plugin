@@ -33,6 +33,20 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
             configs.add(new PromotionConfig(req,c));
     }
 
+    @Override
+    protected void setOwner(AbstractProject<?, ?> owner) {
+        super.setOwner(owner);
+        for (PromotionConfig config : configs)
+            config.init(this);
+    }
+
+    /**
+     * Gets {@link AbstractProject} that contains us.
+     */
+    public AbstractProject<?,?> getOwner() {
+        return owner;
+    }
+
     /**
      * Gets the list of promotion criteria defined for this project.
      *
@@ -93,7 +107,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
 
         // exposed for Jelly
         public List<Descriptor<? extends BuildStep>> getApplicableBuildSteps(AbstractProject<?,?> p) {
-            return PostPromotionTask.getAll();
+            return PromotionProcessJob.getAll();
         }
 
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();
