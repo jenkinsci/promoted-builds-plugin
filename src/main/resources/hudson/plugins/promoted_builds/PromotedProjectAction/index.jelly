@@ -10,7 +10,16 @@
           <img src="${imagesURL}/32x32/star-gold.gif"/> ${c.name}
         </h2>
         <p>
-          Permalink to <a href="${c.name}/">the last promoted build</a>
+          <j:set var="b" value="${it.getLastPromoted(c)}" />
+          <j:choose>
+            <j:when test="${b!=null}">
+              Last promoted build is <t:buildLink job="${b.project}" number="${b.number}" />
+              (<a href="${c.name}/">permalink</a>) 
+            </j:when>
+            <j:otherwise>
+              No build promoted so far.
+            </j:otherwise>
+          </j:choose>
         </p>
       </j:forEach>
     </l:main-panel>

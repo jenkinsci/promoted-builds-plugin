@@ -1,7 +1,8 @@
 package hudson.plugins.promoted_builds;
 
-import hudson.model.ProminentProjectAction;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.ProminentProjectAction;
 
 import java.util.List;
 
@@ -20,6 +21,22 @@ public class PromotedProjectAction implements ProminentProjectAction {
 
     public List<PromotionConfig> getConfigs() {
         return property.getConfigs();
+    }
+
+    public AbstractBuild<?,?> getLastPromoted(PromotionConfig config) {
+        return getLastPromoted(config.getName());        
+    }
+
+    /**
+     * Finds the last promoted build under the given criteria.
+     */
+    public AbstractBuild<?,?> getLastPromoted(String name) {
+        for( AbstractBuild<?,?> build : owner.getBuilds() ) {
+            PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
+            if(a!=null && a.contains(name))
+                return build;
+        }
+        return null;
     }
 
     public String getIconFileName() {
