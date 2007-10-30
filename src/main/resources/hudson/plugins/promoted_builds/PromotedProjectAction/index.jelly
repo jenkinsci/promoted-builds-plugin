@@ -5,7 +5,7 @@
       <h1>Promotions</h1>
 
       <!-- list promotions that are already attained -->
-      <j:forEach var="c" items="${it.configs}">
+      <j:forEach var="c" items="${it.processes}">
         <h2>
           <img src="${imagesURL}/32x32/star-gold.gif"/> ${c.name}
         </h2>

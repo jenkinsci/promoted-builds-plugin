@@ -47,9 +47,9 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     /**
      * Checks if the given criterion is already promoted.
      */
-    public boolean contains(PromotionConfig config) {
+    public boolean contains(PromotionProcess process) {
         for (PromotionBadgeList p : promotions)
-            if(p.isFor(config))
+            if(p.isFor(process))
                 return true;
         return false;
     }
@@ -59,7 +59,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
      */
     public boolean contains(String name) {
         for (PromotionBadgeList p : promotions)
-            if(p.criterion.equals(name))
+            if(p.name.equals(name))
                 return true;
         return false;
     }
@@ -69,7 +69,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
      */
     public synchronized boolean add(PromotionBadgeList badgeList) throws IOException {
         for (PromotionBadgeList p : promotions)
-            if(p.criterion.equals(badgeList.criterion))
+            if(p.name.equals(badgeList.name))
                 return false; // already promoted. noop
 
         this.promotions.add(badgeList);
@@ -89,16 +89,16 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     }
 
     /**
-     * Gets list of {@link PromotionConfig}s that are not yet attained.
+     * Gets list of {@link PromotionProcess}s that are not yet attained.
      * @return can be empty but never null.
      */
-    public List<PromotionConfig> getPendingPromotions() {
+    public List<PromotionProcess> getPendingPromotions() {
         JobPropertyImpl pp = getProject().getProperty(JobPropertyImpl.class);
         if(pp==null)        return Collections.emptyList();
 
-        List<PromotionConfig> r = new ArrayList<PromotionConfig>();
-        for (PromotionConfig c : pp.getConfigs()) {
-            if(!contains(c))    r.add(c);
+        List<PromotionProcess> r = new ArrayList<PromotionProcess>();
+        for (PromotionProcess p : pp.getItems()) {
+            if(!contains(p))    r.add(p);
         }
 
         return r;
@@ -129,7 +129,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         if(pp==null)
             throw new IllegalStateException("This project doesn't have any promotion criteria set");
 
-        PromotionConfig c = pp.getConfig(name);
+        PromotionProcess c = pp.getItem(name);
         if(c==null)
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
         promotions.add(new PromotionBadgeList(c,Collections.singleton(new ManualPromotionBadge())));

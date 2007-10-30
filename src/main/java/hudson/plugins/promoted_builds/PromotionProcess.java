@@ -1,63 +1,147 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.Result;
+import hudson.model.AbstractProject;
+import hudson.model.DependencyGraph;
+import hudson.model.Descriptor;
 import hudson.tasks.BuildStep;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.util.DescribableList;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.StaplerRequest;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Records a promotion process.
+ * A dummy {@link AbstractProject} to carry out promotion operations.
  *
  * @author Kohsuke Kawaguchi
  */
-public class PromotionProcess extends AbstractBuild<PromotionProcessJob,PromotionProcess> {
-    public PromotionProcess(PromotionProcessJob job) throws IOException {
-        super(job);
+public final class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements DescribableList.Owner {
+    /**
+     * {@link PromotionCondition}s. All have to be met for a build to be promoted.
+     */
+    public final DescribableList<PromotionCondition,PromotionConditionDescriptor> conditions =
+            new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
+
+    private List<BuildStep> buildSteps;
+
+    /*package*/ PromotionProcess(JobPropertyImpl property, String name) {
+        super(property, name);
     }
 
-    public PromotionProcess(PromotionProcessJob job, Calendar timestamp) {
-        super(job, timestamp);
+    /*package*/ void configure(StaplerRequest req, JSONObject c) throws Descriptor.FormException, IOException {
+        // apply configuration
+        conditions.rebuild(req,c, PromotionConditions.CONDITIONS,"condition");
+
+        buildSteps = (List)Descriptor.newInstancesFromHeteroList(
+                req, c, "buildStep", (List) PromotionProcess.getAll());
+        save();
     }
 
-    public PromotionProcess(PromotionProcessJob project, File buildDir) throws IOException {
-        super(project, buildDir);
+    @Override
+    public JobPropertyImpl getParent() {
+        return (JobPropertyImpl)super.getParent();
     }
 
-    public void run() {
-        run(new RunnerImpl());
+    /**
+     * Gets the owner {@link AbstractProject} that configured {@link JobPropertyImpl} as
+     * a job property.
+     */
+    public AbstractProject<?,?> getOwner() {
+        return getParent().getOwner();
     }
 
-    protected class RunnerImpl extends AbstractRunner {
-        protected Result doRun(BuildListener listener) throws Exception {
-            if(!preBuild(listener,project.config.buildSteps))
-                return Result.FAILURE;
+    public FilePath getWorkspace() {
+        return getOwner().getWorkspace();
+    }
 
-            if(!build(listener,project.config.buildSteps))
-                return Result.FAILURE;
+    protected Class<Promotion> getBuildClass() {
+        return Promotion.class;
+    }
 
-            return null;
+    public List<BuildStep> getBuildSteps() {
+        return Collections.unmodifiableList(buildSteps);
+    }
+
+    /**
+     * Checks if all the conditions to promote a build is met.
+     *
+     * @return
+     *      null if promotion conditions are not met.
+     *      otherwise returns a list of badges that record how the promotion happened.
+     */
+    public PromotionBadgeList isMet(AbstractBuild<?,?> build) {
+        List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
+        for (PromotionCondition cond : conditions) {
+            PromotionBadge b = cond.isMet(build);
+            if(b==null)
+                return null;
+            badges.add(b);
+        }
+        return new PromotionBadgeList(this,badges);
+    }
+
+    /**
+     * Checks if the build is promotable, and if so, promote it.
+     *
+     * @return
+     *      true if the build was promoted.
+     */
+    public boolean considerPromotion(AbstractBuild<?,?> build) throws IOException {
+        PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
+
+        // if it's already promoted, no need to do anything.
+        if(a!=null && a.contains(this))
+            return false;
+
+        PromotionBadgeList badges = isMet(build);
+        if(badges==null)
+            return false; // not this time
+
+        // promote it
+        scheduleBuild();
+
+        if(a!=null) {
+            a.add(badges);
+        } else {
+            build.addAction(new PromotedBuildAction(build,badges));
+            build.save();
         }
 
-        protected void post2(BuildListener listener) throws Exception {
-            // no-op
-        }
+        return true;
+    }
 
-        private boolean build(BuildListener listener, BuildStep[] steps) throws IOException, InterruptedException {
-            for( BuildStep bs : steps )
-                if(!bs.perform(PromotionProcess.this, launcher, listener))
-                    return false;
-            return true;
-        }
+//
+// these are dummy implementations to implement abstract methods.
+// need to think about what the implications are.
+//
+    public boolean isFingerprintConfigured() {
+        throw new UnsupportedOperationException();
+    }
 
-        private boolean preBuild(BuildListener listener,BuildStep[] steps) {
-            for( BuildStep bs : steps )
-                if(!bs.prebuild(PromotionProcess.this,listener))
-                    return false;
-            return true;
+    protected void buildDependencyGraph(DependencyGraph graph) {
+        throw new UnsupportedOperationException();
+    }
+
+    public static List<Descriptor<? extends BuildStep>> getAll() {
+        List<Descriptor<? extends BuildStep>> list = new ArrayList<Descriptor<? extends BuildStep>>();
+        addTo(BuildStep.BUILDERS, list);
+        addTo(BuildStep.PUBLISHERS, list);
+        return list;
+    }
+
+    private static void addTo(List<? extends Descriptor<? extends BuildStep>> source, List<Descriptor<? extends BuildStep>> list) {
+        for (Descriptor<? extends BuildStep> d : source) {
+            if (d instanceof BuildStepDescriptor) {
+                BuildStepDescriptor bsd = (BuildStepDescriptor) d;
+                if(bsd.isApplicable(PromotionProcess.class))
+                    list.add(d);
+            }
         }
     }
 }

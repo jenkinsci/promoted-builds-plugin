@@ -19,12 +19,12 @@ public class PromotedProjectAction implements ProminentProjectAction {
         this.property = property;
     }
 
-    public List<PromotionConfig> getConfigs() {
-        return property.getConfigs();
+    public List<PromotionProcess> getProcesses() {
+        return property.getItems();
     }
 
-    public AbstractBuild<?,?> getLatest(PromotionConfig config) {
-        return getLatest(config.getName());        
+    public AbstractBuild<?,?> getLatest(PromotionProcess p) {
+        return getLatest(p.getName());
     }
 
     /**

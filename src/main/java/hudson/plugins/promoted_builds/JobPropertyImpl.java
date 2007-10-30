@@ -1,43 +1,92 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.BuildListener;
 import hudson.model.Descriptor;
+import hudson.model.ItemGroup;
+import hudson.model.ItemGroupMixIn;
+import hudson.model.Items;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 import hudson.tasks.BuildStep;
+import hudson.util.Function1;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.Ancestor;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This doesn't really publish anything, but we want the configuration to show
- * up in the post-build action because the promotion is a post-build activity.
+ * Promotion processes defined for a project.
  *
  * <p>
- * The primary role of this class is to remember the promotion criteria.
+ * TODO: a possible performance problem as every time the owner job is reconfigured,
+ * all the promotion processes get reloaded from the disk.
  *
  * @author Kohsuke Kawaguchi
  */
-public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
-    private final List<PromotionConfig> configs = new ArrayList<PromotionConfig>();
+public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> implements ItemGroup<PromotionProcess> {
+    /**
+     * These are loaded from the disk in a different way.
+     */
+    private transient /*final*/ List<PromotionProcess> processes = new ArrayList<PromotionProcess>();
 
-    private JobPropertyImpl(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
-        for( JSONObject c : (List<JSONObject>) JSONArray.fromObject(json.get("config")) )
-            configs.add(new PromotionConfig(req,c));
+//    /**
+//     * Names of the processes that are configured.
+//     * Used to construct {@link #processes}.
+//     */
+//    private final List<String> names = new ArrayList<String>();
+    
+    private JobPropertyImpl(StaplerRequest req, JSONObject json) throws Descriptor.FormException, IOException {
+        // a hack to get the owning AbstractProject.
+        // this is needed here so that we can load items
+        List<Ancestor> ancs = req.getAncestors();
+        owner = (AbstractProject)ancs.get(ancs.size()-1).getObject();
+
+        for( JSONObject c : (List<JSONObject>) JSONArray.fromObject(json.get("config")) ) {
+            String name = c.getString("name");
+            PromotionProcess p;
+            try {
+                p = (PromotionProcess) Items.load(this, getRootDirFor(name));
+            } catch (IOException e) {
+                // failed to load
+                p = new PromotionProcess(this,name);
+            }
+
+            // apply configuration
+            p.configure(req,c);
+            processes.add(p);
+        }
     }
 
-    @Override
-    protected void setOwner(AbstractProject<?, ?> owner) {
+    protected void setOwner(AbstractProject<?,?> owner) {
         super.setOwner(owner);
-        for (PromotionConfig config : configs)
-            config.init(this);
+
+        // readResolve is too early because we don't have our parent set yet,
+        // so use this as the initialization opportunity.
+        processes = new ArrayList<PromotionProcess>(ItemGroupMixIn.<String,PromotionProcess>loadChildren(
+            this,getRootDir(),new Function1<String,PromotionProcess>() {
+            public String call(PromotionProcess p) {
+                return p.getName();
+            }
+        }).values());
+    }
+
+    /**
+     * Gets the list of promotion criteria defined for this project.
+     *
+     * @return
+     *      non-null and non-empty. Read-only.
+     */
+    public List<PromotionProcess> getItems() {
+        return processes;
     }
 
     /**
@@ -48,24 +97,46 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
     }
 
     /**
-     * Gets the list of promotion criteria defined for this project.
-     *
-     * @return
-     *      non-null and non-empty. Read-only.
-     */
-    public List<PromotionConfig> getConfigs() {
-        return configs;
-    }
-
-    /**
      * Finds a config by name.
      */
-    public PromotionConfig getConfig(String name) {
-        for (PromotionConfig c : configs) {
+    public PromotionProcess getItem(String name) {
+        for (PromotionProcess c : processes) {
             if(c.getName().equals(name))
                 return c;
         }
         return null;
+    }
+
+    public File getRootDir() {
+        return new File(getOwner().getRootDir(),"promotions");
+    }
+
+    public String getUrl() {
+        return getOwner().getUrl()+"promotion/";
+    }
+
+    public String getFullName() {
+        return getOwner().getFullName()+"/promotion";
+    }
+
+    public String getFullDisplayName() {
+        return getOwner().getFullDisplayName()+" \u00BB promotion";
+    }
+
+    public String getUrlChildPrefix() {
+        return "";
+    }
+
+    public File getRootDirFor(PromotionProcess child) {
+        return getRootDirFor(child.getName());
+    }
+
+    private File getRootDirFor(String name) {
+        return new File(getRootDir(), name);
+    }
+
+    public String getDisplayName() {
+        return "promotion";
     }
 
     @Override
@@ -97,7 +168,11 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
         }
 
         public JobPropertyImpl newInstance(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
-            return new JobPropertyImpl(req,json);
+            try {
+                return new JobPropertyImpl(req,json);
+            } catch (IOException e) {
+                throw new FormException("Failed to create",e,null); // TODO:hmm
+            }
         }
 
         // exposed for Jelly
@@ -107,7 +182,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> {
 
         // exposed for Jelly
         public List<Descriptor<? extends BuildStep>> getApplicableBuildSteps(AbstractProject<?,?> p) {
-            return PromotionProcessJob.getAll();
+            return PromotionProcess.getAll();
         }
 
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();

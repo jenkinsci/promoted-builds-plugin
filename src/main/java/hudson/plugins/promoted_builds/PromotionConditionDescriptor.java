@@ -2,8 +2,6 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * {@link Descriptor} for {@link PromotionCondition}.

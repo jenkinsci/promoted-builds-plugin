@@ -13,7 +13,7 @@ import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
-import hudson.plugins.promoted_builds.PromotionConfig;
+import hudson.plugins.promoted_builds.PromotionProcess;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -148,11 +148,11 @@ public class DownstreamPassCondition extends PromotionCondition {
         public void onCompleted(AbstractBuild<?,?> build, TaskListener listener) {
             // this is not terribly efficient,
             for(AbstractProject<?,?> j : Hudson.getInstance().getAllItems(AbstractProject.class)) {
-                JobPropertyImpl p = j.getProperty(JobPropertyImpl.class);
-                if(p!=null) {
-                    for (PromotionConfig c : p.getConfigs()) {
+                JobPropertyImpl jp = j.getProperty(JobPropertyImpl.class);
+                if(jp!=null) {
+                    for (PromotionProcess p : jp.getItems()) {
                         boolean considerPromotion = false;
-                        for (PromotionCondition cond : c.conditions) {
+                        for (PromotionCondition cond : p.conditions) {
                             if (cond instanceof DownstreamPassCondition) {
                                 DownstreamPassCondition dpcond = (DownstreamPassCondition) cond;
                                 if(dpcond.contains(build.getParent())) {
@@ -169,7 +169,7 @@ public class DownstreamPassCondition extends PromotionCondition {
                                     if(build.getResult()==Result.SUCCESS)
                                         listener.getLogger().println("WARNING: "+j.getFullDisplayName()+" appears to use this job as a promotion criteria, but no fingerprint is recorded.");
                                 } else
-                                if(c.considerPromotion(u))
+                                if(p.considerPromotion(u))
                                     listener.getLogger().println("Promoted "+u);
                             } catch (IOException e) {
                                 e.printStackTrace(listener.error("Failed to promote a build"));

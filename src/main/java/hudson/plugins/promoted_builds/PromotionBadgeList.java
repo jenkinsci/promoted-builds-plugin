@@ -15,9 +15,9 @@ import java.util.GregorianCalendar;
  */
 public final class PromotionBadgeList extends AbstractList<PromotionBadge> {
     /**
-     * Matches with {@link PromotionConfig#name}.
+     * Matches with {@link PromotionProcess#name}.
      */
-    public final String criterion;
+    public final String name;
 
     private final PromotionBadge[] badges;
 
@@ -26,13 +26,13 @@ public final class PromotionBadgeList extends AbstractList<PromotionBadge> {
      */
     public final Calendar timestamp = new GregorianCalendar();
 
-    public PromotionBadgeList(PromotionConfig config, Collection<? extends PromotionBadge> badges) {
-        this.criterion = config.getName();
+    public PromotionBadgeList(PromotionProcess process, Collection<? extends PromotionBadge> badges) {
+        this.name = process.getName();
         this.badges = badges.toArray(new PromotionBadge[badges.size()]);
     }
 
     public String getName() {
-        return criterion;
+        return name;
     }
 
     /**
@@ -54,8 +54,8 @@ public final class PromotionBadgeList extends AbstractList<PromotionBadge> {
         return Util.getTimeSpanString(duration);
     }
 
-    public boolean isFor(PromotionConfig config) {
-        return config.getName().equals(this.criterion);
+    public boolean isFor(PromotionProcess process) {
+        return process.getName().equals(this.name);
     }
 
     public PromotionBadge get(int index) {
