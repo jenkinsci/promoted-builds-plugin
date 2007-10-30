@@ -13,15 +13,19 @@ import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import hudson.tasks.BuildStep;
 import hudson.util.Function1;
+import hudson.util.CopyOnWriteMap;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.Ancestor;
+import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Promotion processes defined for a project.
@@ -38,6 +42,17 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
      */
     private transient /*final*/ List<PromotionProcess> processes = new ArrayList<PromotionProcess>();
 
+    /**
+     * Subset of {@link #processes} that only contains {@link #activeProcessNames processes that are active}.
+     * This is really just a cache and not an independent variable.
+     */
+    private transient /*final*/ List<PromotionProcess> activeProcesses;
+
+    /**
+     * These {@link PromotionProcess}es are active.
+     */
+    private final Set<String> activeProcessNames = new HashSet<String>();
+
 //    /**
 //     * Names of the processes that are configured.
 //     * Used to construct {@link #processes}.
@@ -52,6 +67,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
         for( JSONObject c : (List<JSONObject>) JSONArray.fromObject(json.get("config")) ) {
             String name = c.getString("name");
+            activeProcessNames.add(name);
             PromotionProcess p;
             try {
                 p = (PromotionProcess) Items.load(this, getRootDirFor(name));
@@ -64,6 +80,21 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
             p.configure(req,c);
             processes.add(p);
         }
+
+        // load inactive processes
+        File[] subdirs = getRootDir().listFiles(new FileFilter() {
+            public boolean accept(File child) {
+                return child.isDirectory() && !activeProcessNames.contains(child.getName());
+            }
+        });
+        if(subdirs!=null) {
+            for (File subdir : subdirs) {
+                PromotionProcess p = (PromotionProcess) Items.load(this, subdir);
+                processes.add(p);
+            }
+        }
+
+        buildActiveProcess();
     }
 
     protected void setOwner(AbstractProject<?,?> owner) {
@@ -72,21 +103,44 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         // readResolve is too early because we don't have our parent set yet,
         // so use this as the initialization opportunity.
         processes = new ArrayList<PromotionProcess>(ItemGroupMixIn.<String,PromotionProcess>loadChildren(
-            this,getRootDir(),new Function1<String,PromotionProcess>() {
-            public String call(PromotionProcess p) {
-                return p.getName();
-            }
-        }).values());
+            this,getRootDir(),ItemGroupMixIn.KEYED_BY_NAME).values());
+        try {
+            buildActiveProcess();
+        } catch (IOException e) {
+            throw new Error(e);
+        }
     }
 
     /**
-     * Gets the list of promotion criteria defined for this project.
+     * Builds {@link #activeProcesses}.
+     */
+    private void buildActiveProcess() throws IOException {
+        activeProcesses = new ArrayList<PromotionProcess>();
+        for (PromotionProcess p : processes) {
+            boolean active = activeProcessNames.contains(p.getName());
+            p.makeDisabled(!active);
+            if(active)
+                activeProcesses.add(p);
+        }
+    }
+
+    /**
+     * Gets the list of promotion processes defined for this project,
+     * including ones that are no longer actively used and only
+     * for archival purpose.
      *
      * @return
      *      non-null and non-empty. Read-only.
      */
     public List<PromotionProcess> getItems() {
         return processes;
+    }
+
+    /**
+     * Gets the list of active promotion processes.
+     */
+    public List<PromotionProcess> getActiveItems() {
+        return activeProcesses;
     }
 
     /**
