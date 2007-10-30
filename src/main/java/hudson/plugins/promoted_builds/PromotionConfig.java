@@ -4,7 +4,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
-import hudson.model.Hudson;
 import hudson.tasks.BuildStep;
 import hudson.util.DescribableList;
 import net.sf.json.JSONObject;
