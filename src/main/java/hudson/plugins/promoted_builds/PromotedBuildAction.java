@@ -84,6 +84,17 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         return promotions.getView();
     }
 
+    /**
+     * Finds the {@link PromotionBadgeList} that has matching {@link PromotionBadgeList#name} value.
+     * Or null if not found.
+     */
+    public PromotionBadgeList getPromotion(String name) {
+        for (PromotionBadgeList p : promotions)
+            if(p.name.equals(name))
+                return p;
+        return null;
+    }
+
     public boolean hasPromotion() {
         return !promotions.isEmpty();
     }
