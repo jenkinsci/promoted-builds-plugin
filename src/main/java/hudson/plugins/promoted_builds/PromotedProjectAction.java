@@ -20,7 +20,7 @@ public class PromotedProjectAction implements ProminentProjectAction {
     }
 
     public List<PromotionProcess> getProcesses() {
-        return property.getItems();
+        return property.getActiveItems();
     }
 
     public AbstractBuild<?,?> getLatest(PromotionProcess p) {

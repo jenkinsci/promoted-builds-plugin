@@ -97,7 +97,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         if(pp==null)        return Collections.emptyList();
 
         List<PromotionProcess> r = new ArrayList<PromotionProcess>();
-        for (PromotionProcess p : pp.getItems()) {
+        for (PromotionProcess p : pp.getActiveItems()) {
             if(!contains(p))    r.add(p);
         }
 
