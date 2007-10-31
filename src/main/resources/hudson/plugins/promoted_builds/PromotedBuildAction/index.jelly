@@ -15,15 +15,15 @@
 
       <!-- list promotions that are already attained -->
       <j:forEach var="p" items="${it.promotions}">
-        <div style="float:right" align="right">
-          <div>(promoted ${p.getTimestampString()} ago)</div>
-          <div>(${p.getDelayString(it.owner)} after build)</div>
-        </div>
         <h2>
           <img src="${imagesURL}/32x32/star-gold.gif"/> ${p.getName()}
         </h2>
         <!-- how did this build qualify for promotion? -->
-        <h4>Qualification</h4>
+        <h4>
+          Qualification
+          <span style="padding-left:2em"> </span>
+          (promoted ${p.getTimestampString()} ago &#x2014; ${p.getDelayString(it.owner)} after build)
+        </h4>
         <j:forEach var="b" items="${p.badges}">
           <st:include it="${b}" page="index.jelly" />
         </j:forEach>
@@ -37,7 +37,7 @@
               Successfully promoted (<a href="${p.name}/lastSuccessful">record</a>)
             </j:when>
             <j:when test="${!p.isPromotionAttempted()}">
-              Pending promotion.
+              Pending promotion
             </j:when>
             <j:otherwise>
               Promotion failed (<a href="${p.name}/lastFailed">record</a>)

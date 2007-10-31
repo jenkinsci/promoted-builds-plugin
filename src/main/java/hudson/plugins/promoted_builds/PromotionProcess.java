@@ -35,7 +35,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     /**
      * Queues of builds to be promoted.
      */
-    /*package*/ transient volatile List<AbstractBuild<?,?>> queue = new LinkedList<AbstractBuild<?,?>>();
+    /*package*/ transient volatile List<AbstractBuild<?,?>> queue;
 
     /*package*/ PromotionProcess(JobPropertyImpl property, String name) {
         super(property, name);
@@ -110,6 +110,16 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         if(badges==null)
             return false; // not this time
 
+        promote(build,badges);
+
+        return true;
+    }
+
+    /**
+     * Promote the given build by using the given qualification.
+     */
+    public void promote(AbstractBuild<?,?> build, PromotionBadgeList badges) throws IOException {
+        PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
         // build is qualified for a promotion.
         if(a!=null) {
             a.add(badges);
@@ -118,16 +128,30 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             build.save();
         }
 
-        if(queue ==null)
-            queue = new LinkedList<AbstractBuild<?,?>>();
-        synchronized(queue) {
-            queue.add(build);
-        }
-        
         // schedule promotion activity.
-        scheduleBuild();
+        scheduleBuild(build);
+    }
 
-        return true;
+    /**
+     * @deprecated
+     *      You need to be using {@link #scheduleBuild(AbstractBuild)}
+     */
+    public boolean scheduleBuild() {
+        return super.scheduleBuild();
+    }
+
+    public boolean scheduleBuild(AbstractBuild<?,?> build) {
+        assert build.getProject()==getOwner();
+
+        if(queue ==null)
+            queue = Collections.synchronizedList(new LinkedList<AbstractBuild<?,?>>());
+        queue.add(build);
+
+        return super.scheduleBuild();
+    }
+
+    public boolean isInQueue(AbstractBuild<?,?> build) {
+        return isInQueue() && queue!=null && queue.contains(build);
     }
 
 //

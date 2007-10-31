@@ -54,6 +54,11 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             AbstractBuild<?,?> target;
 
             // which build are we trying to promote?
+            if(project.queue==null) {
+                listener.getLogger().println("Nothing to promote here. Aborting");
+                return Result.ABORTED;
+            }
+            
             synchronized (project.queue) {
                 if(project.queue.isEmpty()) {
                     listener.getLogger().println("Nothing to promote here. Aborting");
@@ -62,9 +67,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                 target = project.queue.remove(0);
                 targetBuildNumber = target.getNumber();
 
-                // if there's more in the queue schedule another one
+                // if there's more in the queue schedule another one.
                 if(!project.queue.isEmpty())
-                    project.scheduleBuild();
+                    project.scheduleBuild(); // the call to a deprecated method is intentional here.
             }
 
             listener.getLogger().println("Promoting "+target);

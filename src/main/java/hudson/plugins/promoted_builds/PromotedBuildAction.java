@@ -141,7 +141,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     /**
      * Binds {@link PromotionBadgeList} to URL hierarchy by its name.
      */
-    public PromotionBadgeList getDynamic(String name) {
+    public PromotionBadgeList getDynamic(String name, StaplerRequest req, StaplerResponse rsp) {
         return getPromotion(name);
     }
 
@@ -158,10 +158,11 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         if(pp==null)
             throw new IllegalStateException("This project doesn't have any promotion criteria set");
 
-        PromotionProcess c = pp.getItem(name);
-        if(c==null)
+        PromotionProcess p = pp.getItem(name);
+        if(p==null)
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
-        add(new PromotionBadgeList(c,Collections.singleton(new ManualPromotionBadge())));
+
+        p.promote(owner,new PromotionBadgeList(p,Collections.singleton(new ManualPromotionBadge())));
 
         rsp.sendRedirect2(".");
     }

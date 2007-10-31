@@ -2,15 +2,20 @@ package hudson.plugins.promoted_builds;
 
 import hudson.Util;
 import hudson.model.AbstractBuild;
+import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.util.Iterators;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
+import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.io.IOException;
 
 /**
  * Promotion status of a build wrt a specific {@link PromotionProcess}.
@@ -76,6 +81,13 @@ public final class PromotionBadgeList {
     }
 
     /**
+     * Gets the build that was qualified for a promotion.
+     */
+    public AbstractBuild<?,?> getTarget() {
+        return getParent().owner;
+    }
+
+    /**
      * Gets the string that says how long since this promotion had happened.
      *
      * @return
@@ -130,6 +142,15 @@ public final class PromotionBadgeList {
     }
 
     /**
+     * Returns true if the promotion for this is pending in the queue,
+     * waiting to be executed.
+     */
+    public boolean isInQueue() {
+        PromotionProcess p = getProcess();
+        return p!=null && p.isInQueue(getTarget());
+    }
+
+    /**
      * Gets the badges indicating how did a build qualify for a promotion.
      */
     public List<PromotionBadge> getBadges() {
@@ -178,5 +199,16 @@ public final class PromotionBadgeList {
                 return b;
         }
         return null;
+    }
+
+    /**
+     * Schedules a new build.
+     */
+    public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+        if(!Hudson.adminCheck(req,rsp))
+            return;
+        getProcess().scheduleBuild(getTarget());
+        // TODO: we need better visual feed back so that the user knows that the build happened.
+        rsp.forwardToPreviousPage(req);
     }
 }
