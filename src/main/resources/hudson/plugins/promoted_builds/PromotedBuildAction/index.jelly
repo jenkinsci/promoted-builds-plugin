@@ -38,6 +38,14 @@
             </j:when>
             <j:when test="${!p.isPromotionAttempted()}">
               Pending promotion
+              <j:choose>
+                <j:when test="${p.isInQueue()}">
+                  (promotion queued)
+                </j:when>
+                <j:otherwise>
+                  <span class='error'>(promotion not queued. Please re-execute promotion)</span>
+                </j:otherwise>
+              </j:choose>
             </j:when>
             <j:otherwise>
               Promotion failed (<a href="${p.name}/lastFailed">record</a>)
