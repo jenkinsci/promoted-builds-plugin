@@ -23,18 +23,18 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     public final AbstractBuild<?,?> owner;
 
     /**
-     * List of promotion criteria names that this build qualified.
+     * Per-process status.
      */
-    private final CopyOnWriteList<PromotionBadgeList> promotions = new CopyOnWriteList<PromotionBadgeList>();
+    private final CopyOnWriteList<Status> statuses = new CopyOnWriteList<Status>();
 
     public PromotedBuildAction(AbstractBuild<?,?> owner) {
         assert owner!=null;
         this.owner = owner;
     }
 
-    public PromotedBuildAction(AbstractBuild<?,?> owner, PromotionBadgeList badgeList) {
+    public PromotedBuildAction(AbstractBuild<?,?> owner, Status firstStatus) {
         this(owner);
-        promotions.add(badgeList);
+        statuses.add(firstStatus);
     }
 
     /**
@@ -48,8 +48,8 @@ public final class PromotedBuildAction implements BuildBadgeAction {
      * Checks if the given criterion is already promoted.
      */
     public boolean contains(PromotionProcess process) {
-        for (PromotionBadgeList p : promotions)
-            if(p.isFor(process))
+        for (Status s : statuses)
+            if(s.isFor(process))
                 return true;
         return false;
     }
@@ -58,22 +58,22 @@ public final class PromotedBuildAction implements BuildBadgeAction {
      * Checks if the given criterion is already promoted.
      */
     public boolean contains(String name) {
-        for (PromotionBadgeList p : promotions)
-            if(p.name.equals(name))
+        for (Status s : statuses)
+            if(s.name.equals(name))
                 return true;
         return false;
     }
 
     /**
-     * Called when the build passes another promotion criterion.
+     * Called when the build is qualified.
      */
-    public synchronized boolean add(PromotionBadgeList badgeList) throws IOException {
-        for (PromotionBadgeList p : promotions)
-            if(p.name.equals(badgeList.name))
-                return false; // already promoted. noop
+    public synchronized boolean add(Status status) throws IOException {
+        for (Status s : statuses)
+            if(s.name.equals(status.name))
+                return false; // already qualified. noop.
 
-        this.promotions.add(badgeList);
-        badgeList.parent = this;
+        this.statuses.add(status);
+        status.parent = this;
         owner.save();
         return true;
     }
@@ -81,23 +81,23 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     /**
      * Gets the read-only view of all the promotions that this build achieved.
      */
-    public List<PromotionBadgeList> getPromotions() {
-        return promotions.getView();
+    public List<Status> getPromotions() {
+        return statuses.getView();
     }
 
     /**
-     * Finds the {@link PromotionBadgeList} that has matching {@link PromotionBadgeList#name} value.
+     * Finds the {@link Status} that has matching {@link Status#name} value.
      * Or null if not found.
      */
-    public PromotionBadgeList getPromotion(String name) {
-        for (PromotionBadgeList p : promotions)
-            if(p.name.equals(name))
-                return p;
+    public Status getPromotion(String name) {
+        for (Status s : statuses)
+            if(s.name.equals(name))
+                return s;
         return null;
     }
 
     public boolean hasPromotion() {
-        return !promotions.isEmpty();
+        return !statuses.isEmpty();
     }
 
     /**
@@ -130,8 +130,8 @@ public final class PromotedBuildAction implements BuildBadgeAction {
 
     private Object readResolve() {
         // resurrect the parent pointer when read from disk
-        for (PromotionBadgeList p : promotions)
-            p.parent = this;
+        for (Status s : statuses)
+            s.parent = this;
         return this;
     }
 
@@ -139,9 +139,9 @@ public final class PromotedBuildAction implements BuildBadgeAction {
 // web methods
 //
     /**
-     * Binds {@link PromotionBadgeList} to URL hierarchy by its name.
+     * Binds {@link Status} to URL hierarchy by its name.
      */
-    public PromotionBadgeList getDynamic(String name, StaplerRequest req, StaplerResponse rsp) {
+    public Status getDynamic(String name, StaplerRequest req, StaplerResponse rsp) {
         return getPromotion(name);
     }
 
@@ -162,7 +162,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         if(p==null)
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
 
-        p.promote(owner,new PromotionBadgeList(p,Collections.singleton(new ManualPromotionBadge())));
+        p.promote(owner,new Status(p,Collections.singleton(new ManualPromotionBadge())));
 
         rsp.sendRedirect2(".");
     }

@@ -41,7 +41,11 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         return getParent().getOwner().getBuildByNumber(targetBuildNumber);
     }
 
-    public PromotionBadgeList getBadgeList() {
+    /**
+     * Gets the {@link Status} object that keeps track of what {@link Promotion}s are
+     * performed for a build, including this {@link Promotion}.
+     */
+    public Status getStatus() {
         return getTarget().getAction(PromotedBuildAction.class).getPromotion(getParent().getName());
     }
 
@@ -59,7 +63,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                 return Result.ABORTED;
             }
 
-            // perform the update of queue and PromotionBadgeList atomically,
+            // perform the update of queue and Status atomically,
             // so that no one gets into a situation that they think they got dropped from the queue
             // without having a build being performed.
             synchronized (project.queue) {
@@ -77,7 +81,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
             listener.getLogger().println("Promoting "+target);
 
-            getBadgeList().addPromotionAttempt(Promotion.this);
+            getStatus().addPromotionAttempt(Promotion.this);
 
             if(!preBuild(listener,project.getBuildSteps()))
                 return Result.FAILURE;
@@ -90,7 +94,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         protected void post2(BuildListener listener) throws Exception {
             if(getResult()== Result.SUCCESS)
-                getBadgeList().onSuccessfulPromotion(Promotion.this);
+                getStatus().onSuccessfulPromotion(Promotion.this);
             // persist the updated build record
             getTarget().save();
         }

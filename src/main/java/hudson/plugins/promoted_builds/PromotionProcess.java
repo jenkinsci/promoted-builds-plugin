@@ -82,7 +82,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      null if promotion conditions are not met.
      *      otherwise returns a list of badges that record how the promotion happened.
      */
-    public PromotionBadgeList isMet(AbstractBuild<?,?> build) {
+    public Status isMet(AbstractBuild<?,?> build) {
         List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
         for (PromotionCondition cond : conditions) {
             PromotionBadge b = cond.isMet(build);
@@ -90,7 +90,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
                 return null;
             badges.add(b);
         }
-        return new PromotionBadgeList(this,badges);
+        return new Status(this,badges);
     }
 
     /**
@@ -106,11 +106,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         if(a!=null && a.contains(this))
             return false;
 
-        PromotionBadgeList badges = isMet(build);
-        if(badges==null)
+        Status qualification = isMet(build);
+        if(qualification==null)
             return false; // not this time
 
-        promote(build,badges);
+        promote(build,qualification);
 
         return true;
     }
@@ -118,13 +118,13 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     /**
      * Promote the given build by using the given qualification.
      */
-    public void promote(AbstractBuild<?,?> build, PromotionBadgeList badges) throws IOException {
+    public void promote(AbstractBuild<?,?> build, Status qualification) throws IOException {
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
         // build is qualified for a promotion.
         if(a!=null) {
-            a.add(badges);
+            a.add(qualification);
         } else {
-            build.addAction(new PromotedBuildAction(build,badges));
+            build.addAction(new PromotedBuildAction(build,qualification));
             build.save();
         }
 

@@ -20,12 +20,10 @@ import java.io.IOException;
 /**
  * Promotion status of a build wrt a specific {@link PromotionProcess}.
  *
- * TODO: rename.
- *
  * @author Kohsuke Kawaguchi
- * @see PromotedBuildAction#promotions
+ * @see PromotedBuildAction#statuses
  */
-public final class PromotionBadgeList {
+public final class Status {
     /**
      * Matches with {@link PromotionProcess#name}.
      */
@@ -55,7 +53,7 @@ public final class PromotionBadgeList {
 
     /*package*/ transient PromotedBuildAction parent;
 
-    public PromotionBadgeList(PromotionProcess process, Collection<? extends PromotionBadge> badges) {
+    public Status(PromotionProcess process, Collection<? extends PromotionBadge> badges) {
         this.name = process.getName();
         this.badges = badges.toArray(new PromotionBadge[badges.size()]);
     }
@@ -65,7 +63,7 @@ public final class PromotionBadgeList {
     }
 
     /**
-     * Gets the parent {@link PromotionBadgeList} that owns this object. 
+     * Gets the parent {@link Status} that owns this object.
      */
     public PromotedBuildAction getParent() {
         return parent;
