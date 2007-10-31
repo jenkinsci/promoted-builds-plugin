@@ -221,9 +221,9 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
         public JobPropertyImpl newInstance(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
             try {
-                JobPropertyImpl p = new JobPropertyImpl(req, json);
-                if(p.processes.isEmpty())   return null;
-                return p;
+                if(json.has("promotions"))
+                    return new JobPropertyImpl(req, json);
+                return null;
             } catch (IOException e) {
                 throw new FormException("Failed to create",e,null); // TODO:hmm
             }
