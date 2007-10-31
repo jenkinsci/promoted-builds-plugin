@@ -58,7 +58,10 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                 listener.getLogger().println("Nothing to promote here. Aborting");
                 return Result.ABORTED;
             }
-            
+
+            // perform the update of queue and PromotionBadgeList atomically,
+            // so that no one gets into a situation that they think they got dropped from the queue
+            // without having a build being performed.
             synchronized (project.queue) {
                 if(project.queue.isEmpty()) {
                     listener.getLogger().println("Nothing to promote here. Aborting");
