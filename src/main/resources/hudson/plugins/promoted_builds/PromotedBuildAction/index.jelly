@@ -24,7 +24,7 @@
         </h2>
         <!-- how did this build qualify for promotion? -->
         <h4>Qualification</h4>
-        <j:forEach var="b" items="${p}">
+        <j:forEach var="b" items="${p.badges}">
           <st:include it="${b}" page="index.jelly" />
         </j:forEach>
 
@@ -32,15 +32,14 @@
         <h4>Status</h4>
         <div>
           <j:choose>
+            <local:re-promote-button />
             <j:when test="${p.isPromotionSuccessful()}">
-              <local:re-promote-button />
               Successfully promoted (<a href="${p.name}/lastSuccessful">record</a>)
             </j:when>
             <j:when test="${!p.isPromotionAttempted()}">
               Pending promotion.
             </j:when>
             <j:otherwise>
-              <local:re-promote-button />
               Promotion failed (<a href="${p.name}/lastFailed">record</a>)
             </j:otherwise>
           </j:choose>

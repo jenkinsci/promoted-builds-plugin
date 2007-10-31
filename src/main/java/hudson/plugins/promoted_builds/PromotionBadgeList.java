@@ -2,21 +2,25 @@ package hudson.plugins.promoted_builds;
 
 import hudson.Util;
 import hudson.model.AbstractBuild;
+import hudson.model.Result;
+import hudson.util.Iterators;
 
-import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
- * List of {@link PromotionBadge}s indicating how a promotion happened.
+ * Promotion status of a build wrt a specific {@link PromotionProcess}.
+ *
+ * TODO: rename.
  *
  * @author Kohsuke Kawaguchi
  * @see PromotedBuildAction#promotions
  */
-public final class PromotionBadgeList extends AbstractList<PromotionBadge> {
+public final class PromotionBadgeList {
     /**
      * Matches with {@link PromotionProcess#name}.
      */
@@ -60,6 +64,15 @@ public final class PromotionBadgeList extends AbstractList<PromotionBadge> {
      */
     public PromotedBuildAction getParent() {
         return parent;
+    }
+
+    /**
+     * Gets the {@link PromotionProcess} that this object deals with.
+     */
+    public PromotionProcess getProcess() {
+        JobPropertyImpl jp = parent.getProject().getProperty(JobPropertyImpl.class);
+        if(jp==null)    return null;
+        return jp.getItem(name);
     }
 
     /**
@@ -115,13 +128,12 @@ public final class PromotionBadgeList extends AbstractList<PromotionBadge> {
     public boolean isPromotionAttempted() {
         return !promotionAttempts.isEmpty();
     }
-    
-    public PromotionBadge get(int index) {
-        return badges[index];
-    }
 
-    public int size() {
-        return badges.length;
+    /**
+     * Gets the badges indicating how did a build qualify for a promotion.
+     */
+    public List<PromotionBadge> getBadges() {
+        return Arrays.asList(badges);
     }
 
     /**
@@ -136,5 +148,35 @@ public final class PromotionBadgeList extends AbstractList<PromotionBadge> {
      */
     /*package*/ void onSuccessfulPromotion(Promotion p) {
         promotion = p.getNumber();
+    }
+
+//
+// web bound methods
+//
+
+    /**
+     * Gets the last successful {@link Promotion}.
+     */
+    public Promotion getLastSuccessful() {
+        PromotionProcess p = getProcess();
+        for( Integer n : Iterators.reverse(promotionAttempts) ) {
+            Promotion b = p.getBuildByNumber(n);
+            if(b!=null && b.getResult()== Result.SUCCESS)
+                return b;
+        }
+        return null;
+    }
+
+    /**
+     * Gets the last successful {@link Promotion}.
+     */
+    public Promotion getLastFailed() {
+        PromotionProcess p = getProcess();
+        for( Integer n : Iterators.reverse(promotionAttempts) ) {
+            Promotion b = p.getBuildByNumber(n);
+            if(b!=null && b.getResult()!=Result.SUCCESS)
+                return b;
+        }
+        return null;
     }
 }
