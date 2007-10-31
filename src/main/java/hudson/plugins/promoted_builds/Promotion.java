@@ -83,6 +83,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
             getStatus().addPromotionAttempt(Promotion.this);
 
+            // start with SUCCESS, unless someone makes it a failure
+            setResult(Result.SUCCESS);
+
             if(!preBuild(listener,project.getBuildSteps()))
                 return Result.FAILURE;
 
