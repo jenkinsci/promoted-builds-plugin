@@ -15,7 +15,13 @@ import java.util.List;
  *
  * @author Kohsuke Kawaguchi
  */
-public class Promotion extends AbstractBuild<PromotionProcess, Promotion> {
+public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
+    /**
+     * The build number of the project that this promotion promoted.
+     * @see #getTarget()
+     */
+    private int targetBuildNumber;
+
     public Promotion(PromotionProcess job) throws IOException {
         super(job);
     }
@@ -28,12 +34,43 @@ public class Promotion extends AbstractBuild<PromotionProcess, Promotion> {
         super(project, buildDir);
     }
 
+    /**
+     * Gets the build that this promotion promoted.
+     */
+    public AbstractBuild<?,?> getTarget() {
+        return getParent().getOwner().getBuildByNumber(targetBuildNumber);
+    }
+
+    public PromotionBadgeList getBadgeList() {
+        return getTarget().getAction(PromotedBuildAction.class).getPromotion(getParent().getName());
+    }
+
     public void run() {
         run(new RunnerImpl());
     }
 
     protected class RunnerImpl extends AbstractRunner {
         protected Result doRun(BuildListener listener) throws Exception {
+            AbstractBuild<?,?> target;
+
+            // which build are we trying to promote?
+            synchronized (project.queue) {
+                if(project.queue.isEmpty()) {
+                    listener.getLogger().println("Nothing to promote here. Aborting");
+                    return Result.ABORTED;
+                }
+                target = project.queue.remove(0);
+                targetBuildNumber = target.getNumber();
+
+                // if there's more in the queue schedule another one
+                if(!project.queue.isEmpty())
+                    project.scheduleBuild();
+            }
+
+            listener.getLogger().println("Promoting "+target);
+
+            getBadgeList().addPromotionAttempt(Promotion.this);
+
             if(!preBuild(listener,project.getBuildSteps()))
                 return Result.FAILURE;
 
@@ -44,7 +81,10 @@ public class Promotion extends AbstractBuild<PromotionProcess, Promotion> {
         }
 
         protected void post2(BuildListener listener) throws Exception {
-            // no-op
+            if(getResult()== Result.SUCCESS)
+                getBadgeList().onSuccessfulPromotion(Promotion.this);
+            // persist the updated build record
+            getTarget().save();
         }
 
         private boolean build(BuildListener listener, List<BuildStep> steps) throws IOException, InterruptedException {

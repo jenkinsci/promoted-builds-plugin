@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.LinkedList;
 
 /**
  * A dummy {@link AbstractProject} to carry out promotion operations.
@@ -22,6 +23,7 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 public final class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements DescribableList.Owner {
+
     /**
      * {@link PromotionCondition}s. All have to be met for a build to be promoted.
      */
@@ -29,6 +31,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
 
     private List<BuildStep> buildSteps;
+
+    /**
+     * Queues of builds to be promoted.
+     */
+    /*package*/ transient volatile List<AbstractBuild<?,?>> queue = new LinkedList<AbstractBuild<?,?>>();
 
     /*package*/ PromotionProcess(JobPropertyImpl property, String name) {
         super(property, name);
@@ -103,15 +110,22 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         if(badges==null)
             return false; // not this time
 
-        // promote it
-        scheduleBuild();
-
+        // build is qualified for a promotion.
         if(a!=null) {
             a.add(badges);
         } else {
             build.addAction(new PromotedBuildAction(build,badges));
             build.save();
         }
+
+        if(queue ==null)
+            queue = new LinkedList<AbstractBuild<?,?>>();
+        synchronized(queue) {
+            queue.add(build);
+        }
+        
+        // schedule promotion activity.
+        scheduleBuild();
 
         return true;
     }

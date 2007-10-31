@@ -73,6 +73,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
                 return false; // already promoted. noop
 
         this.promotions.add(badgeList);
+        badgeList.parent = this;
         owner.save();
         return true;
     }
@@ -127,6 +128,23 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         return "promotion";
     }
 
+    private Object readResolve() {
+        // resurrect the parent pointer when read from disk
+        for (PromotionBadgeList p : promotions)
+            p.parent = this;
+        return this;
+    }
+
+//
+// web methods
+//
+    /**
+     * Binds {@link PromotionBadgeList} to URL hierarchy by its name.
+     */
+    public PromotionBadgeList getDynamic(String name) {
+        return getPromotion(name);
+    }
+
     /**
      * Force a promotion.
      */
@@ -143,8 +161,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         PromotionProcess c = pp.getItem(name);
         if(c==null)
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
-        promotions.add(new PromotionBadgeList(c,Collections.singleton(new ManualPromotionBadge())));
-        owner.save();
+        add(new PromotionBadgeList(c,Collections.singleton(new ManualPromotionBadge())));
 
         rsp.sendRedirect2(".");
     }
