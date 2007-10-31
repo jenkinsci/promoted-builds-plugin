@@ -239,6 +239,9 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
             return PromotionProcess.getAll();
         }
 
+        // exposed for Jelly
+        public final Class<PromotionProcess> promotionProcessType = PromotionProcess.class;
+
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();
     }
 }

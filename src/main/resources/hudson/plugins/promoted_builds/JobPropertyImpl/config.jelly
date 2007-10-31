@@ -11,14 +11,16 @@
             <f:section title="Promotion criteria">
               <f:nested>
                 <table style="width:100%">
-                  <f:descriptorList varName="condition" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
+                  <f:descriptorList varName="condition" targetType="${descriptor.promotionProcessType}"
+                                    descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
                 </table>
               </f:nested>
             </f:section>
             <f:section title="Post-promotion actions">
               <f:nested>
-                <f:hetero-list name="buildStep" descriptors="${descriptor.getApplicableBuildSteps(it)}" items="${s.buildSteps}"
-                        addCaption="Add post-promotion action"/>
+                <f:hetero-list name="buildStep" targetType="${descriptor.promotionProcessType}"
+                               descriptors="${descriptor.getApplicableBuildSteps(it)}" items="${s.buildSteps}"
+                               addCaption="Add post-promotion action"/>
               </f:nested>
             </f:section>
 
