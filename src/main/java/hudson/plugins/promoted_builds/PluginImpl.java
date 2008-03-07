@@ -14,6 +14,8 @@ public class PluginImpl extends Plugin {
         Jobs.PROPERTIES.add(JobPropertyImpl.DescriptorImpl.INSTANCE);
         // force the evaluation of the object, which registers its handler
         noop(DownstreamPassCondition.DescriptorImpl.INSTANCE);
+
+        // DownstreamPassCondition contains RunListener which triggers promotion conditions
     }
 
     private void noop(Object o) {
