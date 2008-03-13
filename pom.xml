@@ -17,7 +17,7 @@
     <dependency>
       <groupId>org.jvnet.hudson.plugins</groupId>
       <artifactId>batch-task</artifactId>
-      <version>1.4-SNAPSHOT</version>
+      <version>1.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
