@@ -13,24 +13,11 @@
   <version>1.0-SNAPSHOT</version>
 
   <dependencies>
-    <dependency>
-      <groupId>org.jvnet.hudson.main</groupId>
-      <artifactId>hudson-war</artifactId>
-      <type>war</type>
-      <version>1.191-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jvnet.hudson.main</groupId>
-      <artifactId>hudson-core</artifactId>
-      <version>1.191-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
     <!-- for testing purpose -->
     <dependency>
       <groupId>org.jvnet.hudson.plugins</groupId>
       <artifactId>batch-task</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.4-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
