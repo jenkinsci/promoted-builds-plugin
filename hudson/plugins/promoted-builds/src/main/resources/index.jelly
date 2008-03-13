@@ -1,0 +1,4 @@
+<div>
+  This plugin implements a "promoted build" feature where a build of one job can be marked as "promoted"
+  when it passes certain criteria.
+</div>

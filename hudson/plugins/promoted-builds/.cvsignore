@@ -1,0 +1,8 @@
+.project
+promoted-builds.iml
+.settings
+.classpath
+target
+work
+*.ipr
+*.iws

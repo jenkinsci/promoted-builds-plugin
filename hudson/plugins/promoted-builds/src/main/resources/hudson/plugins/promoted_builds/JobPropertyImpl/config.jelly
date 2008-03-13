@@ -1,0 +1,38 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:optionalBlock name="promotions" title="Promote builds when... (beta)" checked="${!empty(instance.activeItems)}" help="/plugin/promoted-builds/help.html">
+    <f:block><div style="padding-left:2em">
+      <f:repeatable var="s" items="${instance.activeItems}" noAddButton="true" minimum="1" name="config">
+        <fieldset style="margin-bottom:1em">
+          <legend>Promotion process</legend>
+          <table width="100%">
+            <f:entry title="Name">
+              <f:textbox name="config.name" value="${s.name}" />
+            </f:entry>
+            <f:section title="Criteria">
+              <f:nested>
+                <table style="width:100%">
+                  <f:descriptorList varName="condition" targetType="${descriptor.promotionProcessType}"
+                                    descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
+                </table>
+              </f:nested>
+            </f:section>
+            <f:section title="Actions">
+              <f:nested>
+                <f:hetero-list name="buildStep" targetType="${descriptor.promotionProcessType}"
+                               descriptors="${descriptor.getApplicableBuildSteps(it)}" items="${s.buildSteps}"
+                               addCaption="Add action"/>
+              </f:nested>
+            </f:section>
+
+            <f:entry>
+              <div align="right">
+                <input type="button" value="Add another promotion process" class="repeatable-add show-if-last" />
+                <input type="button" value="Delete this promotion process" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
+              </div>
+            </f:entry>
+          </table>
+        </fieldset>
+      </f:repeatable>
+    </div></f:block>
+  </f:optionalBlock>
+</j:jelly>

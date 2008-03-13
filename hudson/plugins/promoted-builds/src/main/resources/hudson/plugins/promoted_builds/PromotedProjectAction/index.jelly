@@ -1,0 +1,31 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project">
+  <l:layout title="Promotions : ${it.owner.displayName}">
+    <st:include page="sidepanel.jelly" it="${it.owner}" />
+    <l:main-panel>
+      <h1>Promotions</h1>
+
+      <!-- list promotions that are already attained -->
+      <j:forEach var="c" items="${it.processes}">
+        <h2>
+          <img src="${imagesURL}/32x32/star-gold.gif"/> ${c.name}
+        </h2>
+        
+        <j:set var="b" value="${it.getLatest(c)}" />
+        <j:choose>
+          <j:when test="${b!=null}">
+            <p>
+              Last promoted build is <t:buildLink job="${b.project}" number="${b.number}" />,
+              ${b.timestampString} ago.
+              (<a href="latest/${c.name}/">permalink</a>)
+            </p>
+          </j:when>
+          <j:otherwise>
+            <p>
+              No build promoted so far.
+            </p>
+          </j:otherwise>
+        </j:choose>
+      </j:forEach>
+    </l:main-panel>
+  </l:layout>
+</j:jelly>

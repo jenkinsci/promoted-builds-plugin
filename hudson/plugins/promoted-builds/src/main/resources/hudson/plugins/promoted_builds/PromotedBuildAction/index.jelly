@@ -1,0 +1,75 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
+  <d:taglib uri="local">
+    <d:tag name="re-promote-button">
+      <l:isAdmin>
+        <form style="float:right" method="post" action="${p.name}/build">
+          <input type="submit" value="Re-execute promotion"/>
+        </form>
+      </l:isAdmin>
+    </d:tag>
+  </d:taglib>
+  <l:layout title="Promotions : ${it.project.displayName} ${it.owner.displayName}" xmlns:local="local">
+    <st:include page="sidepanel.jelly" it="${it.owner}" />
+    <l:main-panel>
+      <h1>Promotions</h1>
+
+      <!-- list promotions that are already attained -->
+      <j:forEach var="p" items="${it.promotions}">
+        <h2>
+          <img src="${imagesURL}/32x32/star-gold.gif"/> ${p.getName()}
+        </h2>
+        <!-- how did this build qualify for promotion? -->
+        <h4>
+          Qualification
+          <span style="padding-left:2em"> </span>
+          (promoted ${p.getTimestampString()} ago &#x2014; ${p.getDelayString(it.owner)} after build)
+        </h4>
+        <j:forEach var="b" items="${p.badges}">
+          <st:include it="${b}" page="index.jelly" />
+        </j:forEach>
+
+        <!-- promotion activity -->
+        <h4>Status</h4>
+        <div>
+          <j:choose>
+            <local:re-promote-button />
+            <j:when test="${p.isPromotionSuccessful()}">
+              Successfully promoted (<a href="${p.name}/lastSuccessful">record</a>)
+            </j:when>
+            <j:when test="${!p.isPromotionAttempted()}">
+              Pending promotion
+              <j:choose>
+                <j:when test="${p.isInQueue()}">
+                  (promotion queued)
+                </j:when>
+                <j:otherwise>
+                  <span class='error'>(promotion not queued. Please re-execute promotion)</span>
+                </j:otherwise>
+              </j:choose>
+            </j:when>
+            <j:otherwise>
+              Promotion failed (<a href="${p.name}/lastFailed">record</a>)
+            </j:otherwise>
+          </j:choose>
+        </div>
+
+        <div style="clear:both" />
+      </j:forEach>
+
+      <!-- list promotions that are not yet attained -->
+      <j:forEach var="p" items="${it.pendingPromotions}">
+        <h2>
+          <img src="${imagesURL}/32x32/star.gif"/> ${p.getName()}
+        </h2>
+        <l:isAdmin>
+          <form style="float:right" method="post" action="forcePromotion?name=${p.getName()}">
+            <input type="submit" value="Force promotion"/>
+          </form>
+        </l:isAdmin>
+        <div>
+          This promotion hasn't happened.
+        </div>
+      </j:forEach>
+    </l:main-panel>
+  </l:layout>
+</j:jelly>
