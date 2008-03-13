@@ -4,3 +4,5 @@ promoted-builds.iml
 .classpath
 target
 work
+*.ipr
+*.iws
