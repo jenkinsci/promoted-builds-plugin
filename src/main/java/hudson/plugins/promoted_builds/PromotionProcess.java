@@ -7,6 +7,7 @@ import hudson.model.DependencyGraph;
 import hudson.model.Descriptor;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
@@ -65,6 +66,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     public FilePath getWorkspace() {
         return getOwner().getWorkspace();
+    }
+
+    public DescribableList<Publisher, Descriptor<Publisher>> getPublishersList() {
+        // TODO: extract from the buildsSteps field? Or should I separate builders and publishers?
+        return new DescribableList<Publisher,Descriptor<Publisher>>(this);
     }
 
     protected Class<Promotion> getBuildClass() {
