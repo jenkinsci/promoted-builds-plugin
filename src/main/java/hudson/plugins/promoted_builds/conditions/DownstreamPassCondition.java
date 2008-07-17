@@ -169,7 +169,9 @@ public class DownstreamPassCondition extends PromotionCondition {
                                 if(u==null) {
                                     // no upstream build. perhaps a configuration problem?
                                     if(build.getResult()==Result.SUCCESS && !warned) {
-                                        listener.getLogger().println("WARNING: "+j.getFullDisplayName()+" appears to use this job as a promotion criteria, but no fingerprint is recorded.");
+                                        listener.getLogger().println("WARNING: "+j.getFullDisplayName()+" appears to use this job as a promotion criteria, " +
+                                            "but no fingerprint is recorded. Fingerprint needs to be enabled on both this job and "+j.getFullDisplayName()+". " +
+                                                "See http://hudson.gotdns.com/wiki/display/HUDSON/Fingerprint for more details");
                                         warned = true;
                                     }
                                 } else
