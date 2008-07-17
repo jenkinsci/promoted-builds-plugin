@@ -148,6 +148,8 @@ public class DownstreamPassCondition extends PromotionCondition {
         public void onCompleted(AbstractBuild<?,?> build, TaskListener listener) {
             // this is not terribly efficient,
             for(AbstractProject<?,?> j : Hudson.getInstance().getAllItems(AbstractProject.class)) {
+                boolean warned = false; // used to avoid warning for the same project more than once.
+
                 JobPropertyImpl jp = j.getProperty(JobPropertyImpl.class);
                 if(jp!=null) {
                     for (PromotionProcess p : jp.getItems()) {
@@ -166,8 +168,10 @@ public class DownstreamPassCondition extends PromotionCondition {
                                 AbstractBuild<?,?> u = build.getUpstreamRelationshipBuild(j);
                                 if(u==null) {
                                     // no upstream build. perhaps a configuration problem?
-                                    if(build.getResult()==Result.SUCCESS)
+                                    if(build.getResult()==Result.SUCCESS && !warned) {
                                         listener.getLogger().println("WARNING: "+j.getFullDisplayName()+" appears to use this job as a promotion criteria, but no fingerprint is recorded.");
+                                        warned = true;
+                                    }
                                 } else
                                 if(p.considerPromotion(u))
                                     listener.getLogger().println("Promoted "+u);
