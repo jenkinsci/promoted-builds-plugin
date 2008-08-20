@@ -163,6 +163,10 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         return new File(getOwner().getRootDir(),"promotions");
     }
 
+    public void save() throws IOException {
+        // there's nothing to save, actually
+    }
+
     public String getUrl() {
         return getOwner().getUrl()+"promotion/";
     }
