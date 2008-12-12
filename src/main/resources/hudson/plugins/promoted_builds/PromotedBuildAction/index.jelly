@@ -1,11 +1,13 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
   <d:taglib uri="local">
     <d:tag name="re-promote-button">
-      <l:isAdmin>
-        <form style="float:right" method="post" action="${p.name}/build">
-          <input type="submit" value="Re-execute promotion"/>
-        </form>
-      </l:isAdmin>
+      <j:choose>
+        <j:when test="${it.canPromote()}">
+          <form style="float:right" method="post" action="${p.name}/build">
+            <input type="submit" value="Re-execute promotion"/>
+          </form>
+        </j:when>
+      </j:choose>
     </d:tag>
   </d:taglib>
   <l:layout title="Promotions : ${it.project.displayName} ${it.owner.displayName}" xmlns:local="local">
@@ -61,11 +63,13 @@
         <h2>
           <img src="${imagesURL}/32x32/star.gif"/> ${p.getName()}
         </h2>
-        <l:isAdmin>
-          <form style="float:right" method="post" action="forcePromotion?name=${p.getName()}">
-            <input type="submit" value="Force promotion"/>
-          </form>
-        </l:isAdmin>
+          <j:choose>
+            <j:when test="${it.canPromote()}">
+              <form style="float:right" method="post" action="forcePromotion?name=${p.getName()}">
+                <input type="submit" value="Force promotion"/>
+              </form>
+            </j:when>
+          </j:choose>
         <div>
           This promotion hasn't happened.
         </div>

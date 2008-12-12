@@ -203,7 +203,7 @@ public final class Status {
      * Schedules a new build.
      */
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-        if(!Hudson.adminCheck(req,rsp))
+        if(!getTarget().hasPermission(Promotion.PROMOTE))
             return;
         getProcess().scheduleBuild(getTarget());
         // TODO: we need better visual feed back so that the user knows that the build happened.

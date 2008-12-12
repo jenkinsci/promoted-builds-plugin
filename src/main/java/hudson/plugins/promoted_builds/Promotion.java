@@ -2,7 +2,10 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Hudson;
 import hudson.model.Result;
+import hudson.security.Permission;
+import hudson.security.PermissionGroup;
 import hudson.tasks.BuildStep;
 
 import java.io.File;
@@ -116,4 +119,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             return true;
         }
     }
+
+    //public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
+    //public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", Messages._Promotion_PromotePermission_Description(), Hudson.ADMINISTER);
+    public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, null);
+    public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", null, Hudson.ADMINISTER);
 }

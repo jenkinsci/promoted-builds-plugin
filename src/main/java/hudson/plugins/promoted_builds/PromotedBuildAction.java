@@ -100,6 +100,13 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         return !statuses.isEmpty();
     }
 
+    public boolean canPromote() {
+        if (this.getProject().hasPermission(Promotion.PROMOTE)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Gets list of {@link PromotionProcess}s that are not yet attained.
      * @return can be empty but never null.
@@ -153,6 +160,9 @@ public final class PromotedBuildAction implements BuildBadgeAction {
 //            rsp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 //            return;
 //        }
+
+        if(!this.getProject().hasPermission(Promotion.PROMOTE))
+            return;
 
         JobPropertyImpl pp = getProject().getProperty(JobPropertyImpl.class);
         if(pp==null)
