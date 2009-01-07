@@ -20,6 +20,19 @@
         <h2>
           <img src="${imagesURL}/32x32/star-gold.gif"/> ${p.getName()}
         </h2>
+
+        <!-- history of this promotion -->
+        <l:pane title="Promotion History" width="100">
+          <j:forEach var="attempt" indexVar="index" items="${p.getPromotionBuilds()}">
+            <tr><td>
+              <a href="${p.name}/promotionBuilds/${index}">
+	        <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
+                 alt="${attempt.iconColor.description}"/> ${attempt.getFullDisplayName()}
+              </a>
+            </td></tr>
+          </j:forEach>
+        </l:pane>
+
         <!-- how did this build qualify for promotion? -->
         <h4>
           Qualification

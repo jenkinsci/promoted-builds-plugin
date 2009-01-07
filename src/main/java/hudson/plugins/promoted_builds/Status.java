@@ -200,6 +200,21 @@ public final class Status {
     }
 
     /**
+     * Gets all the promotion builds.
+     */
+    public List<Promotion> getPromotionBuilds() {
+        PromotionProcess p = getProcess();
+        List<Promotion> builds = new ArrayList<Promotion>();
+        for( Integer n : promotionAttempts ) {
+            Promotion b = p.getBuildByNumber(n);
+            if (b != null) {
+                builds.add(b);
+            }
+        }
+        return builds;
+    }
+
+    /**
      * Schedules a new build.
      */
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
