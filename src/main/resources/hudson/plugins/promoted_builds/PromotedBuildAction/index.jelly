@@ -50,7 +50,14 @@
               </j:choose>
             </j:when>
             <j:otherwise>
-              Promotion failed (<a href="${p.name}/lastFailed">record</a>)
+              <j:choose>
+                <j:when test="${p.getLastFailed() == null}">
+                  Promotion in progress (<a href="${p.name}/lastSuccessful">record</a>)
+                </j:when>
+                <j:otherwise>
+                  Promotion failed (<a href="${p.name}/lastFailed">record</a>)
+                </j:otherwise>
+              </j:choose>
             </j:otherwise>
           </j:choose>
         </div>
