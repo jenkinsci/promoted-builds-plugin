@@ -1,12 +1,14 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.tasks.BuildStep;
+import hudson.tasks.BuildTrigger;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,9 +108,17 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         private boolean build(BuildListener listener, List<BuildStep> steps) throws IOException, InterruptedException {
-            for( BuildStep bs : steps )
-                if(!bs.perform(Promotion.this, launcher, listener))
+            for( BuildStep bs : steps ) {
+                if ( bs instanceof BuildTrigger) {
+                    BuildTrigger bt = (BuildTrigger)bs;
+                    for(AbstractProject p : bt.getChildProjects()) {
+                        listener.getLogger().println("  scheduling build for " + p.getDisplayName());
+                        p.scheduleBuild();
+                    }
+                } else if(!bs.perform(Promotion.this, launcher, listener)) {
                     return false;
+                }
+            }
             return true;
         }
 
@@ -117,9 +127,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                 if(!bs.prebuild(Promotion.this,listener))
                     return false;
             return true;
-        }
-    }
-
+                }
+            }
+        
     //public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
     //public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", Messages._Promotion_PromotePermission_Description(), Hudson.ADMINISTER);
     public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, null);
