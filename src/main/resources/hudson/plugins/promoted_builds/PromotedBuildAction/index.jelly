@@ -49,6 +49,7 @@
           <j:choose>
             <local:re-promote-button />
             <j:when test="${p.isPromotionSuccessful()}">
+              <img src="${imagesURL}/16x16/blue.gif" alt="Unstable" width="16" height="16" />
               Successfully promoted (<a href="${p.name}/lastSuccessful">record</a>)
             </j:when>
             <j:when test="${!p.isPromotionAttempted()}">
@@ -68,6 +69,7 @@
                   Promotion in progress (<a href="${p.name}/lastSuccessful">record</a>)
                 </j:when>
                 <j:otherwise>
+                  <img src="${imagesURL}/16x16/red.gif" alt="Unstable" width="16" height="16" />
                   Promotion failed (<a href="${p.name}/lastFailed">record</a>)
                 </j:otherwise>
               </j:choose>

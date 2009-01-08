@@ -7,8 +7,10 @@ import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
+import hudson.Launcher;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildTrigger;
+import hudson.tasks.BuildStepCompatibilityLayer;
 
 import java.io.File;
 import java.io.IOException;
@@ -116,20 +118,41 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                         p.scheduleBuild();
                     }
                 } else if(!bs.perform(Promotion.this, launcher, listener)) {
+                    listener.getLogger().println("failed build " + bs + " " + getResult());
                     return false;
+                } else  {
+                    listener.getLogger().println("build " + bs + " " + getResult());
                 }
             }
             return true;
         }
 
         private boolean preBuild(BuildListener listener, List<BuildStep> steps) {
-            for( BuildStep bs : steps )
-                if(!bs.prebuild(Promotion.this,listener))
+            boolean allOk = true;
+            for( BuildStep bs : steps ) {
+                if(bs instanceof BuildStepCompatibilityLayer && ! overridesPerform(bs.getClass())) {
+                    listener.getLogger().println(bs + " doesn't support Promotion");
+                    allOk = false;
+                } else if(!bs.prebuild(Promotion.this,listener)) {
+                    listener.getLogger().println("failed pre build " + bs + " " + getResult());
                     return false;
-            return true;
                 }
             }
+            return allOk;
+        }
         
+        private boolean overridesPerform(Class<? extends BuildStep> bsc) {
+           try {
+                Class<?> declarer = bsc.getMethod("perform", AbstractBuild.class, Launcher.class, BuildListener.class).getDeclaringClass();
+                return ! declarer.equals(BuildStepCompatibilityLayer.class);
+            } catch (NoSuchMethodException noSuchMethodException) {
+                return false;
+            } catch (SecurityException securityException) {
+                throw new RuntimeException(securityException);
+            }
+        }
+    }
+
     //public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
     //public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", Messages._Promotion_PromotePermission_Description(), Hudson.ADMINISTER);
     public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, null);
