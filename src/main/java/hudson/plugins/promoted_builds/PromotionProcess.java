@@ -51,6 +51,16 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         save();
     }
 
+    /**
+     * Returns the root project value.
+     *
+     * @return the root project value.
+     */
+    @Override
+    public AbstractProject getRootProject() {
+    	return getParent().getOwner().getRootProject();
+    }
+    
     @Override
     public JobPropertyImpl getParent() {
         return (JobPropertyImpl)super.getParent();
