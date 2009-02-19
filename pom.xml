@@ -10,7 +10,20 @@
   <artifactId>promoted-builds</artifactId>
   <packaging>hpi</packaging>
   <name>Hudson promoted builds plugin</name>
+  <url>http://wiki.hudson-ci.org//display/HUDSON/Promoted+Builds+Plugin</url>
   <version>1.2-SNAPSHOT</version>
+  <repositories>
+    <repository>
+      <id>m.g.o-public</id>
+      <url>http://maven.glassfish.org/content/groups/public/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
   <dependencies>
     <!-- for testing purpose -->
