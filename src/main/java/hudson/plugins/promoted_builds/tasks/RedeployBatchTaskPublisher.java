@@ -36,10 +36,6 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
     public static final class DescriptorImpl extends RedeployPublisher.DescriptorImpl {
-        public DescriptorImpl() {
-            super(RedeployPublisher.class);
-        }
-
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return jobType== PromotionProcess.class;
