@@ -63,6 +63,10 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         List<Ancestor> ancs = req.getAncestors();
         owner = (AbstractProject)ancs.get(ancs.size()-1).getObject();
 
+        // newer version of Hudson put "promotions". This code makes it work with or without them.
+        if(json.has("promotions"))
+            json = json.getJSONObject("promotions");
+
         for( JSONObject c : (List<JSONObject>) JSONArray.fromObject(json.get("config")) ) {
             String name = c.getString("name");
             activeProcessNames.add(name);
