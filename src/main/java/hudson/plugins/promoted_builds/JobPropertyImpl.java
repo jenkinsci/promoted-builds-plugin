@@ -56,7 +56,15 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 //     * Used to construct {@link #processes}.
 //     */
 //    private final List<String> names = new ArrayList<String>();
-    
+
+    /**
+     * Programmatic construction.
+     */
+    public JobPropertyImpl(AbstractProject<?,?> owner) throws Descriptor.FormException, IOException {
+        this.owner = owner;
+        init();
+    }
+
     private JobPropertyImpl(StaplerRequest req, JSONObject json) throws Descriptor.FormException, IOException {
         // a hack to get the owning AbstractProject.
         // this is needed here so that we can load items
@@ -82,7 +90,10 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
             p.configure(req,c);
             processes.add(p);
         }
+        init();
+    }
 
+    private void init() throws IOException {
         // load inactive processes
         File[] subdirs = getRootDir().listFiles(new FileFilter() {
             public boolean accept(File child) {
@@ -97,6 +108,17 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         }
 
         buildActiveProcess();
+    }
+
+    /**
+     * Adds a new promotion process of the given name.
+     */
+    public PromotionProcess addProcess(String name) throws IOException {
+        PromotionProcess p = new PromotionProcess(this, name);
+        activeProcessNames.add(name);
+        processes.add(p);
+        buildActiveProcess();
+        return p;
     }
 
     protected void setOwner(AbstractProject<?,?> owner) {

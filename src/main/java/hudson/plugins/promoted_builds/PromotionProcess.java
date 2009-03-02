@@ -5,6 +5,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.DependencyGraph;
 import hudson.model.Descriptor;
+import hudson.model.Saveable;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
@@ -23,7 +24,7 @@ import java.util.LinkedList;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements DescribableList.Owner {
+public final class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements Saveable {
 
     /**
      * {@link PromotionCondition}s. All have to be met for a build to be promoted.
@@ -31,7 +32,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public final DescribableList<PromotionCondition,PromotionConditionDescriptor> conditions =
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
 
-    private List<BuildStep> buildSteps;
+    private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
 
     /**
      * Queues of builds to be promoted.
@@ -44,7 +45,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     /*package*/ void configure(StaplerRequest req, JSONObject c) throws Descriptor.FormException, IOException {
         // apply configuration
-        conditions.rebuild(req,c, PromotionConditions.CONDITIONS,"condition");
+        conditions.rebuild(req,c, PromotionConditions.CONDITIONS);
 
         buildSteps = (List)Descriptor.newInstancesFromHeteroList(
                 req, c, "buildStep", (List) PromotionProcess.getAll());
@@ -88,7 +89,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public List<BuildStep> getBuildSteps() {
-        return Collections.unmodifiableList(buildSteps);
+        return buildSteps;
     }
 
     /**
