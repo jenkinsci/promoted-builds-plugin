@@ -11,7 +11,7 @@
   <packaging>hpi</packaging>
   <name>Hudson promoted builds plugin</name>
   <url>http://wiki.hudson-ci.org//display/HUDSON/Promoted+Builds+Plugin</url>
-  <version>1.2</version>
+  <version>1.3-SNAPSHOT</version>
   <repositories>
     <repository>
       <id>m.g.o-public</id>
@@ -34,10 +34,4 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <scm>
-    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/promoted-builds-1.2</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/promoted-builds-1.2</developerConnection>
-    <url>https://hudson.dev.java.net/source/browse/hudson/hudson/plugins/promoted-builds/tags/promoted-builds-1.2</url>
-  </scm>
 </project>
