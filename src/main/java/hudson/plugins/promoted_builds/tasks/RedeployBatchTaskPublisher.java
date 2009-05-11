@@ -1,13 +1,12 @@
 package hudson.plugins.promoted_builds.tasks;
 
+import hudson.Extension;
 import hudson.maven.RedeployPublisher;
 import hudson.maven.reporters.MavenAbstractArtifactRecord;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Publisher;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
@@ -28,13 +27,7 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
         return ((Promotion)(AbstractBuild)build).getTarget().getAction(MavenAbstractArtifactRecord.class);
     }
 
-    @Override
-    public BuildStepDescriptor<Publisher> getDescriptor() {
-        return DESCRIPTOR;
-    }
-
-    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
-
+    @Extension
     public static final class DescriptorImpl extends RedeployPublisher.DescriptorImpl {
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {

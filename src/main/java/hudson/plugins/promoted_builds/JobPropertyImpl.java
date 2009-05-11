@@ -12,6 +12,7 @@ import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import hudson.tasks.BuildStep;
+import hudson.Extension;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.Ancestor;
@@ -232,15 +233,8 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         return new PromotedProjectAction(job,this);
     }
 
-    public DescriptorImpl getDescriptor() {
-        return DescriptorImpl.INSTANCE;
-    }
-
+    @Extension
     public static final class DescriptorImpl extends JobPropertyDescriptor {
-        private DescriptorImpl() {
-            super(JobPropertyImpl.class);
-        }
-
         public String getDisplayName() {
             return "Promote Builds When...";
         }
@@ -261,7 +255,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
         // exposed for Jelly
         public List<PromotionConditionDescriptor> getApplicableConditions(AbstractProject<?,?> p) {
-            return PromotionConditions.getApplicableTriggers(p);
+            return PromotionCondition.getApplicableTriggers(p);
         }
 
         // exposed for Jelly
@@ -271,7 +265,5 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
         // exposed for Jelly
         public final Class<PromotionProcess> promotionProcessType = PromotionProcess.class;
-
-        public static final DescriptorImpl INSTANCE = new DescriptorImpl();
     }
 }

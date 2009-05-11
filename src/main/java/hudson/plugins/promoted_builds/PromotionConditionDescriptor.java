@@ -7,11 +7,16 @@ import hudson.model.Descriptor;
  * {@link Descriptor} for {@link PromotionCondition}.
  *
  * @author Kohsuke Kawaguchi
- * @see PromotionConditions#CONDITIONS
+ * @see PromotionCondition#all()
+ * @see PromotionCondition#getApplicableTriggers(AbstractProject) 
  */
 public abstract class PromotionConditionDescriptor extends Descriptor<PromotionCondition> {
     protected PromotionConditionDescriptor(Class<? extends PromotionCondition> clazz) {
         super(clazz);
+    }
+
+    protected PromotionConditionDescriptor() {
+        super();
     }
 
     /**

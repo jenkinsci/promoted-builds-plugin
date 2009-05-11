@@ -2,6 +2,7 @@ package hudson.plugins.promoted_builds.conditions;
 
 import hudson.CopyOnWrite;
 import hudson.Util;
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Fingerprint;
@@ -65,10 +66,6 @@ public class DownstreamPassCondition extends PromotionCondition {
         return badge;
     }
 
-    public PromotionConditionDescriptor getDescriptor() {
-        return DescriptorImpl.INSTANCE;
-    }
-
     /**
      * List of downstream jobs that we need to monitor.
      *
@@ -107,12 +104,8 @@ public class DownstreamPassCondition extends PromotionCondition {
         }
     }
 
+    @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
-        public DescriptorImpl() {
-            super(DownstreamPassCondition.class);
-            new RunListenerImpl().register();
-        }
-
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }
@@ -139,7 +132,8 @@ public class DownstreamPassCondition extends PromotionCondition {
      * This is a single instance that receives all the events everywhere in the system.
      * @author Kohsuke Kawaguchi
      */
-    private static final class RunListenerImpl extends RunListener<AbstractBuild<?,?>> {
+    @Extension
+    public static final class RunListenerImpl extends RunListener<AbstractBuild<?,?>> {
         public RunListenerImpl() {
             super((Class)AbstractBuild.class);
         }
@@ -196,10 +190,7 @@ public class DownstreamPassCondition extends PromotionCondition {
          * Called whenever some {@link JobPropertyImpl} changes to update {@link #DOWNSTREAM_JOBS}.
          */
         public static void rebuildCache() {
-            Set<AbstractProject> downstreams = new HashSet<AbstractProject>();
-
-
-            DOWNSTREAM_JOBS = downstreams;
+            DOWNSTREAM_JOBS = new HashSet<AbstractProject>();
         }
     }
 }

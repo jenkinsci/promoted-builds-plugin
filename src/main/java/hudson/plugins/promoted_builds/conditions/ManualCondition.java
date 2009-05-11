@@ -5,6 +5,7 @@ import hudson.model.AbstractProject;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
+import hudson.Extension;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -20,15 +21,8 @@ public class ManualCondition extends PromotionCondition {
         return null;
     }
 
-    public PromotionConditionDescriptor getDescriptor() {
-        return DescriptorImpl.INSTANCE;
-    }
-
+    @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
-        public DescriptorImpl() {
-            super(ManualCondition.class);
-        }
-
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }
@@ -44,8 +38,6 @@ public class ManualCondition extends PromotionCondition {
         public String getHelpFile() {
             return "/plugin/promoted-builds/conditions/manual.html";
         }
-
-        public static final DescriptorImpl INSTANCE = new DescriptorImpl();
     }
 }
 

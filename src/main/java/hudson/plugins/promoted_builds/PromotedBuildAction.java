@@ -101,10 +101,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     }
 
     public boolean canPromote() {
-        if (this.getProject().hasPermission(Promotion.PROMOTE)) {
-            return true;
-        }
-        return false;
+        return this.getProject().hasPermission(Promotion.PROMOTE);
     }
 
     /**

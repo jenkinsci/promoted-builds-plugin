@@ -9,6 +9,7 @@ import hudson.model.Saveable;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
+import hudson.tasks.Builder;
 import hudson.util.DescribableList;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
@@ -45,7 +46,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     /*package*/ void configure(StaplerRequest req, JSONObject c) throws Descriptor.FormException, IOException {
         // apply configuration
-        conditions.rebuild(req,c, PromotionConditions.CONDITIONS);
+        conditions.rebuild(req,c, PromotionCondition.all());
 
         buildSteps = (List)Descriptor.newInstancesFromHeteroList(
                 req, c, "buildStep", (List) PromotionProcess.getAll());
@@ -185,8 +186,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     public static List<Descriptor<? extends BuildStep>> getAll() {
         List<Descriptor<? extends BuildStep>> list = new ArrayList<Descriptor<? extends BuildStep>>();
-        addTo(BuildStep.BUILDERS, list);
-        addTo(BuildStep.PUBLISHERS, list);
+        addTo(Builder.all(), list);
+        addTo(Publisher.all(), list);
         return list;
     }
 
