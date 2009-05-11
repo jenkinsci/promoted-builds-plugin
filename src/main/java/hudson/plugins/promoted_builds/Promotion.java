@@ -8,6 +8,7 @@ import hudson.model.Result;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.Launcher;
+import hudson.EnvVars;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildTrigger;
 import hudson.tasks.BuildStepCompatibilityLayer;
@@ -54,6 +55,15 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      */
     public Status getStatus() {
         return getTarget().getAction(PromotedBuildAction.class).getPromotion(getParent().getName());
+    }
+
+    @Override
+    public EnvVars getEnvironment() throws IOException, InterruptedException {
+        EnvVars e = super.getEnvironment();
+        String rootUrl = Hudson.getInstance().getRootUrl();
+        if(rootUrl!=null)
+            e.put("PROMOTED_URL",rootUrl+getTarget().getUrl());
+        return e;
     }
 
     public void run() {
