@@ -10,7 +10,7 @@
   <artifactId>promoted-builds</artifactId>
   <packaging>hpi</packaging>
   <name>Hudson promoted builds plugin</name>
-  <url>http://wiki.hudson-ci.org//display/HUDSON/Promoted+Builds+Plugin</url>
+  <url>http://wiki.hudson-ci.org/display/HUDSON/Promoted+Builds+Plugin</url>
   <version>1.5-SNAPSHOT</version>
   <repositories>
     <repository>
