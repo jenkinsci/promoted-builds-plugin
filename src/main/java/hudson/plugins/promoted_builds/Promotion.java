@@ -87,6 +87,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         protected Result doRun(BuildListener listener) throws Exception {
             AbstractBuild<?, ?> target = getTarget();
+            targetBuildNumber = target.getNumber();
 
             listener.getLogger().println("Promoting "+target);
 
