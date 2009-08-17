@@ -1,5 +1,5 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:optionalBlock name="promotions" title="Promote builds when... (beta)" checked="${!empty(instance.activeItems)}" help="/plugin/promoted-builds/help.html">
+  <f:optionalBlock name="promotions" title="Promote builds when..." checked="${!empty(instance.activeItems)}" help="/plugin/promoted-builds/help.html">
     <f:block><div style="padding-left:2em">
       <f:repeatable var="s" items="${instance.activeItems}" noAddButton="true" minimum="1" name="config">
         <fieldset style="margin-bottom:1em">

@@ -1,8 +1,8 @@
 package hudson.plugins.promoted_builds.conditions;
 
 import hudson.CopyOnWrite;
-import hudson.Util;
 import hudson.Extension;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Fingerprint;

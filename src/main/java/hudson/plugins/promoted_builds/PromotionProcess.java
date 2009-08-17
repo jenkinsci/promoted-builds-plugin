@@ -2,26 +2,24 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Cause;
+import hudson.model.Cause.LegacyCodeCause;
 import hudson.model.DependencyGraph;
 import hudson.model.Descriptor;
-import hudson.model.Saveable;
 import hudson.model.Hudson;
-import hudson.model.Cause;
 import hudson.model.Queue.Item;
-import hudson.model.Cause.LegacyCodeCause;
+import hudson.model.Saveable;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Publisher;
 import hudson.tasks.Builder;
+import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.LinkedList;
 
 /**
  * A dummy {@link AbstractProject} to carry out promotion operations.

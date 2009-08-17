@@ -1,21 +1,21 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.EnvVars;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
+import hudson.model.Node;
 import hudson.model.Result;
 import hudson.model.TaskListener;
-import hudson.model.Node;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
-import hudson.Launcher;
-import hudson.EnvVars;
-import hudson.slaves.WorkspaceList.Lease;
 import hudson.slaves.WorkspaceList;
+import hudson.slaves.WorkspaceList.Lease;
 import hudson.tasks.BuildStep;
-import hudson.tasks.BuildTrigger;
 import hudson.tasks.BuildStepCompatibilityLayer;
+import hudson.tasks.BuildTrigger;
 
 import java.io.File;
 import java.io.IOException;

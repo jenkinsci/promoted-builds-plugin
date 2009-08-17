@@ -1,16 +1,14 @@
 package hudson.plugins.promoted_builds;
 
-import hudson.ExtensionPoint;
 import hudson.DescriptorExtensionList;
-import hudson.scm.SCMDescriptor;
-import hudson.scm.SCM;
+import hudson.ExtensionPoint;
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Describable;
 import hudson.model.Hudson;
-import hudson.model.AbstractProject;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Extension point for defining a promotion criteria.

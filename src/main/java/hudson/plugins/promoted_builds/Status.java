@@ -2,21 +2,20 @@ package hudson.plugins.promoted_builds;
 
 import hudson.Util;
 import hudson.model.AbstractBuild;
-import hudson.model.Hudson;
-import hudson.model.Result;
 import hudson.model.Cause.UserCause;
+import hudson.model.Result;
 import hudson.util.Iterators;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import javax.servlet.ServletException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.io.IOException;
 
 /**
  * Promotion status of a build wrt a specific {@link PromotionProcess}.
