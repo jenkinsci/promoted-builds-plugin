@@ -1,11 +1,14 @@
 package hudson.plugins.promoted_builds;
 
-import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.DependencyGraph;
 import hudson.model.Descriptor;
 import hudson.model.Saveable;
+import hudson.model.Hudson;
+import hudson.model.Cause;
+import hudson.model.Queue.Item;
+import hudson.model.Cause.LegacyCodeCause;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
@@ -34,11 +37,6 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
 
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
-
-    /**
-     * Queues of builds to be promoted.
-     */
-    /*package*/ transient volatile List<AbstractBuild<?,?>> queue;
 
     /*package*/ PromotionProcess(JobPropertyImpl property, String name) {
         super(property, name);
@@ -74,10 +72,6 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     public AbstractProject<?,?> getOwner() {
         return getParent().getOwner();
-    }
-
-    public FilePath getWorkspace() {
-        return getOwner().getWorkspace();
     }
 
     public DescribableList<Publisher, Descriptor<Publisher>> getPublishersList() {
@@ -128,15 +122,18 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         if(qualification==null)
             return false; // not this time
 
-        promote(build,qualification);
+        promote(build,new LegacyCodeCause(),qualification); // TODO: define promotion cause
 
         return true;
     }
 
     /**
      * Promote the given build by using the given qualification.
+     *
+     * @parma cause
+     *      Why the build is promoted?
      */
-    public void promote(AbstractBuild<?,?> build, Status qualification) throws IOException {
+    public void promote(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
         // build is qualified for a promotion.
         if(a!=null) {
@@ -147,7 +144,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         }
 
         // schedule promotion activity.
-        scheduleBuild(build);
+        scheduleBuild(build,cause);
     }
 
     /**
@@ -159,17 +156,21 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public boolean scheduleBuild(AbstractBuild<?,?> build) {
+        return scheduleBuild(build,new LegacyCodeCause());
+    }
+
+    public boolean scheduleBuild(AbstractBuild<?,?> build, Cause cause) {
         assert build.getProject()==getOwner();
 
-        if(queue ==null)
-            queue = Collections.synchronizedList(new LinkedList<AbstractBuild<?,?>>());
-        queue.add(build);
-
-        return super.scheduleBuild();
+        // remember what build we are promoting
+        return super.scheduleBuild(0,cause,new PromotionTargetAction(build));
     }
 
     public boolean isInQueue(AbstractBuild<?,?> build) {
-        return isInQueue() && queue!=null && queue.contains(build);
+        for (Item item : Hudson.getInstance().getQueue().getItems(this))
+            if (item.getAction(PromotionTargetAction.class).resolve()==build)
+                return true;
+        return false;
     }
 
 //

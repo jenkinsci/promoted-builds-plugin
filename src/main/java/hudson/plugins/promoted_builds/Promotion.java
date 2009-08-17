@@ -5,10 +5,14 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
 import hudson.model.Result;
+import hudson.model.TaskListener;
+import hudson.model.Node;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.Launcher;
 import hudson.EnvVars;
+import hudson.slaves.WorkspaceList.Lease;
+import hudson.slaves.WorkspaceList;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildTrigger;
 import hudson.tasks.BuildStepCompatibilityLayer;
@@ -58,8 +62,8 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     }
 
     @Override
-    public EnvVars getEnvironment() throws IOException, InterruptedException {
-        EnvVars e = super.getEnvironment();
+    public EnvVars getEnvironment(TaskListener listener) throws IOException, InterruptedException {
+        EnvVars e = super.getEnvironment(listener);
         String rootUrl = Hudson.getInstance().getRootUrl();
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+getTarget().getUrl());
@@ -71,30 +75,18 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     }
 
     protected class RunnerImpl extends AbstractRunner {
+        private AbstractBuild<?,?> getTarget() {
+            PromotionTargetAction pta = getAction(PromotionTargetAction.class);
+            return pta.resolve();
+        }
+
+        @Override
+        protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
+            return wsl.acquire(getTarget().getWorkspace(),true);
+        }
+
         protected Result doRun(BuildListener listener) throws Exception {
-            AbstractBuild<?,?> target;
-
-            // which build are we trying to promote?
-            if(project.queue==null) {
-                listener.getLogger().println("Nothing to promote here. Aborting");
-                return Result.ABORTED;
-            }
-
-            // perform the update of queue and Status atomically,
-            // so that no one gets into a situation that they think they got dropped from the queue
-            // without having a build being performed.
-            synchronized (project.queue) {
-                if(project.queue.isEmpty()) {
-                    listener.getLogger().println("Nothing to promote here. Aborting");
-                    return Result.ABORTED;
-                }
-                target = project.queue.remove(0);
-                targetBuildNumber = target.getNumber();
-
-                // if there's more in the queue schedule another one.
-                if(!project.queue.isEmpty())
-                    project.scheduleBuild(); // the call to a deprecated method is intentional here.
-            }
+            AbstractBuild<?, ?> target = getTarget();
 
             listener.getLogger().println("Promoting "+target);
 

@@ -4,6 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildBadgeAction;
+import hudson.model.Cause.UserCause;
 import hudson.util.CopyOnWriteList;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -169,7 +170,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         if(p==null)
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
 
-        p.promote(owner,new Status(p,Collections.singleton(new ManualPromotionBadge())));
+        p.promote(owner,new UserCause(),new Status(p,Collections.singleton(new ManualPromotionBadge())));
 
         rsp.sendRedirect2(".");
     }

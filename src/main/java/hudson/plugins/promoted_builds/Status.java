@@ -4,6 +4,7 @@ import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 import hudson.model.Result;
+import hudson.model.Cause.UserCause;
 import hudson.util.Iterators;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -220,7 +221,7 @@ public final class Status {
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
         if(!getTarget().hasPermission(Promotion.PROMOTE))
             return;
-        getProcess().scheduleBuild(getTarget());
+        getProcess().scheduleBuild(getTarget(),new UserCause());
         // TODO: we need better visual feed back so that the user knows that the build happened.
         rsp.forwardToPreviousPage(req);
     }
