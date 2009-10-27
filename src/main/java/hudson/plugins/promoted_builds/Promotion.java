@@ -9,6 +9,7 @@ import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.model.TaskListener;
+import hudson.model.TopLevelItem;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.slaves.WorkspaceList;
@@ -82,7 +83,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
-            return wsl.acquire(getTarget().getWorkspace(),true);
+            return wsl.acquire(n.getWorkspaceFor((TopLevelItem)getTarget().getProject()),true);
         }
 
         protected Result doRun(BuildListener listener) throws Exception {
