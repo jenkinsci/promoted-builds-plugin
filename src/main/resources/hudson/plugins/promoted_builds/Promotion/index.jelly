@@ -6,7 +6,9 @@
     <l:header />
     <l:side-panel>
       <l:tasks>
-        <l:task icon="images/24x24/up.gif" href=".." title="Back to Promotion Status" />
+        <l:task icon="images/24x24/up.gif"
+                href="${h.getNearestAncestorUrl(request,it.target)}/promotion/"
+                title="${%Back to Promotion Status}" />
       </l:tasks>
     </l:side-panel>
     <l:main-panel>
@@ -15,7 +17,7 @@
       </t:buildCaption>
       <l:rightspace>
         <a href="consoleText">
-          <img src="${imagesURL}/24x24/document.gif" alt="" />View as plain text
+          <img src="${imagesURL}/24x24/document.gif" alt="" />${%View as plain text}
         </a>
       </l:rightspace>
       <j:choose>
