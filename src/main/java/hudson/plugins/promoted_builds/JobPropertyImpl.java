@@ -127,6 +127,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
         // readResolve is too early because we don't have our parent set yet,
         // so use this as the initialization opportunity.
+        // CopyListener is also using setOwner to re-init after copying config from another job.
         processes = new ArrayList<PromotionProcess>(ItemGroupMixIn.<String,PromotionProcess>loadChildren(
             this,getRootDir(),ItemGroupMixIn.KEYED_BY_NAME).values());
         try {
@@ -214,7 +215,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         return getRootDirFor(child.getName());
     }
 
-    private File getRootDirFor(String name) {
+    File getRootDirFor(String name) {
         return new File(getRootDir(), name);
     }
 
