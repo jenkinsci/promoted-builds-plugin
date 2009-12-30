@@ -38,13 +38,14 @@ public class PromotionProcessTest extends HudsonTestCase {
         // this is the test job
         down.getBuildersList().add(new Shell(
             "wget -N "+new WebClient().getContextPath()+"job/up/lastSuccessfulBuild/artifact/a.jar\n"+
-            "[ $(expr $BUILD_NUMBER % 2) = 0 ]\n"
+            "expr $BUILD_NUMBER % 2 - 1\n"  // expr exits with non-zero status if result is zero
         ));
         down.getPublishersList().replaceBy(recorders);
 
         // not yet promoted while the downstream is failing
         FreeStyleBuild up1 = assertBuildStatusSuccess(up.scheduleBuild2(0).get());
         assertBuildStatus(Result.FAILURE,down.scheduleBuild2(0).get());
+        Thread.sleep(1000); // give it a time to not promote
         assertEquals(0,proc.getBuilds().size());
 
         // a successful downstream build promotes upstream
