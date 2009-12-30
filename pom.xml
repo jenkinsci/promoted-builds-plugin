@@ -12,6 +12,13 @@
   <name>Hudson promoted builds plugin</name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Promoted+Builds+Plugin</url>
   <version>1.6-SNAPSHOT</version>
+  <developers>
+    <developer>
+      <id>kohsuke</id>
+      <name>Kohsuke Kawaguchi</name>
+    </developer>
+  </developers>
+
   <repositories>
     <repository>
       <id>m.g.o-public</id>
