@@ -7,6 +7,7 @@ import hudson.model.Cause.LegacyCodeCause;
 import hudson.model.DependencyGraph;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
+import hudson.model.JDK;
 import hudson.model.Queue.Item;
 import hudson.model.Saveable;
 import hudson.tasks.BuildStep;
@@ -83,6 +84,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     public List<BuildStep> getBuildSteps() {
         return buildSteps;
+    }
+
+    @Override public JDK getJDK() {
+        return getOwner().getJDK();
     }
 
     /**

@@ -76,7 +76,8 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         if(json.has("promotions"))
             json = json.getJSONObject("promotions");
 
-        for( JSONObject c : (List<JSONObject>) JSONArray.fromObject(json.get("config")) ) {
+        for( Object o : JSONArray.fromObject(json.get("config")) ) {
+            JSONObject c = (JSONObject)o;
             String name = c.getString("name");
             activeProcessNames.add(name);
             PromotionProcess p;
