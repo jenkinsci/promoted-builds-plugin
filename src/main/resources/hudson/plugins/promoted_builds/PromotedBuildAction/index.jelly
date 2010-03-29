@@ -4,30 +4,30 @@
       <j:choose>
         <j:when test="${it.canPromote()}">
           <form style="float:right" method="post" action="${p.name}/build">
-            <input type="submit" value="Re-execute promotion"/>
+            <input type="submit" value="${%Re-execute promotion}"/>
           </form>
         </j:when>
       </j:choose>
     </d:tag>
   </d:taglib>
-  <l:layout title="Promotions : ${it.project.displayName} ${it.owner.displayName}" xmlns:local="local">
+  <l:layout title="${%Promotions} : ${it.project.displayName} ${it.owner.displayName}" xmlns:local="local">
     <st:include page="sidepanel.jelly" it="${it.owner}" />
     <l:main-panel>
-      <h1>Promotions</h1>
+      <h1>${%Promotions}</h1>
 
       <!-- list promotions that are already attained -->
       <j:forEach var="p" items="${it.promotions}">
         <h2>
-          <img src="${imagesURL}/32x32/star-gold.gif"/> ${p.getName()}
+          <img src="${imagesURL}/32x32/star-gold.gif"/> ${p.name}
         </h2>
 
         <!-- history of this promotion -->
-        <l:pane title="Promotion History" width="100">
-          <j:forEach var="attempt" indexVar="index" items="${p.getPromotionBuilds()}">
+        <l:pane title="${%Promotion History}" width="100">
+          <j:forEach var="attempt" indexVar="index" items="${p.promotionBuilds}">
             <tr><td>
               <a href="${p.name}/promotionBuilds/${index}">
-	        <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
-                 alt="${attempt.iconColor.description}"/> ${attempt.getFullDisplayName()}
+                <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
+                 alt="${attempt.iconColor.description}"/> ${attempt.fullDisplayName}
               </a>
             </td></tr>
           </j:forEach>
@@ -35,9 +35,9 @@
 
         <!-- how did this build qualify for promotion? -->
         <h4>
-          Qualification
+          ${%Qualification}
           <span style="padding-left:2em"> </span>
-          (promoted ${p.getTimestampString()} ago &#x2014; ${p.getDelayString(it.owner)} after build)
+          (promoted ${p.timestampString} ago &#x2014; ${p.getDelayString(it.owner)} after build)
         </h4>
         <j:forEach var="b" items="${p.badges}">
           <st:include it="${b}" page="index.jelly" />
@@ -50,27 +50,27 @@
             <local:re-promote-button />
             <j:when test="${p.isPromotionSuccessful()}">
               <img src="${imagesURL}/16x16/blue.gif" alt="Unstable" width="16" height="16" />
-              Successfully promoted (<a href="${p.name}/lastSuccessful">record</a>)
+              ${%Successfully promoted} (<a href="${p.name}/lastSuccessful">${%log}</a>)
             </j:when>
             <j:when test="${!p.isPromotionAttempted()}">
-              Pending promotion
+              ${%Pending promotion}
               <j:choose>
                 <j:when test="${p.isInQueue()}">
-                  (promotion queued)
+                  (${%promotion queued})
                 </j:when>
                 <j:otherwise>
-                  <span class='error'>(promotion not queued. Please re-execute promotion)</span>
+                  <span class="error">(${%promotion not queued. Please re-execute promotion})</span>
                 </j:otherwise>
               </j:choose>
             </j:when>
             <j:otherwise>
               <j:choose>
-                <j:when test="${p.getLastFailed() == null}">
-                  Promotion in progress (<a href="${p.name}/lastSuccessful">record</a>)
+                <j:when test="${p.lastFailed == null}">
+                  ${%Promotion in progress} (<a href="${p.name}/lastSuccessful">${%log}</a>)
                 </j:when>
                 <j:otherwise>
                   <img src="${imagesURL}/16x16/red.gif" alt="Unstable" width="16" height="16" />
-                  Promotion failed (<a href="${p.name}/lastFailed">record</a>)
+                  ${%Promotion failed} (<a href="${p.name}/lastFailed">${%log}</a>)
                 </j:otherwise>
               </j:choose>
             </j:otherwise>
@@ -83,17 +83,17 @@
       <!-- list promotions that are not yet attained -->
       <j:forEach var="p" items="${it.pendingPromotions}">
         <h2>
-          <img src="${imagesURL}/32x32/star.gif"/> ${p.getName()}
+          <img src="${imagesURL}/32x32/star.gif"/> ${p.name}
         </h2>
           <j:choose>
             <j:when test="${it.canPromote()}">
-              <form style="float:right" method="post" action="forcePromotion?name=${p.getName()}">
-                <input type="submit" value="Force promotion"/>
+              <form style="float:right" method="post" action="forcePromotion?name=${p.name}">
+                <input type="submit" value="${%Force promotion}"/>
               </form>
             </j:when>
           </j:choose>
         <div>
-          This promotion hasn't happened.
+          ${%This promotion has not happened.}
         </div>
       </j:forEach>
     </l:main-panel>
