@@ -42,7 +42,7 @@
     <dependency>
       <groupId>org.jvnet.hudson.plugins</groupId>
       <artifactId>batch-task</artifactId>
-      <version>1.10</version>
+      <version>[1.10,)</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

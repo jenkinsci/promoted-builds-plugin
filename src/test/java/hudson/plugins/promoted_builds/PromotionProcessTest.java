@@ -36,8 +36,10 @@ public class PromotionProcessTest extends HudsonTestCase {
         proc.conditions.add(new DownstreamPassCondition(down.getName()));
 
         // this is the test job
+        String baseUrl = new WebClient().getContextPath() + "job/up/lastSuccessfulBuild";
         down.getBuildersList().add(new Shell(
-            "wget -N "+new WebClient().getContextPath()+"job/up/lastSuccessfulBuild/artifact/a.jar\n"+
+            "wget -N "+baseUrl+"/artifact/a.jar \\\n"+
+            "  || curl "+baseUrl+"/artifact/a.jar > a.jar\n"+
             "expr $BUILD_NUMBER % 2 - 1\n"  // expr exits with non-zero status if result is zero
         ));
         down.getPublishersList().replaceBy(recorders);
