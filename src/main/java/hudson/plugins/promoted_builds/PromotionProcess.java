@@ -8,6 +8,7 @@ import hudson.model.DependencyGraph;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.JDK;
+import hudson.model.Label;
 import hudson.model.Queue.Item;
 import hudson.model.Saveable;
 import hudson.tasks.BuildStep;
@@ -84,6 +85,12 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     public List<BuildStep> getBuildSteps() {
         return buildSteps;
+    }
+
+    @Override public Label getAssignedLabel() {
+        // Really would like to run on the exact node that the promoted build ran on,
+        // not just the same label.. but at least this works if job is tied to one node:
+        return getOwner().getAssignedLabel();
     }
 
     @Override public JDK getJDK() {
