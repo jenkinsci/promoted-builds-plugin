@@ -205,7 +205,7 @@ public final class Status {
     public List<Promotion> getPromotionBuilds() {
         PromotionProcess p = getProcess();
         List<Promotion> builds = new ArrayList<Promotion>();
-        for( Integer n : promotionAttempts ) {
+        for( Integer n : Iterators.reverse(promotionAttempts) ) {
             Promotion b = p.getBuildByNumber(n);
             if (b != null) {
                 builds.add(b);
