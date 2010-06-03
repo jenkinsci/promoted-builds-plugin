@@ -1,9 +1,11 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
   <j:if test="${it.hasPromotion()}">
-    <a href="${link}promotion/">
-      <img width="16" height="16"
-        title="Promoted build"
-        src="${imagesURL}/16x16/star-gold.gif"/>
-    </a>
+    <j:forEach var="status" items="${it.getPromotions()}">
+      <a href="${link}promotion/">
+        <img width="16" height="16"
+          title="${status.name}"
+          src="${rootURL}/plugin/promoted-builds/icons/16x16/${status.getProcess().getIcon()}.gif"/>
+      </a>
+    </j:forEach>
   </j:if>
 </j:jelly>

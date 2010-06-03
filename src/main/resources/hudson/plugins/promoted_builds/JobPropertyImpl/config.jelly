@@ -8,6 +8,16 @@
             <f:entry title="Name">
               <f:textbox name="config.name" value="${s.name}" />
             </f:entry>
+            <f:entry title="Icon">
+              <select class="setting-input" name="config.icon">
+                <f:option selected="${s.icon=='star-gold'}"   value="star-gold">Gold star</f:option>
+                <f:option selected="${s.icon=='star-blue'}"   value="star-blue">Blue star</f:option>
+                <f:option selected="${s.icon=='star-green'}"  value="star-green">Green star</f:option>
+                <f:option selected="${s.icon=='star-orange'}" value="star-orange">Orange star</f:option>
+                <f:option selected="${s.icon=='star-purple'}" value="star-purple">Purple star</f:option>
+                <f:option selected="${s.icon=='star-red'}"    value="star-red">Red star</f:option>
+              </select> 
+            </f:entry>
             <f:section title="Criteria">
               <f:nested>
                 <table style="width:100%">

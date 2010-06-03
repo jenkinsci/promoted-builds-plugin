@@ -18,7 +18,7 @@
       <!-- list promotions that are already attained -->
       <j:forEach var="p" items="${it.promotions}">
         <h2>
-          <img src="${imagesURL}/32x32/star-gold.gif"/> ${p.name}
+          <img src="${rootURL}/plugin/promoted-builds/icons/32x32/${p.getProcess().getIcon()}.gif"/> ${p.name}
         </h2>
 
         <!-- history of this promotion -->

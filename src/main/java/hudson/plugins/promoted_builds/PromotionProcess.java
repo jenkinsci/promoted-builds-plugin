@@ -35,6 +35,12 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     public final DescribableList<PromotionCondition,PromotionConditionDescriptor> conditions =
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
+    /**
+     * The icon that represents this promotion process. This is the name of
+     * the GIF icon that can be found in ${rootURL}/plugin/promoted-builds/icons/16x16/
+     * and ${rootURL}/plugin/promoted-builds/icons/32x32/, e.g. <code>"star-gold"</code>.
+     */
+    public String icon;
 
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
 
@@ -48,6 +54,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
         buildSteps = (List)Descriptor.newInstancesFromHeteroList(
                 req, c, "buildStep", (List) PromotionProcess.getAll());
+        icon = c.getString("icon");
         save();
     }
 
@@ -95,6 +102,32 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     @Override public JDK getJDK() {
         return getOwner().getJDK();
+    }
+
+    /**
+     * Get the icon name, without the extension. It will always return a non null
+     * and non empty string, as <code>"star-gold"</code> is used for compatibility
+     * for older promotions configurations.
+     * 
+     * @return the icon name
+     */
+    public String getIcon() {
+    	return getIcon(icon);
+    }
+
+    /**
+     * Handle compatibility with pre-1.8 configs.
+     * 
+     * @param sIcon
+     *      the name of the icon used by this promotion; if null or empty,
+     *      we return the gold icon for compatibility with previous releases
+     * @return the icon file name for this promotion
+     */
+    private static String getIcon(String sIcon) {
+    	if ((sIcon == null) || sIcon.equals(""))
+            return "star-gold";
+    	else
+            return sIcon;
     }
 
     /**

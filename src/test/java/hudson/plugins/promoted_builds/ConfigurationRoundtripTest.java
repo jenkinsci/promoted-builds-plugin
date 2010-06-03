@@ -46,6 +46,7 @@ public class ConfigurationRoundtripTest extends HudsonTestCase {
         assertEquals(1,pp.getItems().size());
         proc.conditions.add(new DownstreamPassCondition(down.getName()));
         proc.getBuildSteps().add(new JavadocArchiver("somedir",true));
+        proc.icon = "star-blue";
 
         // round trip
         submit(new WebClient().getPage(p,"configure").getFormByName("config"));
@@ -61,5 +62,6 @@ public class ConfigurationRoundtripTest extends HudsonTestCase {
         JavadocArchiver ja = (JavadocArchiver)proc.getBuildSteps().get(0);
         assertEquals("somedir",ja.getJavadocDir());
         assertTrue(ja.isKeepAll());
+        assertEquals("star-blue", proc.icon);
     }
 }
