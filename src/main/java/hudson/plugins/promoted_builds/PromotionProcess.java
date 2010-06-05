@@ -173,7 +173,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     /**
      * Promote the given build by using the given qualification.
      *
-     * @parma cause
+     * @param cause
      *      Why the build is promoted?
      */
     public void promote(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
