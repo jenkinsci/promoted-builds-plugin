@@ -5,9 +5,13 @@ import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Cause.UpstreamCause;
 import hudson.model.Fingerprint;
+import hudson.model.Fingerprint.BuildPtr;
 import hudson.model.Hudson;
+import hudson.model.InvisibleAction;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
@@ -50,12 +54,23 @@ public class DownstreamPassCondition extends PromotionCondition {
     public PromotionBadge isMet(AbstractBuild<?,?> build) {
         Badge badge = new Badge();
 
+        PseudoDownstreamBuilds pdb = build.getAction(PseudoDownstreamBuilds.class);
+
         OUTER:
         for (AbstractProject<?,?> j : getJobList()) {
             for( AbstractBuild<?,?> b : build.getDownstreamBuilds(j) ) {
                 if(b.getResult()== Result.SUCCESS) {
                     badge.add(b);
                     continue OUTER;
+                }
+            }
+
+            if (pdb!=null) {// if fingerprint doesn't have any, try the pseudo-downstream
+                for (AbstractBuild<?,?> b : pdb.listBuilds(j)) {
+                    if(b.getResult()== Result.SUCCESS) {
+                        badge.add(b);
+                        continue OUTER;
+                    }
                 }
             }
 
@@ -160,7 +175,24 @@ public class DownstreamPassCondition extends PromotionCondition {
                         if(considerPromotion) {
                             try {
                                 AbstractBuild<?,?> u = build.getUpstreamRelationshipBuild(j);
-                                if(u==null) {
+                                if (u==null) {
+                                    // if the fingerprint doesn't tell us, perhaps the cause would tell us?
+                                    for (UpstreamCause uc : Util.filter(build.getCauses(), UpstreamCause.class)) {
+                                        if (uc.getUpstreamProject().equals(j.getFullName())) {
+                                            u = j.getBuildByNumber(uc.getUpstreamBuild());
+                                            if (u!=null) {
+                                                // remember that this build is a pseudo-downstream of the discovered build.
+                                                PseudoDownstreamBuilds pdb = u.getAction(PseudoDownstreamBuilds.class);
+                                                if (pdb==null)
+                                                    u.addAction(pdb=new PseudoDownstreamBuilds());
+                                                pdb.add(build);
+                                                u.save();
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (u==null) {
                                     // no upstream build. perhaps a configuration problem?
                                     if(build.getResult()==Result.SUCCESS && !warned) {
                                         listener.getLogger().println("WARNING: "+j.getFullDisplayName()+" appears to use this job as a promotion criteria, " +
@@ -168,8 +200,9 @@ public class DownstreamPassCondition extends PromotionCondition {
                                                 "See http://hudson.gotdns.com/wiki/display/HUDSON/Fingerprint for more details");
                                         warned = true;
                                     }
-                                } else
-                                if(p.considerPromotion(u))
+                                }
+
+                                if(u!=null && p.considerPromotion(u))
                                     listener.getLogger().println("Promoted "+u);
                             } catch (IOException e) {
                                 e.printStackTrace(listener.error("Failed to promote a build"));
@@ -191,6 +224,32 @@ public class DownstreamPassCondition extends PromotionCondition {
          */
         public static void rebuildCache() {
             DOWNSTREAM_JOBS = new HashSet<AbstractProject>();
+        }
+    }
+
+    /**
+     * Remembers those downstream jobs that are not related by fingerprint but by the triggering relationship.
+     * This is a weaker form of the relationship and less reliable, but often people don't understand
+     * the notion of fingerprints, in which case this works.
+     */
+    public static class PseudoDownstreamBuilds extends InvisibleAction {
+        final List<BuildPtr> builds = new ArrayList<BuildPtr>();
+
+        public void add(AbstractBuild<?,?> run) {
+            builds.add(new BuildPtr(run));
+        }
+
+        public List<AbstractBuild<?,?>> listBuilds(AbstractProject<?, ?> job) {
+            List<AbstractBuild<?,?>> list = new ArrayList<AbstractBuild<?,?>>();
+            for (BuildPtr b : builds) {
+                if (b.is(job)) {
+                    Run r = b.getRun();
+                    if (r instanceof AbstractBuild)
+                        // mainly null check, plus a defensive measure caused by a possible rename.
+                        list.add((AbstractBuild)r);
+                }
+            }
+            return list;
         }
     }
 }
