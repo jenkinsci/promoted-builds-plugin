@@ -8,8 +8,11 @@ import hudson.model.DependencyGraph;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.JDK;
+import hudson.model.Job;
 import hudson.model.Label;
+import hudson.model.PermalinkProjectAction.Permalink;
 import hudson.model.Queue.Item;
+import hudson.model.Run;
 import hudson.model.Saveable;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
@@ -243,5 +246,30 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
                     list.add(d);
             }
         }
+    }
+
+    public Permalink asPermalink() {
+        return new Permalink() {
+            @Override
+            public String getDisplayName() {
+                return Messages.PromotionProcess_PermalinkDisplayName(PromotionProcess.this.getDisplayName());
+            }
+
+            @Override
+            public String getId() {
+                return PromotionProcess.this.getName();
+            }
+
+            @Override
+            public Run<?, ?> resolve(Job<?, ?> job) {
+                String id = getId();
+                for( Run<?,?> build : job.getBuilds() ) {
+                    PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
+                    if(a!=null && a.contains(id))
+                        return build;
+                }
+                return null;
+            }
+        };
     }
 }

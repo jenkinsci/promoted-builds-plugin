@@ -2,15 +2,17 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.PermalinkProjectAction;
 import hudson.model.ProminentProjectAction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * For customizing project top-level GUI.
  * @author Kohsuke Kawaguchi
  */
-public class PromotedProjectAction implements ProminentProjectAction {
+public class PromotedProjectAction implements ProminentProjectAction, PermalinkProjectAction {
     public final AbstractProject<?,?> owner;
     private final JobPropertyImpl property;
 
@@ -37,6 +39,13 @@ public class PromotedProjectAction implements ProminentProjectAction {
                 return build;
         }
         return null;
+    }
+
+    public List<Permalink> getPermalinks() {
+        List<Permalink> r = new ArrayList<Permalink>();
+        for (PromotionProcess pp : property.getActiveItems())
+            r.add(pp.asPermalink());
+        return r;
     }
 
     public String getIconFileName() {
