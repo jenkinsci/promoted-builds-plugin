@@ -30,7 +30,7 @@
               <f:nested>
                 <f:hetero-list name="buildStep" targetType="${descriptor.promotionProcessType}"
                                descriptors="${descriptor.getApplicableBuildSteps(it)}" items="${s.buildSteps}"
-                               addCaption="Add action"/>
+                               addCaption="Add action" hasHeader="true"/>
               </f:nested>
             </f:section>
 
