@@ -36,7 +36,7 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
      * Returns all the registered {@link PromotionConditionDescriptor}s.
      */
     public static DescriptorExtensionList<PromotionCondition,PromotionConditionDescriptor> all() {
-        return Hudson.getInstance().getDescriptorList(PromotionCondition.class);
+        return Hudson.getInstance().<PromotionCondition,PromotionConditionDescriptor>getDescriptorList(PromotionCondition.class);
     }
 
     /**
