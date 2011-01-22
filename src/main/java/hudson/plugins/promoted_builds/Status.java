@@ -215,6 +215,17 @@ public final class Status {
     }
 
     /**
+     * Gets the promotion build by build number.
+     *
+     * @param number build number
+     * @return promotion build
+     */
+    public Promotion getPromotionBuild(int number) {
+        PromotionProcess p = getProcess();
+        return p.getBuildByNumber(number);
+    }
+
+    /**
      * Schedules a new build.
      */
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {

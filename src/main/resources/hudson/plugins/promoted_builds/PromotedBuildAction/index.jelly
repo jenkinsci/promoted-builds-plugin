@@ -23,9 +23,9 @@
 
         <!-- history of this promotion -->
         <l:pane title="${%Promotion History}" width="100">
-          <j:forEach var="attempt" indexVar="index" items="${p.promotionBuilds}">
+          <j:forEach var="attempt" items="${p.promotionBuilds}">
             <tr><td>
-              <a href="${p.name}/promotionBuilds/${index}">
+              <a href="${p.name}/promotionBuild/${attempt.number}/">
                 <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
                  alt="${attempt.iconColor.description}"/> ${attempt.fullDisplayName}
               </a>
