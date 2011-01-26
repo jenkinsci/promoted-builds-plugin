@@ -1,11 +1,14 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.Extension;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
+import hudson.model.Failure;
+import hudson.model.Hudson;
 import hudson.model.ItemGroup;
 import hudson.model.ItemGroupMixIn;
 import hudson.model.Items;
@@ -13,6 +16,7 @@ import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import hudson.tasks.BuildStep;
+import hudson.util.FormValidation;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.Ancestor;
@@ -25,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.kohsuke.stapler.QueryParameter;
 
 /**
  * Promotion processes defined for a project.
@@ -79,6 +84,11 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         for( Object o : JSONArray.fromObject(json.get("config")) ) {
             JSONObject c = (JSONObject)o;
             String name = c.getString("name");
+            try {
+                Hudson.checkGoodName(name);
+            } catch (Failure f) {
+                throw new Descriptor.FormException(f.getMessage(), name);
+            }
             activeProcessNames.add(name);
             PromotionProcess p;
             try {
@@ -123,6 +133,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         return p;
     }
 
+    @Override
     protected void setOwner(AbstractProject<?,?> owner) {
         super.setOwner(owner);
 
@@ -230,7 +241,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         return true;
     }
 
-    @Override
+    @Deprecated
     public Action getJobAction(AbstractProject<?,?> job) {
         return new PromotedProjectAction(job,this);
     }
@@ -241,10 +252,12 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
             return "Promote Builds When...";
         }
 
+        @Override
         public boolean isApplicable(Class<? extends Job> jobType) {
             return AbstractProject.class.isAssignableFrom(jobType);
         }
 
+        @Override
         public JobPropertyImpl newInstance(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
             try {
                 if(json.has("promotions"))
@@ -267,5 +280,21 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
         // exposed for Jelly
         public final Class<PromotionProcess> promotionProcessType = PromotionProcess.class;
+
+        public FormValidation doCheckName(@QueryParameter String name) {
+            name = Util.fixEmptyAndTrim(name);
+            if (name == null) {
+                return FormValidation.error(Messages.JobPropertyImpl_ValidateRequired());
+            }
+
+            try {
+                Hudson.checkGoodName(name);
+            } catch (Failure f) {
+                return FormValidation.error(f.getMessage());
+            }
+
+            return FormValidation.ok();
+        }
+
     }
 }

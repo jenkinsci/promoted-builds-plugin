@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.325</version>
+    <version>1.363</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
@@ -85,14 +85,6 @@
     <dependency>
       <groupId>org.jvnet.hudson.main</groupId>
       <artifactId>maven-plugin</artifactId>
-    </dependency>
-
-    <!-- for testing purpose -->
-    <dependency>
-      <groupId>org.jvnet.hudson.plugins</groupId>
-      <artifactId>batch-task</artifactId>
-      <version>[1.10,)</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 

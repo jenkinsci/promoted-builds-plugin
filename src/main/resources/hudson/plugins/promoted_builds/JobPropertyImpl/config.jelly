@@ -5,11 +5,11 @@
         <fieldset style="margin-bottom:1em">
           <legend>Promotion process</legend>
           <table width="100%">
-            <f:entry title="Name">
-              <f:textbox name="config.name" value="${s.name}" />
+            <f:entry title="Name" field="name">
+              <f:textbox value="${s.name}" />
             </f:entry>
             <f:entry title="Icon">
-              <select class="setting-input" name="config.icon">
+              <select class="setting-input" name="icon">
                 <f:option selected="${s.icon=='star-gold'}"   value="star-gold">Gold star</f:option>
                 <f:option selected="${s.icon=='star-blue'}"   value="star-blue">Blue star</f:option>
                 <f:option selected="${s.icon=='star-green'}"  value="star-green">Green star</f:option>

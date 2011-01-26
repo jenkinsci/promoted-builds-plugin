@@ -1,10 +1,10 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.EnvVars;
-import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Cause.LegacyCodeCause;
 import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
@@ -15,7 +15,6 @@ import hudson.security.PermissionGroup;
 import hudson.slaves.WorkspaceList;
 import hudson.slaves.WorkspaceList.Lease;
 import hudson.tasks.BuildStep;
-import hudson.tasks.BuildStepCompatibilityLayer;
 import hudson.tasks.BuildTrigger;
 
 import java.io.File;
@@ -119,7 +118,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                     BuildTrigger bt = (BuildTrigger)bs;
                     for(AbstractProject p : bt.getChildProjects()) {
                         listener.getLogger().println("  scheduling build for " + p.getDisplayName());
-                        p.scheduleBuild();
+                        p.scheduleBuild(0, new LegacyCodeCause());
                     }
                 } else if(!bs.perform(Promotion.this, launcher, listener)) {
                     listener.getLogger().println("failed build " + bs + " " + getResult());
@@ -132,29 +131,15 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         private boolean preBuild(BuildListener listener, List<BuildStep> steps) {
-            boolean allOk = true;
             for( BuildStep bs : steps ) {
-                if(bs instanceof BuildStepCompatibilityLayer && ! overridesPerform(bs.getClass())) {
-                    listener.getLogger().println(bs + " doesn't support Promotion");
-                    allOk = false;
-                } else if(!bs.prebuild(Promotion.this,listener)) {
+                if(!bs.prebuild(Promotion.this,listener)) {
                     listener.getLogger().println("failed pre build " + bs + " " + getResult());
                     return false;
                 }
             }
-            return allOk;
+            return true;
         }
         
-        private boolean overridesPerform(Class<? extends BuildStep> bsc) {
-           try {
-                Class<?> declarer = bsc.getMethod("perform", AbstractBuild.class, Launcher.class, BuildListener.class).getDeclaringClass();
-                return ! declarer.equals(BuildStepCompatibilityLayer.class);
-            } catch (NoSuchMethodException noSuchMethodException) {
-                return false;
-            } catch (SecurityException securityException) {
-                throw new RuntimeException(securityException);
-            }
-        }
     }
 
     //public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
