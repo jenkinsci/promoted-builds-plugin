@@ -6,6 +6,7 @@ import hudson.model.Cause;
 import hudson.model.Cause.LegacyCodeCause;
 import hudson.model.DependencyGraph;
 import hudson.model.Descriptor;
+import hudson.model.FreeStyleProject;
 import hudson.model.Hudson;
 import hudson.model.JDK;
 import hudson.model.Job;
@@ -107,6 +108,19 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return getOwner().getJDK();
     }
 
+    /**
+     * Gets the customWorkspace of the owner project.
+     *
+     * Support for FreeStyleProject only.
+     * @return customWorkspace
+     */
+    public String getCustomWorkspace() {
+        AbstractProject<?, ?> p = getOwner();
+        if (p instanceof FreeStyleProject)
+            return ((FreeStyleProject) p).getCustomWorkspace();
+        return null;
+    }
+    
     /**
      * Get the icon name, without the extension. It will always return a non null
      * and non empty string, as <code>"star-gold"</code> is used for compatibility

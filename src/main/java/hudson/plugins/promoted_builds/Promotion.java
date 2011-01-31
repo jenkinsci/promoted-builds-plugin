@@ -1,11 +1,13 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Cause.LegacyCodeCause;
 import hudson.model.Hudson;
+import hudson.model.Job;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.model.TaskListener;
@@ -21,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Records a promotion process.
@@ -65,7 +68,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     public EnvVars getEnvironment(TaskListener listener) throws IOException, InterruptedException {
         EnvVars e = super.getEnvironment(listener);
         String rootUrl = Hudson.getInstance().getRootUrl();
-        if(rootUrl!=null)
+        if(rootUrl!=null && targetBuildNumber != 0)
             e.put("PROMOTED_URL",rootUrl+getTarget().getUrl());
         return e;
     }
@@ -82,6 +85,11 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
+            String customWorkspace = getProject().getCustomWorkspace();
+            if (customWorkspace != null)
+                // we allow custom workspaces to be concurrently used between jobs.
+                return Lease.createDummyLease(
+                        n.getRootPath().child(getEnvironment(listener).expand(customWorkspace)));
             return wsl.acquire(n.getWorkspaceFor((TopLevelItem)getTarget().getProject()),true);
         }
 
