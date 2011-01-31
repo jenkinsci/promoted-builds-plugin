@@ -42,14 +42,25 @@ public class DownstreamPassCondition extends PromotionCondition {
      */
     private final String jobs;
 
+    private final boolean evenIfUnstable;
+
     public DownstreamPassCondition(String jobs) {
+        this(jobs, false);
+    }
+
+    public DownstreamPassCondition(String jobs, boolean evenIfUnstable) {
         this.jobs = jobs;
+        this.evenIfUnstable = evenIfUnstable;
     }
 
     public String getJobs() {
         return jobs;
     }
 
+    public boolean isEvenIfUnstable() {
+        return evenIfUnstable;
+    }
+    
     @Override
     public PromotionBadge isMet(AbstractBuild<?,?> build) {
         Badge badge = new Badge();
@@ -59,7 +70,8 @@ public class DownstreamPassCondition extends PromotionCondition {
         OUTER:
         for (AbstractProject<?,?> j : getJobList()) {
             for( AbstractBuild<?,?> b : build.getDownstreamBuilds(j) ) {
-                if(b.getResult()== Result.SUCCESS) {
+                Result r = b.getResult();
+                if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
                     badge.add(b);
                     continue OUTER;
                 }
@@ -67,7 +79,8 @@ public class DownstreamPassCondition extends PromotionCondition {
 
             if (pdb!=null) {// if fingerprint doesn't have any, try the pseudo-downstream
                 for (AbstractBuild<?,?> b : pdb.listBuilds(j)) {
-                    if(b.getResult()== Result.SUCCESS) {
+                    Result r = b.getResult();
+                    if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
                         badge.add(b);
                         continue OUTER;
                     }
@@ -134,7 +147,8 @@ public class DownstreamPassCondition extends PromotionCondition {
         }
         
         public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return new DownstreamPassCondition(formData.getString("jobs"));
+            return new DownstreamPassCondition(
+                    formData.getString("jobs"), formData.getBoolean("evenIfUnstable"));
         }
 
         public static final DescriptorImpl INSTANCE = new DescriptorImpl();

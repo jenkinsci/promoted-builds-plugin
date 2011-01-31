@@ -2,4 +2,8 @@
   <f:entry title="Job names">
     <f:textbox name="promotion.downstream.jobs" value="${instance.jobs}" />
   </f:entry>
+  <f:entry>
+    <f:checkbox name="promotion.downstream.evenIfUnstable" checked="${instance.evenIfUnstable}"/>
+    <label class="attach-previous">${%Trigger even if the build is unstable}</label>
+  </f:entry>
 </j:jelly>
