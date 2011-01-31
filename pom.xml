@@ -12,7 +12,7 @@
   <name>Hudson promoted builds plugin</name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Promoted+Builds+Plugin</url>
   
-  <version>1.11-SNAPSHOT</version>
+  <version>1.11</version>
   <developers>
     <developer>
       <id>kohsuke</id>
