@@ -25,8 +25,28 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
      *      non-null if the promotion condition is met. This object is then recorded so that
      *      we know how a build was promoted.
      *      Null if otherwise, meaning it shouldn't be promoted.
+     * @deprecated use isMet(PromotionProcess, build)
      */
-    public abstract PromotionBadge isMet(AbstractBuild<?,?> build);
+    public PromotionBadge isMet(AbstractBuild<?,?> build) {
+        return null;
+    }
+    
+    /**
+     * Checks if the promotion criteria is met.
+     *
+     * @param p
+     *      The promotion process that we are currently checking these conditionns
+     *      against
+     * @param build
+     *      The build for which the promotion is considered.
+     * @return
+     *      non-null if the promotion condition is met. This object is then recorded so that
+     *      we know how a build was promoted.
+     *      Null if otherwise, meaning it shouldn't be promoted.
+     */
+    public PromotionBadge isMet(PromotionProcess p, AbstractBuild<?,?> build) {
+        return isMet(build);
+    }
 
     public PromotionConditionDescriptor getDescriptor() {
         return (PromotionConditionDescriptor)Hudson.getInstance().getDescriptor(getClass());

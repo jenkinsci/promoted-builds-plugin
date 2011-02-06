@@ -62,7 +62,7 @@ public class DownstreamPassCondition extends PromotionCondition {
     }
     
     @Override
-    public PromotionBadge isMet(AbstractBuild<?,?> build) {
+    public PromotionBadge isMet(PromotionProcess p, AbstractBuild<?,?> build) {
         Badge badge = new Badge();
 
         PseudoDownstreamBuilds pdb = build.getAction(PseudoDownstreamBuilds.class);

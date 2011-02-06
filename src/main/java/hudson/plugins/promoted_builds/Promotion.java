@@ -114,10 +114,21 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         protected void post2(BuildListener listener) throws Exception {
-            if(getResult()== Result.SUCCESS)
+            if(getResult()== Result.SUCCESS) 
                 getStatus().onSuccessfulPromotion(Promotion.this);
+            
             // persist the updated build record
             getTarget().save();
+
+            if (getResult() == Result.SUCCESS) {
+                // we should evaluate any other pending promotions in case
+                // they had a condition on this promotion
+                PromotedBuildAction pba = getTarget().getAction(PromotedBuildAction.class);
+
+                for (PromotionProcess pp : pba.getPendingPromotions()) {
+                    pp.considerPromotion(getTarget());
+                }
+            }
         }
 
         private boolean build(BuildListener listener, List<BuildStep> steps) throws IOException, InterruptedException {

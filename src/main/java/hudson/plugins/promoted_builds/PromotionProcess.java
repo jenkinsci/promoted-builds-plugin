@@ -17,6 +17,7 @@ import hudson.model.PermalinkProjectAction.Permalink;
 import hudson.model.Queue.Item;
 import hudson.model.Run;
 import hudson.model.Saveable;
+import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -150,6 +151,19 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     /**
+     * Checks to see if this promotion process requires a manual approval
+     *
+     * @return true if it does, false otherwise
+     */
+    public boolean requiresApproval() {
+        for (PromotionCondition cond : conditions) {
+            if (ManualCondition.class.isInstance(cond))
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Checks if all the conditions to promote a build is met.
      *
      * @return
@@ -159,7 +173,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public Status isMet(AbstractBuild<?,?> build) {
         List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
         for (PromotionCondition cond : conditions) {
-            PromotionBadge b = cond.isMet(build);
+            PromotionBadge b = cond.isMet(this, build);
             if(b==null)
                 return null;
             badges.add(b);

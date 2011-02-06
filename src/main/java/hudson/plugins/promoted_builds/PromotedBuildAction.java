@@ -5,6 +5,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildBadgeAction;
 import hudson.model.Cause.UserCause;
+import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.util.CopyOnWriteList;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -27,6 +28,11 @@ public final class PromotedBuildAction implements BuildBadgeAction {
      * Per-process status.
      */
     private final CopyOnWriteList<Status> statuses = new CopyOnWriteList<Status>();
+
+    /**
+     * Per-process approval status
+     */
+    private final CopyOnWriteList<Approval> approvals = new CopyOnWriteList<Approval>();
 
     public PromotedBuildAction(AbstractBuild<?,?> owner) {
         assert owner!=null;
@@ -84,6 +90,39 @@ public final class PromotedBuildAction implements BuildBadgeAction {
      */
     public List<Status> getPromotions() {
         return statuses.getView();
+    }
+
+    /**
+     * Gets the read-only approval status that has a matching {@link Approval#name} value.
+     * Or null if not found.
+     */
+    public Approval getApproval(String name) {
+        for (Approval approval : approvals) {
+            if (approval.name.equals(name)) {
+                return approval;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Decide if the promotion with a matching {@link Promotion#name} can be approved.
+     * This is decided by verifying the logged in user has permission, that the
+     * promotion requires an approval, it has not already been promoted and
+     * it has not already been approved.
+     */
+    public boolean canApprove(String name) {
+        List<PromotionProcess> pps = getPendingPromotions();
+
+        for (PromotionProcess pp : pps) {
+            if (pp.getName().equals(name)) {
+                // require manual approval?
+                return pp.requiresApproval() &&
+                        this.getProject().hasPermission(Promotion.PROMOTE) &&
+                        getApproval(name) == null;
+            }
+        }
+        return false;
     }
 
     /**
@@ -151,14 +190,9 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     }
 
     /**
-     * Force a promotion.
+     * Approve a promotion.
      */
-    public void doForcePromotion(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name) throws IOException {
-//        if(!req.getMethod().equals("POST")) {// require post,
-//            rsp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-//            return;
-//        }
-
+    public void doApprovePromotion(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name) throws IOException {
         if(!this.getProject().hasPermission(Promotion.PROMOTE))
             return;
 
@@ -170,7 +204,15 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         if(p==null)
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
 
-        p.promote(owner,new UserCause(),new Status(p,Collections.singleton(new ManualPromotionBadge())));
+
+        // add approval to build and save
+        if (canApprove(name)) {
+            approvals.add(new Approval(name));
+            owner.save();
+
+            // consider promotion now that we've been approved
+            p.considerPromotion(owner);
+        }
 
         rsp.sendRedirect2(".");
     }
