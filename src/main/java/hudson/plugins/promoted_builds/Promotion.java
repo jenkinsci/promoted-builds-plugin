@@ -70,6 +70,8 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         String rootUrl = Hudson.getInstance().getRootUrl();
         if(rootUrl!=null && targetBuildNumber != 0)
             e.put("PROMOTED_URL",rootUrl+getTarget().getUrl());
+        e.put("PROMOTED_JOB_NAME", getTarget().getParent().getName());
+        e.put("PROMOTED_NUMBER", Integer.toString(targetBuildNumber));
         return e;
     }
 
