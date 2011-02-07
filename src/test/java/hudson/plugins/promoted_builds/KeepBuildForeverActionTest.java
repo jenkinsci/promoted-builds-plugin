@@ -56,7 +56,7 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         assertFalse(upBuild.isKeepLog());
     }
 
-    public void testDoesNotMarkBuildIfBuildNotGoodEnough() throws Exception {
+    public void testDoesNotCareAboutResultOfOriginalBuild() throws Exception {
         FreeStyleProject upJob = createProject("up");
         upJob.getBuildersList().add(new FixedResultBuilder(Result.FAILURE));
         FreeStyleProject downJob = createProject("down");
@@ -70,7 +70,7 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         
         assertBuildStatusSuccess(downJob.scheduleBuild2(0).get());
         waitForBuild(promotionJob, 1);
-        assertFalse(upBuild.isKeepLog());
+        assertTrue(upBuild.isKeepLog());
     }
 
     public void testDoesNotMarkBuildIfBuildNotPromotion() throws Exception {

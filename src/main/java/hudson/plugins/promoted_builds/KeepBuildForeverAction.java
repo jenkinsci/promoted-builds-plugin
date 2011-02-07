@@ -20,7 +20,6 @@ public class KeepBuildForeverAction extends Notifier {
     public static final KeepBuildForeverDescriptor DESCRIPTOR = new KeepBuildForeverDescriptor();
     
     private static final Result PROMOTION_RESULT_MUST_BE_AT_LEAST = Result.UNSTABLE;
-    private static final Result TARGET_BUILD_RESULT_MUST_BE_AT_LEAST = Result.UNSTABLE;
     
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.BUILD;
@@ -29,21 +28,17 @@ public class KeepBuildForeverAction extends Notifier {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         PrintStream console = listener.getLogger();
+        // only applicable to promotions, so should be impossible not to be one, but check anyway
         if (!(build instanceof Promotion)) {
-            // only applicable to promotions, so should be impossible not to be one, but check anyway
             console.println(Messages.KeepBuildForEverAction_console_notPromotion());
             build.setResult(Result.FAILURE);
             return false;
         }
-        if (build.getResult().isWorseThan(PROMOTION_RESULT_MUST_BE_AT_LEAST)) {
+        if ((build.getResult() != null) && build.getResult().isWorseThan(PROMOTION_RESULT_MUST_BE_AT_LEAST)) {
             console.println(Messages.KeepBuildForEverAction_console_promotionNotGoodEnough(build.getResult()));
             return true;
         }
         AbstractBuild promoted = ((Promotion) build).getTarget();
-        if (promoted.getResult().isWorseThan(TARGET_BUILD_RESULT_MUST_BE_AT_LEAST)) {
-            console.println(Messages.KeepBuildForEverAction_console_buildNotGoodEnough(promoted.getResult()));
-            return true;
-        }
         console.println(Messages.KeepBuildForEverAction_console_keepingBuild());
         promoted.keepLog();
         return true;
