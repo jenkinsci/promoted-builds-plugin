@@ -1,0 +1,13 @@
+<div>
+    This option requires that other promotions happen prior to this promotion.  This
+    could be useful if you want to enforce a workflow in your promotions such as
+    moving from DEV, to QA, to PROD.
+  <p>
+    For example, consider a case where promotion <tt>DEV</tt> is set as the promotion criteria of
+    promotion <tt>QA</tt>. When the job is built, <tt>QA</tt> will not be promoted right away
+    as no <tt>DEV</tt> promotion has run yet.  Once the <tt>DEV</tt> promotion has run
+    <tt>QA</tt> promotion may be ready to promote, depending on the other promotion criteria
+    you have configured and may execute immediately if all have been met.
+  <p>
+
+</div>
