@@ -2,6 +2,7 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.Cause.LegacyCodeCause;
 import hudson.model.DependencyGraph;
@@ -11,6 +12,7 @@ import hudson.model.Hudson;
 import hudson.model.JDK;
 import hudson.model.Job;
 import hudson.model.Label;
+import hudson.model.ParametersAction;
 import hudson.model.PermalinkProjectAction.Permalink;
 import hudson.model.Queue.Item;
 import hudson.model.Run;
@@ -222,8 +224,17 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public boolean scheduleBuild(AbstractBuild<?,?> build, Cause cause) {
         assert build.getProject()==getOwner();
 
+        // Get the parameters, if any, used in the target build and make these
+        // available as part of the promotion steps
+        List<ParametersAction> parameters = build.getActions(ParametersAction.class);
+
+        // Create list of actions to pass to scheduled build
+        List<Action> actions = new ArrayList<Action>();
+        actions.addAll(parameters);
+        actions.add(new PromotionTargetAction(build));
+
         // remember what build we are promoting
-        return super.scheduleBuild(0,cause,new PromotionTargetAction(build));
+        return super.scheduleBuild(0,cause,actions.toArray(new Action[actions.size()]));
     }
 
     public boolean isInQueue(AbstractBuild<?,?> build) {
