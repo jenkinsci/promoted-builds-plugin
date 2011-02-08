@@ -1,7 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 /**
- * Indicates that the promotion happened manually.
+ * This indicates the the promotion was forced.
  *
  * @author Kohsuke Kawaguchi
  */

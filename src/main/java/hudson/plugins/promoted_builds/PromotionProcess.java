@@ -87,6 +87,19 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return getParent().getOwner();
     }
 
+    /**
+     * Get the promotion condition by referencing it fully qualified class name
+     */
+    public PromotionCondition getPromotionCondition(String promotionClassName) {
+        for (PromotionCondition condition : conditions) {
+            if (condition.getClass().getName().equals(promotionClassName)) {
+                return condition;
+            }
+        }
+
+        return null;
+    }
+
     public DescribableList<Publisher, Descriptor<Publisher>> getPublishersList() {
         // TODO: extract from the buildsSteps field? Or should I separate builders and publishers?
         return new DescribableList<Publisher,Descriptor<Publisher>>(this);
@@ -150,6 +163,34 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     /**
+     * Get the badges of conditions that were passed for this promotion for the build
+     */
+    public List<PromotionBadge> getMetQualifications(AbstractBuild<?,?> build) {
+        List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
+        for (PromotionCondition cond : conditions) {
+            PromotionBadge b = cond.isMet(this, build);
+
+            if (b != null)
+                badges.add(b);
+        }
+        return badges;
+    }
+
+    /**
+     * Get the conditions that have not been met for this promotion for the build
+     */
+    public List<PromotionCondition> getUnmetConditions(AbstractBuild<?,?> build) {
+        List<PromotionCondition> unmetConditions = new ArrayList<PromotionCondition>();
+
+        for (PromotionCondition cond : conditions) {
+            if (cond.isMet(this, build) == null)
+                unmetConditions.add(cond);
+        }
+
+        return unmetConditions;
+    }
+
+    /**
      * Checks if all the conditions to promote a build is met.
      *
      * @return
@@ -159,7 +200,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public Status isMet(AbstractBuild<?,?> build) {
         List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
         for (PromotionCondition cond : conditions) {
-            PromotionBadge b = cond.isMet(build);
+            PromotionBadge b = cond.isMet(this, build);
             if(b==null)
                 return null;
             badges.add(b);

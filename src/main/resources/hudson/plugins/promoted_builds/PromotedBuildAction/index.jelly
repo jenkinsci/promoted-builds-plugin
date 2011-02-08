@@ -95,6 +95,25 @@
         <div>
           ${%This promotion has not happened.}
         </div>
+        
+        <!-- how did this build qualify for promotion? -->
+        <h4>
+          ${%Met Qualification(s)}
+          <span style="padding-left:2em"> </span>
+        </h4>
+        <j:forEach var="b" items="${p.getMetQualifications(it.owner)}">
+          <st:include it="${b}" page="index.jelly" />
+        </j:forEach>
+
+        <!-- Remaining qualifications -->
+        <h4>
+          ${%Unmet Qualification(s)}
+          <span style="padding-left:2em"> </span>
+        </h4>
+        <j:forEach var="c" items="${p.getUnmetConditions(it.owner)}">
+          <j:set var="pba" value="${it}"/>
+          <st:include it="${c}" page="index.jelly" />
+        </j:forEach>
       </j:forEach>
     </l:main-panel>
   </l:layout>

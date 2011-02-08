@@ -7,6 +7,7 @@ import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
+import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.plugins.promoted_builds.Status;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
@@ -47,7 +48,7 @@ public class UpstreamPromotionCondition extends PromotionCondition {
     }
     
     @Override
-    public PromotionBadge isMet(AbstractBuild<?,?> build) {
+    public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?,?> build) {
         Badge badge = new Badge();
 
         Set<String> requiredPromotions = getRequiredPromotionNamesAsSet();

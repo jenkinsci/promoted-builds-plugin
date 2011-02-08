@@ -1,0 +1,12 @@
+<j:jelly xmlns:j="jelly:core">
+  <j:choose>
+    <j:when test="${it.canApprove(p, pba.owner)}">
+      <form style="float:right" method="post" action="promotionProcess/${p.name}/promotionCondition/hudson.plugins.promoted_builds.conditions.ManualCondition/approve?job=${pba.owner.parent.name}&amp;buildNumber=${pba.owner.number}&amp;promotion=${p.name}">
+        <input type="submit" value="${%Approve promotion}"/>
+      </form>
+    </j:when>
+  </j:choose>
+  <div>
+    Manual approval
+  </div>
+</j:jelly>

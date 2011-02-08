@@ -39,6 +39,13 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     }
 
     /**
+     * Gets the owning build.
+     */
+    public AbstractBuild<?,?> getOwner() {
+        return owner;
+    }
+
+    /**
      * Gets the owning project.
      */
     public AbstractProject<?,?> getProject() {
@@ -119,6 +126,22 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         }
 
         return r;
+    }
+
+    /**
+     * Get the specified promotion process by name
+     */
+    public PromotionProcess getPromotionProcess(String name) {
+        JobPropertyImpl pp = getProject().getProperty(JobPropertyImpl.class);
+        if (pp==null)
+            return null;
+
+        for (PromotionProcess p : pp.getItems()) {
+            if(p.getName().equals(name))
+                return p;
+        }
+
+        return null;
     }
 
     public String getIconFileName() {
