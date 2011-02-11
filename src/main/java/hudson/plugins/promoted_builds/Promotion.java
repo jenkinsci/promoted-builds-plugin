@@ -67,11 +67,13 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     @Override
     public EnvVars getEnvironment(TaskListener listener) throws IOException, InterruptedException {
         EnvVars e = super.getEnvironment(listener);
-        String rootUrl = Hudson.getInstance().getRootUrl();
-        if(rootUrl!=null && targetBuildNumber != 0)
-            e.put("PROMOTED_URL",rootUrl+getTarget().getUrl());
-        e.put("PROMOTED_JOB_NAME", getTarget().getParent().getName());
-        e.put("PROMOTED_NUMBER", Integer.toString(targetBuildNumber));
+        if (targetBuildNumber != 0) {
+            String rootUrl = Hudson.getInstance().getRootUrl();
+            if(rootUrl!=null)
+                e.put("PROMOTED_URL",rootUrl+getTarget().getUrl());
+            e.put("PROMOTED_JOB_NAME", getTarget().getParent().getName());
+            e.put("PROMOTED_NUMBER", Integer.toString(targetBuildNumber));
+        }
         return e;
     }
 
