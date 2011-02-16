@@ -207,6 +207,14 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         // there's nothing to save, actually
     }
 
+    public void onDeleted(PromotionProcess process) {
+        // TODO delete the persisted directory?
+    }
+
+    public void onRenamed(PromotionProcess item, String oldName, String newName) throws IOException {
+        // TODO should delete the persisted directory?
+    }
+
     public String getUrl() {
         return getOwner().getUrl()+"promotion/";
     }
