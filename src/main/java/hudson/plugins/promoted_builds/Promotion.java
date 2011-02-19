@@ -56,6 +56,11 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         return getParent().getOwner().getBuildByNumber(targetBuildNumber);
     }
 
+    @Override
+    public String getUrl() {
+        return getTarget().getUrl() + "promotion/" + getParent().getName() + "/promotionBuild/" + getNumber();
+    }
+
     /**
      * Gets the {@link Status} object that keeps track of what {@link Promotion}s are
      * performed for a build, including this {@link Promotion}.
