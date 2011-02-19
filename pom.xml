@@ -24,9 +24,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/hudson/promoted-builds-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:hudson/promoted-builds-plugin.git</developerConnection>
-    <url>http://github.com/hudson/promoted-builds-plugin</url>
+    <connection>scm:git:git://github.com/jenkinsci/promoted-builds-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/promoted-builds-plugin.git</developerConnection>
+    <url>http://github.com/jenkinsci/promoted-builds-plugin</url>
   </scm>
 
   <properties>
