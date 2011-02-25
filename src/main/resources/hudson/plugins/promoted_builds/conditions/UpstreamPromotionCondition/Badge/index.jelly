@@ -1,5 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <div>
-    Upstream promotions ${it.promotions} succeeded
-  </div>
+  <l:pane title="${%Upstream promotions succeeded}" width="100">
+    <j:forEach var="p" items="${it.promotions}">
+      <tr><td>${p}</td></tr>
+    </j:forEach>
+  </l:pane>
 </j:jelly>

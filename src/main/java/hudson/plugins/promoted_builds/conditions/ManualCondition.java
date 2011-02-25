@@ -1,10 +1,14 @@
 package hudson.plugins.promoted_builds.conditions;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParameterValue;
 import hudson.model.User;
 import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.PromotionBadge;
@@ -12,11 +16,15 @@ import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.servlet.ServletException;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.acegisecurity.GrantedAuthority;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -29,13 +37,32 @@ import org.kohsuke.stapler.StaplerResponse;
  */
 public class ManualCondition extends PromotionCondition {
     private String users;
+    private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
 
-    public ManualCondition(String users) {
-        this.users = users;
+    public ManualCondition() {
     }
 
     public String getUsers() {
         return users;
+    }
+
+    public List<ParameterDefinition> getParameterDefinitions() {
+        return parameterDefinitions;
+    }
+
+    /**
+     * Gets the {@link ParameterDefinition} of the given name, if any.
+     */
+    public ParameterDefinition getParameterDefinition(String name) {
+        if (parameterDefinitions == null) {
+            return null;
+        }
+
+        for (ParameterDefinition pd : parameterDefinitions)
+            if (pd.getName().equals(name))
+                return pd;
+        
+        return null;
     }
 
     public Set<String> getUsersAsSet() {
@@ -59,7 +86,7 @@ public class ManualCondition extends PromotionCondition {
 
         for (ManualApproval approval : approvals) {
             if (approval.name.equals(promotionProcess.getName()))
-                return new Badge(approval.authenticationName);
+                return approval.badge;
         }
 
         return null;
@@ -71,12 +98,8 @@ public class ManualCondition extends PromotionCondition {
      * approved.
      */
     public boolean canApprove(PromotionProcess promotionProcess, AbstractBuild<?,?> build) {
-        // Current user must be in users list or users list is empty
-        Set<String> users = getUsersAsSet();
-        if (!users.isEmpty()) {
-            if (!users.contains(Hudson.getAuthentication().getName())) {
-                return false;
-            }
+        if (!getUsersAsSet().isEmpty() && !isInUsersList() && !isInGroupList()) {
+            return false;
         }
         
         List<ManualApproval> approvals = build.getActions(ManualApproval.class);
@@ -90,11 +113,35 @@ public class ManualCondition extends PromotionCondition {
         return true;
     }
 
+    /*
+     * Check if user is listed in user list as a specific user
+     */
+    private boolean isInUsersList() {
+        // Current user must be in users list or users list is empty
+        Set<String> usersSet = getUsersAsSet();
+        return usersSet.contains(Hudson.getAuthentication().getName());
+    }
+
+    /*
+     * Check if user is a member of a groups as listed in the user / group field
+     */
+    private boolean isInGroupList() {
+        Set<String> groups = getUsersAsSet();
+        GrantedAuthority[] authorities = Hudson.getAuthentication().getAuthorities();
+        for (GrantedAuthority authority : authorities) {
+            if (groups.contains(authority.getAuthority()))
+                return true;
+        }
+        return false;
+    }
+
     /**
      * Web method to handle the approval action submitted by the user.
      */
     public void doApprove(StaplerRequest req, StaplerResponse rsp, @QueryParameter("job") String jobName,
-            @QueryParameter("buildNumber") int buildNumber, @QueryParameter("promotion") String promotionName) throws IOException {
+            @QueryParameter("buildNumber") int buildNumber, @QueryParameter("promotion") String promotionName) throws IOException, ServletException {
+
+	JSONObject formData = req.getSubmittedForm();
         AbstractProject<?,?> job = Hudson.getInstance().getItemByFullName(jobName, AbstractProject.class);
 
         // Get the specific build from the job by number
@@ -105,8 +152,27 @@ public class ManualCondition extends PromotionCondition {
         PromotionProcess promotionProcess = pba.getPromotionProcess(promotionName);
 
         if (canApprove(promotionProcess, build)) {
+            List<ParameterValue> paramValues = new ArrayList<ParameterValue>();
+
+            if (!parameterDefinitions.isEmpty()) {
+                JSONArray a = JSONArray.fromObject(formData.get("parameter"));
+
+                for (Object o : a) {
+                    JSONObject jo = (JSONObject) o;
+                    String name = jo.getString("name");
+
+                    ParameterDefinition d = getParameterDefinition(name);
+                    if (d==null)
+                        throw new IllegalArgumentException("No such parameter definition: " + name);
+
+                    ParameterValue value = d.createValue(req, jo);
+
+                    paramValues.add(d.createValue(req, jo));
+                }
+            }
+
             // add approval to build
-            build.addAction(new ManualApproval(promotionName));
+            build.addAction(new ManualApproval(promotionName, paramValues));
             build.save();
 
             // check for promotion
@@ -122,19 +188,21 @@ public class ManualCondition extends PromotionCondition {
      */
     public static final class ManualApproval extends InvisibleAction {
         public String name;
-        public String authenticationName;
+        public Badge badge;
 
-        public ManualApproval(String name) {
+        public ManualApproval(String name, List<ParameterValue> values) {
             this.name = name;
-            authenticationName = Hudson.getAuthentication().getName();
+            badge = new Badge(values);
         }
     }
 
     public static final class Badge extends PromotionBadge {
         public String authenticationName;
+        private final List<ParameterValue> values;
 
-        public Badge(String authenticationName) {
-            this.authenticationName = authenticationName;
+        public Badge(List<ParameterValue> values) {
+            this.authenticationName = Hudson.getAuthentication().getName();
+            this.values = values;
         }
 
         public String getUserName() {
@@ -143,6 +211,17 @@ public class ManualCondition extends PromotionCondition {
 
             User u = User.get(authenticationName, false);
             return u != null ? u.getDisplayName() : authenticationName;
+        }
+
+        public List<ParameterValue> getParameterValues() {
+            return values != null ? values : Collections.EMPTY_LIST;
+        }
+
+        @Override
+        public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
+            for (ParameterValue value : values) {
+                value.buildEnvVars(build, env);
+            }
         }
     }
 
@@ -156,10 +235,15 @@ public class ManualCondition extends PromotionCondition {
             return "Only when manually approved";
         }
 
+        @Override
         public ManualCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return new ManualCondition(formData.getString("users"));
+            ManualCondition instance = new ManualCondition();
+            instance.users = formData.getString("users");
+            instance.parameterDefinitions = Descriptor.newInstancesFromHeteroList(req, formData, "parameters", ParameterDefinition.all());
+            return instance;
         }
 
+        @Override
         public String getHelpFile() {
             return "/plugin/promoted-builds/conditions/manual.html";
         }

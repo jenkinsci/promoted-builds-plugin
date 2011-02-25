@@ -1,8 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <div>
-    Downstream builds succeeded:
+  <l:pane title="${%Downstream builds succeeded}" width="100">
     <j:forEach var="b" items="${it.builds}">
-      <t:buildLink job="${b.job}" jobName="${b.name}" number="${b.number}" />
+      <tr><td colspan="4"><t:buildLink job="${b.job}" jobName="${b.name}" number="${b.number}" /></td></tr>
     </j:forEach>
-  </div>
+  </l:pane>
 </j:jelly>

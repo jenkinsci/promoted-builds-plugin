@@ -1,12 +1,23 @@
-<j:jelly xmlns:j="jelly:core">
-  <j:choose>
-    <j:when test="${it.canApprove(p, pba.owner)}">
-      <form style="float:right" method="post" action="promotionProcess/${p.name}/promotionCondition/hudson.plugins.promoted_builds.conditions.ManualCondition/approve?job=${pba.owner.parent.name}&amp;buildNumber=${pba.owner.number}&amp;promotion=${p.name}">
-        <input type="submit" value="${%Approve promotion}"/>
-      </form>
-    </j:when>
-  </j:choose>
-  <div>
-    Manual approval
-  </div>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+  <l:pane title="${%Manual Approval}" width="100"><tr><td>
+    <f:form method="post" action="promotionProcess/${p.name}/promotionCondition/hudson.plugins.promoted_builds.conditions.ManualCondition/approve?job=${pba.owner.parent.name}&amp;buildNumber=${pba.owner.number}&amp;promotion=${p.name}" name="approve">
+      <j:if test="${!it.usersAsSet.isEmpty()}">
+        <f:entry title="${%Approvers}" description="${%List of users or groups that can approve this promotion}">
+          <f:textbox value="${it.users}" readonly="true"/>
+	</f:entry>
+      </j:if>
+      <j:if test="${it.canApprove(p, pba.owner)}">
+        <j:if test="${!it.parameterDefinitions.isEmpty()}">
+          <f:section title="${%Parameters}">
+            <j:forEach var="parameterDefinition" items="${it.parameterDefinitions}">
+              <st:include it="${parameterDefinition}" page="${parameterDefinition.descriptor.valuePage}" />
+            </j:forEach>
+          </f:section>
+        </j:if>
+        <f:block>
+          <f:submit value="${%Approve}" />
+        </f:block>
+      </j:if>
+    </f:form>
+  </td></tr></l:pane>
 </j:jelly>

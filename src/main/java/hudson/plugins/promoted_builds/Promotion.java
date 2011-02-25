@@ -72,6 +72,8 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     @Override
     public EnvVars getEnvironment(TaskListener listener) throws IOException, InterruptedException {
         EnvVars e = super.getEnvironment(listener);
+
+        // Augment environment with target build's information
         if (targetBuildNumber != 0) {
             String rootUrl = Hudson.getInstance().getRootUrl();
             if(rootUrl!=null)
@@ -80,6 +82,10 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             e.put("PROMOTED_NUMBER", Integer.toString(targetBuildNumber));
             e.put("PROMOTED_ID", getTarget().getId());
         }
+
+        // Allow the promotion status to contribute to build environment
+        getStatus().buildEnvVars(this, e);
+
         return e;
     }
 

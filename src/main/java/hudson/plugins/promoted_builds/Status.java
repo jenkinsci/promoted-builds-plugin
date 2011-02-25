@@ -1,5 +1,6 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause.UserCause;
@@ -83,6 +84,20 @@ public final class Status {
      */
     public AbstractBuild<?,?> getTarget() {
         return getParent().owner;
+    }
+
+    /**
+     * Called by {@link Promotion} to allow status to contribute environment variables.
+     *
+     * @param build
+     *      The calling build. Never null.
+     * @param env
+     *      Environment variables should be added to this map.
+     */
+    public void buildEnvVars(AbstractBuild<?,?> build, EnvVars env) {
+        for (PromotionBadge badge : badges) {
+            badge.buildEnvVars(build, env);
+        }
     }
 
     /**

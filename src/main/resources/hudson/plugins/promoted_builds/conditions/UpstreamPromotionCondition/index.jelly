@@ -1,5 +1,7 @@
-<j:jelly xmlns:j="jelly:core">
-  <div>
-    Upstream promotions
-  </div>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+  <l:pane title="${%Upstream promotions}" width="100">
+    <j:forEach var="p" items="${it.requiredPromotionNamesAsSet}">
+      <tr><td>${p}</td></tr>
+    </j:forEach>
+  </l:pane>
 </j:jelly>
