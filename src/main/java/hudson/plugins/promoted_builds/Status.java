@@ -4,6 +4,7 @@ import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause.UserCause;
+import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.util.Iterators;
 import org.kohsuke.stapler.StaplerRequest;
@@ -77,6 +78,18 @@ public final class Status {
         JobPropertyImpl jp = parent.getProject().getProperty(JobPropertyImpl.class);
         if(jp==null)    return null;
         return jp.getItem(name);
+    }
+
+    /**
+     * Gets the icon that should represent this promotion (that is potentially attempted but failed.)
+     */
+    public String getIcon(String size) {
+        PromotionProcess p = getProcess();
+        if (p == null)      return null;
+        Promotion l = getLast();
+        if (l!=null && l.getResult()!= Result.SUCCESS)
+            return Hudson.RESOURCE_PATH+"/images/"+size+"/error.png";
+        return "/plugin/promoted-builds/icons/"+size+"/"+p.getIcon()+".gif";
     }
 
     /**
@@ -209,6 +222,16 @@ public final class Status {
         for( Integer n : Iterators.reverse(promotionAttempts) ) {
             Promotion b = p.getBuildByNumber(n);
             if(b!=null && b.getResult()!=Result.SUCCESS)
+                return b;
+        }
+        return null;
+    }
+
+    public Promotion getLast() {
+        PromotionProcess p = getProcess();
+        for( Integer n : Iterators.reverse(promotionAttempts) ) {
+            Promotion b = p.getBuildByNumber(n);
+            if(b!=null)
                 return b;
         }
         return null;
