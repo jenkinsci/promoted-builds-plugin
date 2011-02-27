@@ -10,6 +10,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -18,6 +19,9 @@ public class KeepBuildForeverAction extends Notifier {
     
     @Extension
     public static final KeepBuildForeverDescriptor DESCRIPTOR = new KeepBuildForeverDescriptor();
+
+    @DataBoundConstructor
+    public KeepBuildForeverAction() { }
     
     private static final Result PROMOTION_RESULT_MUST_BE_AT_LEAST = Result.UNSTABLE;
     
