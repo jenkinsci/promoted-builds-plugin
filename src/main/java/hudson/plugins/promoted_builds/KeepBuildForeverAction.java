@@ -17,9 +17,6 @@ import java.io.PrintStream;
 
 public class KeepBuildForeverAction extends Notifier {
     
-    @Extension
-    public static final KeepBuildForeverDescriptor DESCRIPTOR = new KeepBuildForeverDescriptor();
-
     @DataBoundConstructor
     public KeepBuildForeverAction() { }
     
@@ -47,7 +44,8 @@ public class KeepBuildForeverAction extends Notifier {
         promoted.keepLog();
         return true;
     }
-    
+
+    @Extension
     public static class KeepBuildForeverDescriptor extends BuildStepDescriptor<Publisher> {
 
         @Override
