@@ -154,7 +154,7 @@ public class ManualCondition extends PromotionCondition {
         if (canApprove(promotionProcess, build)) {
             List<ParameterValue> paramValues = new ArrayList<ParameterValue>();
 
-            if (!parameterDefinitions.isEmpty()) {
+            if (parameterDefinitions != null && !parameterDefinitions.isEmpty()) {
                 JSONArray a = JSONArray.fromObject(formData.get("parameter"));
 
                 for (Object o : a) {
