@@ -219,7 +219,7 @@ public class ManualCondition extends PromotionCondition {
 
         @Override
         public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
-            for (ParameterValue value : values) {
+            for (ParameterValue value : getParameterValues()) {
                 value.buildEnvVars(build, env);
             }
         }
