@@ -6,6 +6,8 @@ import hudson.model.Action;
 import hudson.model.BuildBadgeAction;
 import hudson.model.Cause.UserCause;
 import hudson.util.CopyOnWriteList;
+import org.kohsuke.stapler.HttpResponse;
+import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -176,14 +178,13 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     /**
      * Force a promotion.
      */
-    public void doForcePromotion(StaplerRequest req, StaplerResponse rsp, @QueryParameter("name") String name) throws IOException {
+    public HttpResponse doForcePromotion(@QueryParameter("name") String name) throws IOException {
 //        if(!req.getMethod().equals("POST")) {// require post,
 //            rsp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 //            return;
 //        }
 
-        if(!this.getProject().hasPermission(Promotion.PROMOTE))
-            return;
+        this.getProject().checkPermission(Promotion.PROMOTE);
 
         JobPropertyImpl pp = getProject().getProperty(JobPropertyImpl.class);
         if(pp==null)
@@ -195,6 +196,6 @@ public final class PromotedBuildAction implements BuildBadgeAction {
 
         p.promote(owner,new UserCause(),new Status(p,Collections.singleton(new ManualPromotionBadge())));
 
-        rsp.sendRedirect2(".");
+        return HttpResponses.redirectToDot();
     }
 }
