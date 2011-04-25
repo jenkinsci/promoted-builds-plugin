@@ -27,6 +27,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -228,6 +229,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         promote(build,new LegacyCodeCause(),qualification); // TODO: define promotion cause
 
         return true;
+    }
+
+    public void promote(AbstractBuild<?,?> build, Cause cause, PromotionBadge... badges) throws IOException {
+        promote(build,cause,new Status(this,Arrays.asList(badges)));
     }
 
     /**

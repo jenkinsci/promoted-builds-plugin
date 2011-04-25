@@ -194,7 +194,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         if(p==null)
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
 
-        p.promote(owner,new UserCause(),new Status(p,Collections.singleton(new ManualPromotionBadge())));
+        p.promote(owner,new UserCause(),new ManualPromotionBadge());
 
         return HttpResponses.redirectToDot();
     }
