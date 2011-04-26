@@ -109,7 +109,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         // load inactive processes
         File[] subdirs = getRootDir().listFiles(new FileFilter() {
             public boolean accept(File child) {
-                return child.isDirectory() && !activeProcessNames.contains(child.getName());
+                return child.isDirectory() && !isActiveProcessNameIgnoreCase(child.getName());
             }
         });
         if(subdirs!=null) {
@@ -155,11 +155,34 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     private void buildActiveProcess() throws IOException {
         activeProcesses = new ArrayList<PromotionProcess>();
         for (PromotionProcess p : processes) {
-            boolean active = activeProcessNames.contains(p.getName());
+            boolean active = isActiveProcessNameIgnoreCase(p.getName());
             p.makeDisabled(!active);
             if(active)
                 activeProcesses.add(p);
+
+            // ensure that the name casing matches what's given in the activeProcessName
+            // this is because in case insensitive file system, we may end up resolving
+            // to a directory name that differs only in their case.
+            p.renameTo(getActiveProcessName(p.getName()));
         }
+    }
+
+    /**
+     * Return the string in the case as specified in {@link #activeProcessNames}.
+     */
+    private String getActiveProcessName(String s) {
+        for (String n : activeProcessNames) {
+            if (n.equalsIgnoreCase(s))
+                return n;
+        }
+        return s;   // huh?
+    }
+
+    private boolean isActiveProcessNameIgnoreCase(String s) {
+        for (String n : activeProcessNames)
+            if (n.equalsIgnoreCase(s))
+                return true;
+        return false;
     }
 
     /**
