@@ -249,12 +249,14 @@ public final class Status {
      * Gets all the promotion builds.
      */
     public List<Promotion> getPromotionBuilds() {
-        PromotionProcess p = getProcess();
         List<Promotion> builds = new ArrayList<Promotion>();
-        for( Integer n : Iterators.reverse(promotionAttempts) ) {
-            Promotion b = p.getBuildByNumber(n);
-            if (b != null) {
-                builds.add(b);
+        PromotionProcess p = getProcess();
+        if (p!=null) {
+            for( Integer n : Iterators.reverse(promotionAttempts) ) {
+                Promotion b = p.getBuildByNumber(n);
+                if (b != null) {
+                    builds.add(b);
+                }
             }
         }
         return builds;
