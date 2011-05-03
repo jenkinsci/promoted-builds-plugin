@@ -1,5 +1,7 @@
 package hudson.plugins.promoted_builds;
 
+import antlr.ANTLRException;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -17,6 +19,8 @@ import hudson.model.PermalinkProjectAction.Permalink;
 import hudson.model.Queue.Item;
 import hudson.model.Run;
 import hudson.model.Saveable;
+import hudson.model.labels.LabelAtom;
+import hudson.model.labels.LabelExpression;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -48,7 +52,9 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * and ${rootURL}/plugin/promoted-builds/icons/32x32/, e.g. <code>"star-gold"</code>.
      */
     public String icon;
-
+    
+    public String assignedLabel;
+    
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
 
     /*package*/ PromotionProcess(JobPropertyImpl property, String name) {
@@ -62,6 +68,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         buildSteps = (List)Descriptor.newInstancesFromHeteroList(
                 req, c, "buildStep", (List) PromotionProcess.getAll());
         icon = c.getString("icon");
+        assignedLabel = Util.fixEmptyAndTrim(c.getString("labelString"));
         save();
     }
 
@@ -100,7 +107,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
         return null;
     }
-
+    
     public DescribableList<Publisher, Descriptor<Publisher>> getPublishersList() {
         // TODO: extract from the buildsSteps field? Or should I separate builders and publishers?
         return new DescribableList<Publisher,Descriptor<Publisher>>(this);
@@ -114,10 +121,27 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return buildSteps;
     }
 
+    /**
+     * Gets the textual representation of the assigned label as it was entered by the user.
+     */
+    @Override
+    public String getAssignedLabelString() {
+        if (assignedLabel == null) return null;
+        try {
+            LabelExpression.parseExpression(assignedLabel);
+            return assignedLabel;
+        } catch (ANTLRException e) {
+            // must be old label or host name that includes whitespace or other unsafe chars
+            return LabelAtom.escape(assignedLabel);
+        }
+    }
+   
     @Override public Label getAssignedLabel() {
         // Really would like to run on the exact node that the promoted build ran on,
         // not just the same label.. but at least this works if job is tied to one node:
-        return getOwner().getAssignedLabel();
+        if (assignedLabel == null) return getOwner().getAssignedLabel();
+
+        return Hudson.getInstance().getLabel(assignedLabel);
     }
 
     @Override public JDK getJDK() {

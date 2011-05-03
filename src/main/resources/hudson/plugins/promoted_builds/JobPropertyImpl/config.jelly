@@ -18,6 +18,11 @@
                 <f:option selected="${s.icon=='star-red'}"    value="star-red">Red star</f:option>
               </select> 
             </f:entry>
+
+            <f:entry title="${%Node/Slave Label Expression}" field="labelString" >
+                <f:textbox autoCompleteDelimChar=" " value="${s.assignedLabelString}" />
+            </f:entry>
+            
             <f:section title="Criteria">
               <f:nested>
                 <table style="width:100%">

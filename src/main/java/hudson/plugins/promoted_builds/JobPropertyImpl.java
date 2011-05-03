@@ -1,5 +1,6 @@
 package hudson.plugins.promoted_builds;
 
+import antlr.ANTLRException;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractBuild;
@@ -15,6 +16,7 @@ import hudson.model.Items;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
+import hudson.model.Label;
 import hudson.tasks.BuildStep;
 import hudson.util.FormValidation;
 import net.sf.json.JSONArray;
@@ -326,6 +328,20 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
             return FormValidation.ok();
         }
-
+        
+        public FormValidation doCheckLabelString(@QueryParameter String value) {
+            if (Util.fixEmpty(value)==null)
+                return FormValidation.ok(); // nothing typed yet
+            try {
+                Label.parseExpression(value);
+            } catch (ANTLRException e) {
+                return FormValidation.error(e,
+                        Messages.JobPropertyImpl_LabelString_InvalidBooleanExpression(e.getMessage()));
+            }
+            // TODO: if there's an atom in the expression that is empty, report it
+            if (Hudson.getInstance().getLabel(value).isEmpty())
+                return FormValidation.warning(Messages.JobPropertyImpl_LabelString_NoMatch());
+            return FormValidation.ok();
+        }
     }
 }
