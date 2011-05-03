@@ -53,6 +53,9 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     public String icon;
     
+    /**
+     * The label that promotion process can be run on.
+     */
     public String assignedLabel;
     
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
@@ -68,7 +71,12 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         buildSteps = (List)Descriptor.newInstancesFromHeteroList(
                 req, c, "buildStep", (List) PromotionProcess.getAll());
         icon = c.getString("icon");
-        assignedLabel = Util.fixEmptyAndTrim(c.getString("labelString"));
+        if (c.has("hasAssignedLabel")) {
+            JSONObject j = c.getJSONObject("hasAssignedLabel");
+            assignedLabel = Util.fixEmptyAndTrim(j.getString("labelString"));
+        } else {
+            assignedLabel = null;
+        }
         save();
     }
 
