@@ -2,7 +2,7 @@
   <d:taglib uri="local">
     <d:tag name="re-promote-button">
       <j:choose>
-        <j:when test="${it.canPromote()}">
+        <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
           <form style="float:right" method="post" action="${p.name}/build">
             <input type="submit" value="${%Re-execute promotion}"/>
           </form>
@@ -86,7 +86,7 @@
           <img src="${imagesURL}/32x32/star.gif"/> ${p.name}
         </h2>
           <j:choose>
-            <j:when test="${it.canPromote()}">
+            <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
               <form style="float:right" method="post" action="forcePromotion?name=${p.name}">
                 <input type="submit" value="${%Force promotion}"/>
               </form>
