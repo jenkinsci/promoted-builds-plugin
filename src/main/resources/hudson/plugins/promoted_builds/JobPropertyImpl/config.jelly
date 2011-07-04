@@ -19,7 +19,7 @@
               </select> 
             </f:entry>
 
-            <f:optionalBlock name="hasAssignedLabel" title="${%Restrict where this promotiom process can be run}" 
+            <f:optionalBlock name="hasAssignedLabel" title="${%Restrict where this promotion process can be run}" 
                              checked="${s.assignedLabelString!=null}">
               <f:entry title="${%Label Expression}" field="labelString" 
                        description="If not set, the label of the promoted build will be used.">
