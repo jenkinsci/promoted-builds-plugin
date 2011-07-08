@@ -90,18 +90,12 @@ public class UpstreamPromotionCondition extends PromotionCondition {
         }
 
         public String getDisplayName() {
-            return "When the following upstream promotions are promoted";
+            return Messages.UpstreamPromotionCondition_DisplayName();
         }
 
-        public String getHelpFile() {
-            return "/plugin/promoted-builds/conditions/upstream-promotions.html";
-        }
-        
         public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return new UpstreamPromotionCondition(
                     formData.getString("promotions"));
         }
-
-        public static final DescriptorImpl INSTANCE = new DescriptorImpl();
     }
 }

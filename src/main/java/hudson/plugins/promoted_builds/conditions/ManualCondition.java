@@ -232,7 +232,7 @@ public class ManualCondition extends PromotionCondition {
         }
 
         public String getDisplayName() {
-            return "Only when manually approved";
+            return Messages.ManualCondition_DisplayName();
         }
 
         @Override
@@ -241,11 +241,6 @@ public class ManualCondition extends PromotionCondition {
             instance.users = formData.getString("users");
             instance.parameterDefinitions = Descriptor.newInstancesFromHeteroList(req, formData, "parameters", ParameterDefinition.all());
             return instance;
-        }
-
-        @Override
-        public String getHelpFile() {
-            return "/plugin/promoted-builds/conditions/manual.html";
         }
     }
 }
