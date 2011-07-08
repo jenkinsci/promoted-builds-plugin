@@ -26,6 +26,8 @@ public class SelfPromotionTest extends HudsonTestCase {
         promo2.conditions.add(new SelfPromotionCondition());
 
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0));
+        // internally, the promotion is still an asynchronous process. It just happens
+        // right away after the build is complete.
         Thread.sleep(1000);
 
         // verify that both promotions happened
