@@ -25,6 +25,9 @@ public class SelfPromotionTest extends HudsonTestCase {
         PromotionProcess promo2 = promotion.addProcess("promo2");
         promo2.conditions.add(new SelfPromotionCondition());
 
+        // ensure that the data survives the roundtrip
+        configRoundtrip(p);
+
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0));
         // internally, the promotion is still an asynchronous process. It just happens
         // right away after the build is complete.
