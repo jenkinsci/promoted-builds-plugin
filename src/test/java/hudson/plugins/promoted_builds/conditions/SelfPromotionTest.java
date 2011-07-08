@@ -28,6 +28,11 @@ public class SelfPromotionTest extends HudsonTestCase {
         // ensure that the data survives the roundtrip
         configRoundtrip(p);
 
+        // rebind
+        promotion = p.getProperty(JobPropertyImpl.class);
+        promo1 = promotion.getItem("promo1");
+        promo2 = promotion.getItem("promo2");
+
         FreeStyleBuild b = assertBuildStatusSuccess(p.scheduleBuild2(0));
         // internally, the promotion is still an asynchronous process. It just happens
         // right away after the build is complete.
