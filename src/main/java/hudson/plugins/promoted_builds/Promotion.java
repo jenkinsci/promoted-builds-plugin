@@ -49,6 +49,11 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         return pta.resolve();
     }
 
+    public AbstractBuild<?,?> getRootBuild() {
+        // TODO: once 1.421 ships, update this to getTarget().getRootBuild() for correctness.
+        return getTarget();
+    }
+
     @Override
     public String getUrl() {
         return getTarget().getUrl() + "promotion/" + getParent().getName() + "/promotionBuild/" + getNumber();
