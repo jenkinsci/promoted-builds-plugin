@@ -29,6 +29,8 @@ import hudson.util.DescribableList;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
+import hudson.plugins.git.util.BuildData;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -305,11 +307,20 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         // Get the parameters, if any, used in the target build and make these
         // available as part of the promotion steps
         List<ParametersAction> parameters = build.getActions(ParametersAction.class);
-
+        
+        //Get the build data so data like git version can be used
+        Action buildData = build.getAction(BuildData.class);
+        
+        
         // Create list of actions to pass to scheduled build
         List<Action> actions = new ArrayList<Action>();
         actions.addAll(parameters);
+        
+        if(buildData!=null)
+            actions.add(buildData);
+        
         actions.add(new PromotionTargetAction(build));
+        
 
         // remember what build we are promoting
         return super.scheduleBuild(0,cause,actions.toArray(new Action[actions.size()]));
