@@ -26,6 +26,7 @@ package hudson.plugins.promoted_builds.conditions;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
@@ -33,7 +34,10 @@ import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
+import net.sf.json.JSONObject;
+
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 
@@ -43,13 +47,27 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  */
 public class SelfPromotionCondition extends PromotionCondition {
+	private boolean onSuccessOnly;
+	
     @DataBoundConstructor
     public SelfPromotionCondition() {
+    	this(false);
+    }
+    
+    public SelfPromotionCondition(boolean onSuccessOnly) {
+    	this.onSuccessOnly = onSuccessOnly;
     }
 
     @Override
     public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?, ?> build) {
+    	if (onSuccessOnly && build.getResult() != Result.SUCCESS) {
+    		return null;
+    	}
         return new SelfPromotionBadge();
+    }
+    
+    public boolean isOnSuccessOnly() {
+    	return onSuccessOnly;
     }
 
     /**
@@ -93,6 +111,13 @@ public class SelfPromotionCondition extends PromotionCondition {
 
         public String getDisplayName() {
             return Messages.SelfPromotionCondition_DisplayName();
+        }
+        
+        @Override
+        public PromotionCondition newInstance(StaplerRequest req,
+        		JSONObject formData)
+        		throws hudson.model.Descriptor.FormException {
+        	return new SelfPromotionCondition(formData.getBoolean("onSuccessOnly"));
         }
     }
 }
