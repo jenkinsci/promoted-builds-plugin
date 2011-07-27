@@ -1,11 +1,12 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.model.ProminentProjectAction;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.PermalinkProjectAction;
-import hudson.model.ProminentProjectAction;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -13,7 +14,11 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 public class PromotedProjectAction implements ProminentProjectAction, PermalinkProjectAction {
-    public final AbstractProject<?,?> owner;
+	
+	//TODO externalize to a plugin property?
+	private static final int SUMMARY_SIZE = 10;
+	
+	public final AbstractProject<?,?> owner;
     private final JobPropertyImpl property;
 
     public PromotedProjectAction(AbstractProject<?, ?> owner, JobPropertyImpl property) {
@@ -33,14 +38,38 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
      * Finds the last promoted build under the given criteria.
      */
     public AbstractBuild<?,?> getLatest(String name) {
+    	List<AbstractBuild<?,?>> list = getPromotions(name);
+        return list.size() > 0 ? list.get(0) : null;
+    }
+
+
+    public List<AbstractBuild<?,?>> getPromotions(String name){
+    	List<AbstractBuild<?,?>> list = new ArrayList<AbstractBuild<?,?>>(); 
         for( AbstractBuild<?,?> build : owner.getBuilds() ) {
             PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
             if(a!=null && a.contains(name))
-                return build;
+            	list.add(build);
         }
-        return null;
+        Collections.sort(list, new BuildPromotionComparator() );
+    	return list;
     }
-
+    
+    /**
+     * returns the summary of the latest promotions for a promotion process.
+     * 
+     * @param promotionProcessName
+     * @return
+     */
+    public List<AbstractBuild<?,?>> getPromotionsSummary(String promotionProcessName){
+    	List<AbstractBuild<?,?>> promotionList = this.getPromotions(promotionProcessName);
+    	if(promotionList.size() > SUMMARY_SIZE ){
+    		return promotionList.subList(0, SUMMARY_SIZE);
+    	}else{
+    		return promotionList;
+    	}
+    }
+    
+    
     public List<Permalink> getPermalinks() {
         List<Permalink> r = new ArrayList<Permalink>();
         for (PromotionProcess pp : property.getActiveItems())

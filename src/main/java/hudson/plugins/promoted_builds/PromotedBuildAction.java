@@ -198,4 +198,20 @@ public final class PromotedBuildAction implements BuildBadgeAction {
 
         return HttpResponses.redirectToDot();
     }
+
+	public Promotion getLastPromotion() {
+		Promotion theLast = null;
+		for( Status s : statuses.getView() ){
+			Promotion thisLast = null;
+			if( s.getPromotionBuilds().size() > 0 ){
+				//get the last
+				thisLast = s.getPromotionBuilds().get( 0 );
+			}else{
+				continue;
+			}
+			if( theLast==null || theLast.getTime().compareTo( thisLast.getTime() ) < 0 )
+				theLast = thisLast;
+		}
+		return theLast;
+	}
 }
