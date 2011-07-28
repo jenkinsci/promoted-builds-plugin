@@ -96,6 +96,22 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     }
 
     /**
+     * Gets the read-only view of all the promotion builds that this build achieved 
+     * for a PromotionProcess.
+     */
+    public List<Promotion> getPromotionBuilds(PromotionProcess promotionProcess) {
+    	List<Promotion> filtered = new ArrayList<Promotion>();
+    	
+    	for(Status s: getPromotions() ){
+    		if( s.isFor(promotionProcess)){
+    			filtered.addAll( s.getPromotionBuilds() );
+    		}
+    	}
+        return filtered;
+    }
+
+    
+    /**
      * Finds the {@link Status} that has matching {@link Status#name} value.
      * Or null if not found.
      */

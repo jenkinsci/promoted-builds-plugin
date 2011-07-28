@@ -27,7 +27,8 @@ import java.util.List;
  *
  * @author Kohsuke Kawaguchi
  */
-public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
+public class Promotion extends AbstractBuild<PromotionProcess,Promotion> 
+	implements Comparable<Promotion>{
 
     public Promotion(PromotionProcess job) throws IOException {
         super(job);
@@ -171,4 +172,10 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     //public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", Messages._Promotion_PromotePermission_Description(), Hudson.ADMINISTER);
     public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, null);
     public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", null, Hudson.ADMINISTER);
+    
+    @Override
+    public int compareTo(Promotion that) {
+    	return that.getId().compareTo( this.getId() );
+    }
+    
 }

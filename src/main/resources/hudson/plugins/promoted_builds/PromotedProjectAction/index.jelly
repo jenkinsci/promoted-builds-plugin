@@ -10,22 +10,43 @@
           <img src="${rootURL}/plugin/promoted-builds/icons/32x32/${c.getIcon()}.gif"/> ${c.name}
         </h2>
         
+        <!-- history of this promotion process -->
+        <l:pane title="${%Promotion History}" width="90">
+          <j:forEach var="attempt" items="${it.getPromotionsSummary(c)}">
+            <tr><td>
+              <a href="../${attempt.target.number}/promotion/${c.name}/promotionBuild/${attempt.number}/">
+                <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
+                 alt="${attempt.iconColor.description}"/> ${c.name} #${attempt.number}
+              </a>
+              	promoted build
+              	<a href="../${attempt.target.number}/"> 
+              		 #${attempt.target.number}
+              	</a>
+              	on ${attempt.time}
+            </td></tr>
+          </j:forEach>
+        </l:pane>
+        
+        <!-- permalink last promotion -->
         <j:set var="b" value="${it.getLatest(c)}" />
-        <j:choose>
-          <j:when test="${b!=null}">
-            <p>
-              Last promoted build is <t:buildLink job="${b.project}" number="${b.number}" />,
-              ${b.timestampString} ago.
-              (<a href="latest/${c.name}/">permalink</a>)
-            </p>
-          </j:when>
-          <j:otherwise>
-            <p>
-              No build promoted so far.
-            </p>
-          </j:otherwise>
-        </j:choose>
+	    <j:choose>
+	      <j:when test="${b!=null}">
+	        <p>
+	          Last promoted build is <t:buildLink job="${b.project}" number="${b.number}" />
+	          (<a href="latest/${c.name}/">permalink</a>)
+	        </p>
+	      </j:when>
+	      <j:otherwise>
+	        <p>
+	          No build promoted so far.
+	        </p>
+	      </j:otherwise>
+	    </j:choose>
+	    
       </j:forEach>
+      
+
+      
     </l:main-panel>
   </l:layout>
 </j:jelly>
