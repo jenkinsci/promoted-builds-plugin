@@ -38,6 +38,11 @@
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>maven-plugin</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jenkinsci.plugins</groupId>
+      <artifactId>git</artifactId>
+      <version>1.1.10</version>
+    </dependency>
   </dependencies>
 
   <repositories>
