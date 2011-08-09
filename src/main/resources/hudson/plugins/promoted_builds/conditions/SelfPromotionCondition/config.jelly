@@ -1,0 +1,6 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:entry>
+    <f:checkbox name="promotion.self.evenIfUnstable" checked="${instance.evenIfUnstable}"/>
+    <label class="attach-previous">${%Trigger even if the build is unstable}</label>
+  </f:entry>
+</j:jelly>

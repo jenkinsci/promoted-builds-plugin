@@ -26,6 +26,7 @@ package hudson.plugins.promoted_builds.conditions;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
@@ -43,13 +44,24 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  */
 public class SelfPromotionCondition extends PromotionCondition {
+    private final boolean evenIfUnstable;
+
     @DataBoundConstructor
-    public SelfPromotionCondition() {
+    public SelfPromotionCondition(boolean evenIfUnstable) {
+        this.evenIfUnstable = evenIfUnstable;
+    }
+
+    public boolean isEvenIfUnstable() {
+        return evenIfUnstable;
     }
 
     @Override
     public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?, ?> build) {
-        return new SelfPromotionBadge();
+        Result r = build.getResult();
+        if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
+            return new SelfPromotionBadge();
+        }
+        return null;
     }
 
     /**
