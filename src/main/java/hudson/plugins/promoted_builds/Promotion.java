@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * Records a promotion process.
@@ -79,6 +80,12 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         e.put("PROMOTED_JOB_NAME", target.getParent().getName());
         e.put("PROMOTED_NUMBER", Integer.toString(target.getNumber()));
         e.put("PROMOTED_ID", target.getId());
+        EnvVars envScm = new EnvVars();
+        target.getProject().getScm().buildEnvVars( target, envScm );
+        for ( Entry<String, String> entry : envScm.entrySet() )
+        {
+            e.put( "PROMOTED_" + entry.getKey(), entry.getValue() );
+        }
 
         // Allow the promotion status to contribute to build environment
         getStatus().buildEnvVars(this, e);
