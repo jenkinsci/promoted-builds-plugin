@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
   <l:pane title="${%Manual Approval}" width="100"><tr><td>
-    <f:form method="post" action="promotionProcess/${p.name}/promotionCondition/hudson.plugins.promoted_builds.conditions.ManualCondition/approve?job=${pba.owner.parent.name}&amp;buildNumber=${pba.owner.number}&amp;promotion=${p.name}" name="approve">
+    <f:form method="post" action="promotionProcess/${h.encode(p.name)}/promotionCondition/hudson.plugins.promoted_builds.conditions.ManualCondition/approve?job=${h.encode(pba.owner.parent.name)}&amp;buildNumber=${pba.owner.number}&amp;promotion=${h.encode(p.name)}" name="approve">
       <j:if test="${!it.usersAsSet.isEmpty()}">
         <f:entry title="${%Approvers}" description="${%List of users or groups that can approve this promotion}">
           <f:textbox value="${it.users}" readonly="true"/>
