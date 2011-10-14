@@ -248,6 +248,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      true if the build was promoted.
      */
     public boolean considerPromotion(AbstractBuild<?,?> build) throws IOException {
+        if (isDisabled()) return false;
+
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
 
         // if it's already promoted, no need to do anything.
