@@ -268,7 +268,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         if(qualification==null)
             return null; // not this time
 
-        return promote2(build, new LegacyCodeCause(), qualification); // TODO: define promotion cause
+        Future<Promotion> f = promote2(build, new LegacyCodeCause(), qualification); // TODO: define promotion cause
+        if (f==null)
+            LOGGER.warning(build+" qualifies for a promotion but the queueing failed.");
+        return f;
     }
 
     public void promote(AbstractBuild<?,?> build, Cause cause, PromotionBadge... badges) throws IOException {
