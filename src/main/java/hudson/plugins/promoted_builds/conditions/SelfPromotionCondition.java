@@ -85,7 +85,7 @@ public class SelfPromotionCondition extends PromotionCondition {
                     for (PromotionCondition cond : p.conditions) {
                         if (cond instanceof SelfPromotionCondition) {
                             try {
-                                p.considerPromotion(build);
+                                p.considerPromotion2(build);
                                 break; // move on to the next process
                             } catch (IOException e) {
                                 e.printStackTrace(listener.error("Failed to promote a build"));

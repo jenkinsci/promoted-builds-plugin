@@ -176,7 +176,7 @@ public class ManualCondition extends PromotionCondition {
             build.save();
 
             // check for promotion
-            promotionProcess.considerPromotion(build);
+            promotionProcess.considerPromotion2(build);
         }
 
         rsp.sendRedirect2("../../../..");

@@ -210,7 +210,7 @@ public class DownstreamPassCondition extends PromotionCondition {
                                     }
                                 }
 
-                                if(u!=null && p.considerPromotion(u))
+                                if(u!=null && p.considerPromotion2(u)!=null)
                                     listener.getLogger().println("Promoted "+u);
                             } catch (IOException e) {
                                 e.printStackTrace(listener.error("Failed to promote a build"));

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
 /**
  * A dummy {@link AbstractProject} to carry out promotion operations.
@@ -335,7 +336,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         actions.add(new PromotionTargetAction(build));
 
         // remember what build we are promoting
-        return super.scheduleBuild2(0,cause,actions.toArray(new Action[actions.size()]));
+        return super.scheduleBuild2(0, cause, actions.toArray(new Action[actions.size()]));
     }
 
     public boolean isInQueue(AbstractBuild<?,?> build) {
@@ -398,4 +399,6 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             }
         };
     }
+
+    private static final Logger LOGGER = Logger.getLogger(PromotionProcess.class.getName());
 }
