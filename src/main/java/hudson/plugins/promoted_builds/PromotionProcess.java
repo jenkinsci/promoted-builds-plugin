@@ -264,10 +264,12 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         if(a!=null && a.contains(this))
             return null;
 
+        LOGGER.fine("Considering the promotion of "+build+" via "+getName());
         Status qualification = isMet(build);
         if(qualification==null)
             return null; // not this time
 
+        LOGGER.fine("Promotion condition of "+build+" is met: "+qualification);
         Future<Promotion> f = promote2(build, new LegacyCodeCause(), qualification); // TODO: define promotion cause
         if (f==null)
             LOGGER.warning(build+" qualifies for a promotion but the queueing failed.");
@@ -291,6 +293,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *
      * @param cause
      *      Why the build is promoted?
+     * @return
+     *      Future to track the completion of the promotion.
      */
     public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
