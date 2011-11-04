@@ -44,10 +44,13 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
 
     /**
      * Gets the build that this promotion promoted.
+     *
+     * @return
+     *      null if there's no such object. For example, if the build has already garbage collected.
      */
     public AbstractBuild<?,?> getTarget() {
         PromotionTargetAction pta = getAction(PromotionTargetAction.class);
-        return pta.resolve();
+        return pta.resolve(this);
     }
 
     public AbstractBuild<?,?> getRootBuild() {

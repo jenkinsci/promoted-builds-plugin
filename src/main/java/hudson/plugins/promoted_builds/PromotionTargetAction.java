@@ -6,7 +6,7 @@ import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
 
 /**
- * Remembers what build it's promoting.
+ * Remembers what build it's promoting. Attached to {@link Promotion}.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -23,5 +23,15 @@ public class PromotionTargetAction extends InvisibleAction {
         AbstractProject<?,?> j = Hudson.getInstance().getItemByFullName(jobName, AbstractProject.class);
         if (j==null)    return null;
         return j.getBuildByNumber(number);
+    }
+
+    public AbstractBuild<?,?> resolve(PromotionProcess parent) {
+        AbstractProject<?,?> j = parent.getOwner();
+        if (j==null)    return null;
+        return j.getBuildByNumber(number);
+    }
+
+    public AbstractBuild<?,?> resolve(Promotion parent) {
+        return resolve(parent.getParent());
     }
 }
