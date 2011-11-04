@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * A dummy {@link AbstractProject} to carry out promotion operations.
@@ -242,40 +243,52 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     /**
+     * @deprecated
+     *      Use {@link #considerPromotion2(AbstractBuild)}
+     */
+    public boolean considerPromotion(AbstractBuild<?,?> build) throws IOException {
+        return considerPromotion2(build)!=null;
+    }
+
+    /**
      * Checks if the build is promotable, and if so, promote it.
      *
      * @return
-     *      true if the build was promoted.
+     *      null if the build was not promoted, otherwise Future that kicks in when the build is completed.
      */
-    public boolean considerPromotion(AbstractBuild<?,?> build) throws IOException {
-        if (isDisabled()) return false;
-
+    public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build) throws IOException {
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
 
         // if it's already promoted, no need to do anything.
         if(a!=null && a.contains(this))
-            return false;
+            return null;
 
         Status qualification = isMet(build);
         if(qualification==null)
-            return false; // not this time
+            return null; // not this time
 
-        promote(build,new LegacyCodeCause(),qualification); // TODO: define promotion cause
-
-        return true;
+        return promote2(build, new LegacyCodeCause(), qualification); // TODO: define promotion cause
     }
 
     public void promote(AbstractBuild<?,?> build, Cause cause, PromotionBadge... badges) throws IOException {
-        promote(build,cause,new Status(this,Arrays.asList(badges)));
+        promote2(build,cause,new Status(this,Arrays.asList(badges)));
     }
 
+    /**
+     * @deprecated
+     *      Use {@link #promote2(AbstractBuild, Cause, Status)}
+     */
+    public void promote(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
+        promote2(build,cause,qualification);
+    }
+    
     /**
      * Promote the given build by using the given qualification.
      *
      * @param cause
      *      Why the build is promoted?
      */
-    public void promote(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
+    public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
         // build is qualified for a promotion.
         if(a!=null) {
@@ -286,7 +299,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         }
 
         // schedule promotion activity.
-        scheduleBuild(build,cause);
+        return scheduleBuild2(build,cause);
     }
 
     /**
@@ -301,7 +314,15 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return scheduleBuild(build,new LegacyCodeCause());
     }
 
+    /**
+     * @deprecated
+     *      Use {@link #scheduleBuild2(AbstractBuild, Cause)}
+     */
     public boolean scheduleBuild(AbstractBuild<?,?> build, Cause cause) {
+        return scheduleBuild2(build,cause)!=null;
+    }
+
+    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
         assert build.getProject()==getOwner();
 
         // Get the parameters, if any, used in the target build and make these
@@ -314,7 +335,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         actions.add(new PromotionTargetAction(build));
 
         // remember what build we are promoting
-        return super.scheduleBuild(0,cause,actions.toArray(new Action[actions.size()]));
+        return super.scheduleBuild2(0,cause,actions.toArray(new Action[actions.size()]));
     }
 
     public boolean isInQueue(AbstractBuild<?,?> build) {
