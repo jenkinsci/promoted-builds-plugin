@@ -18,6 +18,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
 /**
  * Promotion status of a build wrt a specific {@link PromotionProcess}.
@@ -279,8 +281,12 @@ public final class Status {
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
         if(!getTarget().hasPermission(Promotion.PROMOTE))
             return;
-        getProcess().scheduleBuild(getTarget(),new UserCause());
+        Future<Promotion> f = getProcess().scheduleBuild2(getTarget(), new UserCause());
+        if (f==null)
+            LOGGER.warning("Failing to schedule the promotion of "+getTarget());
         // TODO: we need better visual feed back so that the user knows that the build happened.
         rsp.forwardToPreviousPage(req);
     }
+
+    private static final Logger LOGGER = Logger.getLogger(Status.class.getName());
 }
