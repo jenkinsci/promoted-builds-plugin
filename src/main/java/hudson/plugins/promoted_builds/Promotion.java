@@ -91,6 +91,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
     }
 
     public void run() {
+        getStatus().addPromotionAttempt(this);
         run(new RunnerImpl());
     }
 
@@ -109,8 +110,6 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
             AbstractBuild<?, ?> target = getTarget();
 
             listener.getLogger().println("Promoting "+target);
-
-            getStatus().addPromotionAttempt(Promotion.this);
 
             // start with SUCCESS, unless someone makes it a failure
             setResult(Result.SUCCESS);
