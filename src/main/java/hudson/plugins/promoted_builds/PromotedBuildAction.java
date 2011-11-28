@@ -147,7 +147,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     }
 
     public String getIconFileName() {
-        return "star.gif";
+        return "star.png";
     }
 
     public String getDisplayName() {
