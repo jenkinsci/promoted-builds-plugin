@@ -87,7 +87,7 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
     }
 
     public String getIconFileName() {
-        return "star.gif";
+        return "star.png";
     }
 
     public String getDisplayName() {
