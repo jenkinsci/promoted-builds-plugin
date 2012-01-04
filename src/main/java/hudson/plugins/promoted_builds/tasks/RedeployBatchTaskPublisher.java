@@ -23,7 +23,7 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
         super(id, url, uniqueVersion);
     }
 
-    @Override
+    /*@Override*/
     protected MavenModuleSetBuild getMavenBuild(AbstractBuild<?,?> build) {
         return super.getMavenBuild(((Promotion) build).getTarget());
     }
