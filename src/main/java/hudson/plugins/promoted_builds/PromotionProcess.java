@@ -27,6 +27,7 @@ import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
@@ -405,6 +406,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
                 return null;
             }
         };
+    }
+
+    @Override
+    public String getShortUrl() {
+        return StringUtils.EMPTY;
     }
 
     private static final Logger LOGGER = Logger.getLogger(PromotionProcess.class.getName());
