@@ -7,6 +7,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
+import hudson.model.ItemGroup;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.User;
@@ -25,6 +26,7 @@ import javax.servlet.ServletException;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.acegisecurity.GrantedAuthority;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -139,10 +141,11 @@ public class ManualCondition extends PromotionCondition {
      * Web method to handle the approval action submitted by the user.
      */
     public void doApprove(StaplerRequest req, StaplerResponse rsp, @QueryParameter("job") String jobName,
-            @QueryParameter("buildNumber") int buildNumber, @QueryParameter("promotion") String promotionName) throws IOException, ServletException {
+            @QueryParameter("buildNumber") int buildNumber, @QueryParameter("promotion") String promotionName,
+            @AncestorInPath ItemGroup context) throws IOException, ServletException {
 
 	JSONObject formData = req.getSubmittedForm();
-        AbstractProject<?,?> job = Hudson.getInstance().getItemByFullName(jobName, AbstractProject.class);
+        AbstractProject<?,?> job = Hudson.getInstance().getItem(jobName, context, AbstractProject.class);
 
         // Get the specific build from the job by number
         AbstractBuild<?,?> build = job.getBuildByNumber(buildNumber);
