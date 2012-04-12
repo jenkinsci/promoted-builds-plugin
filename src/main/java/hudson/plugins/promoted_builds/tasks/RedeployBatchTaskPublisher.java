@@ -25,7 +25,12 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
 
     /*@Override*/
     protected MavenModuleSetBuild getMavenBuild(AbstractBuild<?,?> build) {
-        return super.getMavenBuild(((Promotion) build).getTarget());
+        // TODO remove copy and paste with delegation once core dependency is at least 1.448
+        // return super.getMavenBuild(((Promotion) build).getTarget());
+        build = ((Promotion) build).getTarget();
+        return (build instanceof MavenModuleSetBuild)
+                ? (MavenModuleSetBuild) build
+                : null;
     }
 
     @Extension
