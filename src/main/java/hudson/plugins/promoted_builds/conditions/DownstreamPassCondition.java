@@ -10,6 +10,7 @@ import hudson.model.Fingerprint;
 import hudson.model.Fingerprint.BuildPtr;
 import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
+import hudson.model.ItemGroup;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -68,7 +69,7 @@ public class DownstreamPassCondition extends PromotionCondition {
         PseudoDownstreamBuilds pdb = build.getAction(PseudoDownstreamBuilds.class);
 
         OUTER:
-        for (AbstractProject<?,?> j : getJobList()) {
+        for (AbstractProject<?,?> j : getJobList(build.getProject().getParent())) {
             for( AbstractBuild<?,?> b : build.getDownstreamBuilds(j) ) {
                 Result r = b.getResult();
                 if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
@@ -99,10 +100,10 @@ public class DownstreamPassCondition extends PromotionCondition {
      *
      * @return never null.
      */
-    public List<AbstractProject<?,?>> getJobList() {
+    public List<AbstractProject<?,?>> getJobList(ItemGroup context) {
         List<AbstractProject<?,?>> r = new ArrayList<AbstractProject<?,?>>();
         for (String name : Util.tokenize(jobs,",")) {
-            AbstractProject job = Hudson.getInstance().getItemByFullName(name.trim(),AbstractProject.class);
+            AbstractProject job = Hudson.getInstance().getItem(name.trim(), context, AbstractProject.class);
             if(job!=null)   r.add(job);
         }
         return r;
