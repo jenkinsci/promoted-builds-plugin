@@ -99,7 +99,7 @@ public final class Status {
 
             baseName = p.getIcon();
         }
-        return "/plugin/promoted-builds/icons/"+size+"/"+ baseName +".gif";
+        return "/plugin/promoted-builds/icons/"+size+"/"+ baseName +".png";
     }
 
     /**

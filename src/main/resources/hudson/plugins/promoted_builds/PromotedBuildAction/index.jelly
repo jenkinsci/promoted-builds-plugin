@@ -49,7 +49,7 @@
           <j:choose>
             <local:re-promote-button />
             <j:when test="${p.isPromotionSuccessful()}">
-              <img src="${imagesURL}/16x16/blue.gif" alt="Unstable" width="16" height="16" />
+              <img src="${imagesURL}/16x16/blue.png" alt="Unstable" width="16" height="16" />
               ${%Successfully promoted} (<a href="${p.name}/lastSuccessful">${%log}</a>)
             </j:when>
             <j:when test="${!p.isPromotionAttempted()}">
@@ -69,7 +69,7 @@
                   ${%Promotion in progress} (<a href="${p.name}/lastSuccessful">${%log}</a>)
                 </j:when>
                 <j:otherwise>
-                  <img src="${imagesURL}/16x16/red.gif" alt="Unstable" width="16" height="16" />
+                  <img src="${imagesURL}/16x16/red.png" alt="Unstable" width="16" height="16" />
                   ${%Promotion failed} (<a href="${p.name}/lastFailed">${%log}</a>)
                 </j:otherwise>
               </j:choose>
@@ -83,7 +83,7 @@
       <!-- list promotions that are not yet attained -->
       <j:forEach var="p" items="${it.pendingPromotions}">
         <h2>
-          <img src="${imagesURL}/32x32/star.gif"/> ${p.name}
+          <img src="${imagesURL}/32x32/star.png"/> ${p.name}
         </h2>
           <j:choose>
             <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
