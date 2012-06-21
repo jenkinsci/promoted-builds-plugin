@@ -1,0 +1,50 @@
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+  <fieldset style="margin-bottom:1em">
+    <legend>${%Promotion process}</legend>
+    <table width="100%">
+      <f:entry title="Name" field="name">
+        <f:textbox />
+      </f:entry>
+      <f:entry title="Icon">
+        <select class="setting-input" name="icon">
+          <f:option selected="${instance.icon=='star-gold'}"   value="star-gold">Gold star</f:option>
+          <f:option selected="${instance.icon=='star-blue'}"   value="star-blue">Blue star</f:option>
+          <f:option selected="${instance.icon=='star-green'}"  value="star-green">Green star</f:option>
+          <f:option selected="${instance.icon=='star-orange'}" value="star-orange">Orange star</f:option>
+          <f:option selected="${instance.icon=='star-purple'}" value="star-purple">Purple star</f:option>
+          <f:option selected="${instance.icon=='star-red'}"    value="star-red">Red star</f:option>
+        </select>
+      </f:entry>
+
+      <f:optionalBlock name="hasAssignedLabel" title="${%Restrict where this promotion process can be run}"
+                       checked="${instance.assignedLabelString!=null}" inline="true">
+        <f:entry title="${%Label Expression}" field="assignedLabelString"
+                 description="If not set, the label of the promoted build will be used.">
+          <f:textbox autoCompleteDelimChar=" " />
+        </f:entry>
+      </f:optionalBlock>
+
+      <f:section title="Criteria">
+        <f:nested>
+          <table style="width:100%">
+            <f:descriptorList field="conditions" descriptors="${descriptor.getApplicableConditions(it)}" />
+          </table>
+        </f:nested>
+      </f:section>
+      <f:section title="Actions">
+        <f:nested>
+          <f:hetero-list  name="buildStep" targetType="${descriptor.promotionProcessType}"
+                         descriptors="${descriptor.getApplicableBuildSteps()}" items="${instance.buildSteps}"
+                         addCaption="Add action" hasHeader="true"/>
+        </f:nested>
+      </f:section>
+
+      <f:entry>
+        <div align="right">
+          <input type="button" value="${%Add another promotion process}" class="repeatable-add show-if-last" />
+          <input type="button" value="${%Delete this promotion process}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
+        </div>
+      </f:entry>
+    </table>
+  </fieldset>
+</j:jelly>

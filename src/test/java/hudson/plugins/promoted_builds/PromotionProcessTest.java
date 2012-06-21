@@ -1,18 +1,25 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.model.FreeStyleProject;
+import hudson.model.Items;
 import hudson.model.Result;
 import hudson.model.FreeStyleBuild;
+import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildTrigger;
 import hudson.tasks.Fingerprinter;
 import hudson.tasks.Recorder;
 import hudson.tasks.Shell;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
+import net.sf.json.JSONObject;
 import org.jvnet.hudson.test.HudsonTestCase;
+import org.kohsuke.stapler.Stapler;
+import org.kohsuke.stapler.StaplerRequest;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -62,6 +69,10 @@ public class PromotionProcessTest extends HudsonTestCase {
             PromotedBuildAction badge = (PromotedBuildAction) up1.getBadgeActions().get(0);
             assertTrue(badge.contains(proc));
         }
+
+        // make sure the UI persists the setup
+        configRoundtrip(up);
+
     }
 
     /**
@@ -111,5 +122,25 @@ public class PromotionProcessTest extends HudsonTestCase {
         while (down.getBuildByNumber(n).isBuilding())
             Thread.sleep(1000);
         Thread.sleep(1000); // give it a time to not promote
+    }
+
+    public void testCaptureXml() throws Exception {
+        executeOnServer(new Callable<Object>() {
+            public Object call() throws Exception {
+                JSONObject o = new JSONObject()
+                        .accumulate("name", "foo")
+                        .accumulate("icon", "star-gold")
+                        .accumulate("conditions",new JSONObject()
+                            .accumulate("hudson-plugins-promoted_builds-conditions-SelfPromotionCondition",
+                                    new JSONObject().accumulate("evenIfUnstable", false)));
+                PromotionProcess p = PromotionProcess.fromJson(Stapler.getCurrentRequest(), o);
+                assertEquals("foo", p.getName());
+                assertEquals("star-gold", p.getIcon());
+                assertEquals(1, p.conditions.size());
+                assertNotNull(p.conditions.get(SelfPromotionCondition.class));
+                System.out.println(Items.XSTREAM2.toXML(p));
+                return null;
+            }
+        });
     }
 }

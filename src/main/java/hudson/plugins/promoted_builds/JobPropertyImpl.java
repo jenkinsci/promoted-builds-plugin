@@ -85,7 +85,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         if(json.has("promotions"))
             json = json.getJSONObject("promotions");
 
-        for( Object o : JSONArray.fromObject(json.get("config")) ) {
+        for( Object o : JSONArray.fromObject(json.get("activeItems")) ) {
             JSONObject c = (JSONObject)o;
             String name = c.getString("name");
             try {
@@ -300,107 +300,6 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
                 return null;
             } catch (IOException e) {
                 throw new FormException("Failed to create",e,null); // TODO:hmm
-            }
-        }
-
-        // exposed for Jelly
-        public List<PromotionConditionDescriptor> getApplicableConditions(AbstractProject<?,?> p) {
-            return PromotionCondition.getApplicableTriggers(p);
-        }
-
-        // exposed for Jelly
-        public List<Descriptor<? extends BuildStep>> getApplicableBuildSteps(AbstractProject<?,?> p) {
-            return PromotionProcess.getAll();
-        }
-
-        // exposed for Jelly
-        public final Class<PromotionProcess> promotionProcessType = PromotionProcess.class;
-
-        public FormValidation doCheckName(@QueryParameter String name) {
-            name = Util.fixEmptyAndTrim(name);
-            if (name == null) {
-                return FormValidation.error(Messages.JobPropertyImpl_ValidateRequired());
-            }
-
-            try {
-                Hudson.checkGoodName(name);
-            } catch (Failure f) {
-                return FormValidation.error(f.getMessage());
-            }
-
-            return FormValidation.ok();
-        }
-        
-        public FormValidation doCheckLabelString(@QueryParameter String value) {
-            if (Util.fixEmpty(value)==null)
-                return FormValidation.ok(); // nothing typed yet
-            try {
-                Label.parseExpression(value);
-            } catch (ANTLRException e) {
-                return FormValidation.error(e,
-                        Messages.JobPropertyImpl_LabelString_InvalidBooleanExpression(e.getMessage()));
-            }
-            // TODO: if there's an atom in the expression that is empty, report it
-            if (Hudson.getInstance().getLabel(value).isEmpty())
-                return FormValidation.warning(Messages.JobPropertyImpl_LabelString_NoMatch());
-            return FormValidation.ok();
-        }
-
-        public AutoCompletionCandidates doAutoCompleteAssignedLabelString(@QueryParameter String value) {
-            AutoCompletionCandidates c = new AutoCompletionCandidates();
-            Set<Label> labels = Hudson.getInstance().getLabels();
-            List<String> queries = new AutoCompleteSeeder(value).getSeeds();
-
-            for (String term : queries) {
-                for (Label l : labels) {
-                    if (l.getName().startsWith(term)) {
-                        c.add(l.getName());
-                    }
-                }
-            }
-            return c;
-        }
-
-        /**
-         * Utility class for taking the current input value and computing a list
-         * of potential terms to match against the list of defined labels.
-         */
-        static class AutoCompleteSeeder {
-
-            private String source;
-            private Pattern quoteMatcher = Pattern.compile("(\\\"?)(.+?)(\\\"?+)(\\s*)");
-
-            AutoCompleteSeeder(String source) {
-                this.source = source;
-            }
-
-            List<String> getSeeds() {
-                ArrayList<String> terms = new ArrayList();
-                boolean trailingQuote = source.endsWith("\"");
-                boolean leadingQuote = source.startsWith("\"");
-                boolean trailingSpace = source.endsWith(" ");
-
-                if (trailingQuote || (trailingSpace && !leadingQuote)) {
-                    terms.add("");
-                } else {
-                    if (leadingQuote) {
-                        int quote = source.lastIndexOf('"');
-                        if (quote == 0) {
-                            terms.add(source.substring(1));
-                        } else {
-                            terms.add("");
-                        }
-                    } else {
-                        int space = source.lastIndexOf(' ');
-                        if (space > -1) {
-                            terms.add(source.substring(space + 1));
-                        } else {
-                            terms.add(source);
-                        }
-                    }
-                }
-
-                return terms;
             }
         }
     }

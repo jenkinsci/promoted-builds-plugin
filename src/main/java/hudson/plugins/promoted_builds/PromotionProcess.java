@@ -1,16 +1,23 @@
 package hudson.plugins.promoted_builds;
 
 import antlr.ANTLRException;
+import hudson.BulkChange;
+import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.AutoCompletionCandidates;
 import hudson.model.Cause;
 import hudson.model.Cause.LegacyCodeCause;
 import hudson.model.DependencyGraph;
+import hudson.model.Describable;
 import hudson.model.Descriptor;
+import hudson.model.Descriptor.FormException;
+import hudson.model.Failure;
 import hudson.model.FreeStyleProject;
 import hudson.model.Hudson;
+import hudson.model.ItemGroup;
 import hudson.model.JDK;
 import hudson.model.Job;
 import hudson.model.Label;
@@ -19,6 +26,7 @@ import hudson.model.PermalinkProjectAction.Permalink;
 import hudson.model.Queue.Item;
 import hudson.model.Run;
 import hudson.model.Saveable;
+import hudson.model.TopLevelItem;
 import hudson.model.labels.LabelAtom;
 import hudson.model.labels.LabelExpression;
 import hudson.tasks.BuildStep;
@@ -26,22 +34,28 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
+import hudson.util.FormValidation;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * A dummy {@link AbstractProject} to carry out promotion operations.
  *
  * @author Kohsuke Kawaguchi
  */
-public final class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements Saveable {
+public final class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements Saveable, Describable<PromotionProcess> {
 
     /**
      * {@link PromotionCondition}s. All have to be met for a build to be promoted.
@@ -66,16 +80,45 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         super(property, name);
     }
 
+    /*package*/ PromotionProcess(ItemGroup parent, String name) {
+        super(parent, name);
+    }
+
+    /**
+     * Creates unconnected {@link PromotionProcess} instance from the JSON configuration.
+     * This is mostly only useful for capturing its configuration in XML format.
+     */
+    public static PromotionProcess fromJson(StaplerRequest req, JSONObject o) throws FormException, IOException {
+        String name = o.getString("name");
+        try {
+            Hudson.checkGoodName(name);
+        } catch (Failure f) {
+            throw new Descriptor.FormException(f.getMessage(), name);
+        }
+        PromotionProcess p = new PromotionProcess(null,name);
+        BulkChange bc = new BulkChange(p);
+        try {
+            p.configure(req, o); // apply configuration. prevent it from trying to save to disk while we do this
+        } finally {
+            bc.abort();
+        }
+        return p;
+    }
+
+    @Override
+    public void doSetName(String name) {
+        super.doSetName(name);
+    }
+
     /*package*/ void configure(StaplerRequest req, JSONObject c) throws Descriptor.FormException, IOException {
         // apply configuration
-        conditions.rebuild(req,c, PromotionCondition.all());
+        conditions.rebuild(req,c.optJSONObject("conditions"), PromotionCondition.all());
 
         buildSteps = (List)Descriptor.newInstancesFromHeteroList(
                 req, c, "buildStep", (List) PromotionProcess.getAll());
         icon = c.getString("icon");
         if (c.has("hasAssignedLabel")) {
-            JSONObject j = c.getJSONObject("hasAssignedLabel");
-            assignedLabel = Util.fixEmptyAndTrim(j.getString("labelString"));
+            assignedLabel = Util.fixEmptyAndTrim(c.optString("assignedLabelString"));
         } else {
             assignedLabel = null;
         }
@@ -407,5 +450,123 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         };
     }
 
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl)Jenkins.getInstance().getDescriptorOrDie(getClass());
+    }
+
+    @Extension
+    public static class DescriptorImpl extends Descriptor<PromotionProcess> {
+        @Override
+        public String getDisplayName() {
+            return "Promotion Process";
+        }
+
+        public FormValidation doCheckLabelString(@QueryParameter String value) {
+            if (Util.fixEmpty(value)==null)
+                return FormValidation.ok(); // nothing typed yet
+            try {
+                Label.parseExpression(value);
+            } catch (ANTLRException e) {
+                return FormValidation.error(e,
+                        Messages.JobPropertyImpl_LabelString_InvalidBooleanExpression(e.getMessage()));
+            }
+            // TODO: if there's an atom in the expression that is empty, report it
+            if (Hudson.getInstance().getLabel(value).isEmpty())
+                return FormValidation.warning(Messages.JobPropertyImpl_LabelString_NoMatch());
+            return FormValidation.ok();
+        }
+
+        public AutoCompletionCandidates doAutoCompleteAssignedLabelString(@QueryParameter String value) {
+            AutoCompletionCandidates c = new AutoCompletionCandidates();
+            Set<Label> labels = Hudson.getInstance().getLabels();
+            List<String> queries = new AutoCompleteSeeder(value).getSeeds();
+
+            for (String term : queries) {
+                for (Label l : labels) {
+                    if (l.getName().startsWith(term)) {
+                        c.add(l.getName());
+                    }
+                }
+            }
+            return c;
+        }
+
+        /**
+         * Utility class for taking the current input value and computing a list
+         * of potential terms to match against the list of defined labels.
+         */
+        static class AutoCompleteSeeder {
+
+            private String source;
+            private Pattern quoteMatcher = Pattern.compile("(\\\"?)(.+?)(\\\"?+)(\\s*)");
+
+            AutoCompleteSeeder(String source) {
+                this.source = source;
+            }
+
+            List<String> getSeeds() {
+                ArrayList<String> terms = new ArrayList();
+                boolean trailingQuote = source.endsWith("\"");
+                boolean leadingQuote = source.startsWith("\"");
+                boolean trailingSpace = source.endsWith(" ");
+
+                if (trailingQuote || (trailingSpace && !leadingQuote)) {
+                    terms.add("");
+                } else {
+                    if (leadingQuote) {
+                        int quote = source.lastIndexOf('"');
+                        if (quote == 0) {
+                            terms.add(source.substring(1));
+                        } else {
+                            terms.add("");
+                        }
+                    } else {
+                        int space = source.lastIndexOf(' ');
+                        if (space > -1) {
+                            terms.add(source.substring(space + 1));
+                        } else {
+                            terms.add(source);
+                        }
+                    }
+                }
+
+                return terms;
+            }
+        }
+
+        // exposed for Jelly
+        public List<PromotionConditionDescriptor> getApplicableConditions(AbstractProject<?,?> p) {
+            return p==null ? PromotionCondition.all() : PromotionCondition.getApplicableTriggers(p);
+        }
+
+        public List<PromotionConditionDescriptor> getApplicableConditions(Object context) {
+            return PromotionCondition.all();
+        }
+
+        // exposed for Jelly
+        public List<Descriptor<? extends BuildStep>> getApplicableBuildSteps() {
+            return PromotionProcess.getAll();
+        }
+
+        // exposed for Jelly
+        public final Class<PromotionProcess> promotionProcessType = PromotionProcess.class;
+
+        public FormValidation doCheckName(@QueryParameter String name) {
+            name = Util.fixEmptyAndTrim(name);
+            if (name == null) {
+                return FormValidation.error(Messages.JobPropertyImpl_ValidateRequired());
+            }
+
+            try {
+                Hudson.checkGoodName(name);
+            } catch (Failure f) {
+                return FormValidation.error(f.getMessage());
+            }
+
+            return FormValidation.ok();
+        }
+    }
+
     private static final Logger LOGGER = Logger.getLogger(PromotionProcess.class.getName());
+
 }

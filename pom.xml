@@ -47,6 +47,11 @@
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>maven-plugin</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.8.5</version>
+    </dependency>
   </dependencies>
 
 
