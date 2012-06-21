@@ -1,12 +1,9 @@
 package hudson.plugins.promoted_builds;
 
-import antlr.ANTLRException;
 import hudson.Extension;
-import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.AutoCompletionCandidates;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Failure;
@@ -17,9 +14,6 @@ import hudson.model.Items;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
-import hudson.model.Label;
-import hudson.tasks.BuildStep;
-import hudson.util.FormValidation;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.Ancestor;
@@ -32,8 +26,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
-import org.kohsuke.stapler.QueryParameter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Promotion processes defined for a project.
@@ -118,8 +112,12 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         });
         if(subdirs!=null) {
             for (File subdir : subdirs) {
-                PromotionProcess p = (PromotionProcess) Items.load(this, subdir);
-                processes.add(p);
+                try {
+                    PromotionProcess p = (PromotionProcess) Items.load(this, subdir);
+                    processes.add(p);
+                } catch (IOException e) {
+                    LOGGER.log(Level.WARNING, "Failed to load promotion process in "+subdir,e);
+                }
             }
         }
 
@@ -303,4 +301,6 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
             }
         }
     }
+
+    private static final Logger LOGGER = Logger.getLogger(JobPropertyImpl.class.getName());
 }
