@@ -115,7 +115,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         buildSteps = (List)Descriptor.newInstancesFromHeteroList(
                 req, c, "buildStep", (List) PromotionProcess.getAll());
         icon = c.getString("icon");
-        if (c.has("hasAssignedLabel")) {
+        if (c.optBoolean("hasAssignedLabel")) {
             assignedLabel = Util.fixEmptyAndTrim(c.optString("assignedLabelString"));
         } else {
             assignedLabel = null;
