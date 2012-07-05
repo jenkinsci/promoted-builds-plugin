@@ -140,19 +140,11 @@ public class ManualCondition extends PromotionCondition {
     /**
      * Web method to handle the approval action submitted by the user.
      */
-    public void doApprove(StaplerRequest req, StaplerResponse rsp, @QueryParameter("job") String jobName,
-            @QueryParameter("buildNumber") int buildNumber, @QueryParameter("promotion") String promotionName,
-            @AncestorInPath ItemGroup context) throws IOException, ServletException {
+    public void doApprove(StaplerRequest req, StaplerResponse rsp,
+            @AncestorInPath PromotionProcess promotionProcess,
+            @AncestorInPath AbstractBuild<?,?> build) throws IOException, ServletException {
 
 	JSONObject formData = req.getSubmittedForm();
-        AbstractProject<?,?> job = Hudson.getInstance().getItem(jobName, context, AbstractProject.class);
-
-        // Get the specific build from the job by number
-        AbstractBuild<?,?> build = job.getBuildByNumber(buildNumber);
-
-        PromotedBuildAction pba = build.getAction(PromotedBuildAction.class);
-
-        PromotionProcess promotionProcess = pba.getPromotionProcess(promotionName);
 
         if (canApprove(promotionProcess, build)) {
             List<ParameterValue> paramValues = new ArrayList<ParameterValue>();
@@ -175,7 +167,7 @@ public class ManualCondition extends PromotionCondition {
             }
 
             // add approval to build
-            build.addAction(new ManualApproval(promotionName, paramValues));
+            build.addAction(new ManualApproval(promotionProcess.getName(), paramValues));
             build.save();
 
             // check for promotion
