@@ -61,7 +61,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
 
     @Override
     public String getUrl() {
-        return getTarget().getUrl() + "promotion/" + getParent().getName() + "/promotionBuild/" + getNumber();
+        return getTarget().getUrl() + "promotion/" + getParent().getName() + "/promotionBuild/" + getNumber() + "/";
     }
 
     /**
