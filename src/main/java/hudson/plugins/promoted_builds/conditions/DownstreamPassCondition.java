@@ -1,15 +1,18 @@
 package hudson.plugins.promoted_builds.conditions;
 
+import com.google.common.collect.Lists;
 import hudson.CopyOnWrite;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.AutoCompletionCandidates;
 import hudson.model.Cause.UpstreamCause;
 import hudson.model.Fingerprint;
 import hudson.model.Fingerprint.BuildPtr;
 import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
+import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -20,7 +23,10 @@ import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
@@ -146,6 +152,33 @@ public class DownstreamPassCondition extends PromotionCondition {
         public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return new DownstreamPassCondition(
                     formData.getString("jobs"), formData.getBoolean("evenIfUnstable"));
+        }
+
+        public AutoCompletionCandidates doAutoCompleteJobs(@QueryParameter String value, @AncestorInPath AbstractProject project) {
+            List<AbstractProject> downstreams = project.getDownstreamProjects();
+            List<Item> all = Jenkins.getInstance().getItems(Item.class);
+            List<String> candidatesDownstreams = Lists.newArrayList();
+            List<String> candidatesOthers = Lists.newArrayList();
+            for (Item i : all) {
+                if (i.getFullName().startsWith(value)) {
+                    if (i.hasPermission(Item.READ)) {
+                        if(downstreams.contains(i)) {
+                            candidatesDownstreams.add(i.getFullName());
+                        }else{
+                            candidatesOthers.add(i.getFullName());
+                        }
+                    }
+                }
+            }
+            AutoCompletionCandidates candidates = new AutoCompletionCandidates();
+            candidates.add(candidatesDownstreams.toArray(new String[0]));
+            if(candidatesDownstreams.size() > 0 && candidatesOthers.size() > 0) {
+                candidates.add("- - -");
+            }
+            // Downstream jobs might not be set when user wants to set DownstreamPassCondition.
+            // Better to show non-downstream candidates even if they are not downstreams at the moment.
+            candidates.add(candidatesOthers.toArray(new String[0]));
+            return candidates;
         }
     }
 
