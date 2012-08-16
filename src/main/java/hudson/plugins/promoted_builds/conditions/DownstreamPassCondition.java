@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds.conditions;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import hudson.CopyOnWrite;
 import hudson.Extension;
 import hudson.Util;
@@ -160,12 +161,16 @@ public class DownstreamPassCondition extends PromotionCondition {
             List<String> candidatesDownstreams = Lists.newArrayList();
             List<String> candidatesOthers = Lists.newArrayList();
             for (Item i : all) {
-                if (i.getFullName().startsWith(value)) {
-                    if (i.hasPermission(Item.READ)) {
+                if(! i.hasPermission(Item.READ)) continue;
+                Set<String> names = Sets.newLinkedHashSet();
+                names.add(i.getRelativeNameFrom(project));
+                names.add(i.getFullName());
+                for(String name : names) {
+                    if(name.startsWith(value)) {
                         if(downstreams.contains(i)) {
-                            candidatesDownstreams.add(i.getFullName());
+                            candidatesDownstreams.add(name);
                         }else{
-                            candidatesOthers.add(i.getFullName());
+                            candidatesOthers.add(name);
                         }
                     }
                 }
