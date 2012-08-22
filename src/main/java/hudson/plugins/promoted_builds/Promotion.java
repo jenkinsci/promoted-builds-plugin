@@ -5,17 +5,18 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Cause.LegacyCodeCause;
-import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.TopLevelItem;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
+import hudson.security.PermissionScope;
 import hudson.slaves.WorkspaceList;
 import hudson.slaves.WorkspaceList.Lease;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildTrigger;
+import jenkins.model.Jenkins;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +78,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         EnvVars e = super.getEnvironment(listener);
 
         // Augment environment with target build's information
-        String rootUrl = Hudson.getInstance().getRootUrl();
+        String rootUrl = Jenkins.getInstance().getRootUrl();
         AbstractBuild<?, ?> target = getTarget();
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
@@ -177,11 +178,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         
     }
 
-    //public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
-    //public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", Messages._Promotion_PromotePermission_Description(), Hudson.ADMINISTER);
-    public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, null);
-    public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", null, Hudson.ADMINISTER);
-    
+    public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
+    public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", Messages._Promotion_PromotePermission_Description(), Jenkins.ADMINISTER, PermissionScope.RUN);
+
     @Override
     public int compareTo(Promotion that) {
     	return that.getId().compareTo( this.getId() );
