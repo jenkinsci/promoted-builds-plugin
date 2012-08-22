@@ -4,7 +4,7 @@
       <j:choose>
         <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
           <form style="float:right" method="post" action="${p.name}/build">
-            <input type="submit" value="${%Re-execute promotion}"/>
+            <f:submit value="${%Re-execute promotion}"/>
           </form>
         </j:when>
       </j:choose>
@@ -88,7 +88,7 @@
           <j:choose>
             <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
               <form style="float:right" method="post" action="forcePromotion?name=${p.name}">
-                <input type="submit" value="${%Force promotion}"/>
+                <f:submit value="${%Force promotion}"/>
               </form>
             </j:when>
           </j:choose>
