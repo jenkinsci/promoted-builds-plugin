@@ -1,12 +1,14 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.EnvVars;
+import hudson.console.HyperlinkNote;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Cause.LegacyCodeCause;
+import hudson.model.Cause;
 import hudson.model.Node;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.TopLevelItem;
 import hudson.security.Permission;
@@ -100,10 +102,16 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
 
     public void run() {
         getStatus().addPromotionAttempt(this);
-        run(new RunnerImpl());
+        run(new RunnerImpl(this));
     }
 
     protected class RunnerImpl extends AbstractRunner {
+        final Promotion promotionRun;
+        
+        RunnerImpl(final Promotion promotionRun) {
+            this.promotionRun = promotionRun;
+        }
+        
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
             String customWorkspace = getProject().getCustomWorkspace();
@@ -117,17 +125,23 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         protected Result doRun(BuildListener listener) throws Exception {
             AbstractBuild<?, ?> target = getTarget();
 
-            listener.getLogger().println("Promoting "+target);
+            listener.getLogger().println(
+                Messages.Promotion_RunnerImpl_Promoting(
+                    HyperlinkNote.encodeTo('/' + target.getUrl(), target.toString())
+                )
+            );
 
             // start with SUCCESS, unless someone makes it a failure
             setResult(Result.SUCCESS);
 
-            if(!preBuild(listener,project.getBuildSteps()))
+            if (! preBuild(listener, project.getBuildSteps())) {
                 return Result.FAILURE;
-
-            if(!build(listener,project.getBuildSteps()))
+            }
+            
+            if (! build(listener, project.getBuildSteps(), target)) {
                 return Result.FAILURE;
-
+            }
+            
             return null;
         }
 
@@ -148,13 +162,23 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
             }
         }
 
-        private boolean build(BuildListener listener, List<BuildStep> steps) throws IOException, InterruptedException {
+        private boolean build(final BuildListener listener,
+                              final List<BuildStep> steps,
+                              final Run promotedBuild)
+            throws IOException, InterruptedException
+        {
             for( BuildStep bs : steps ) {
                 if ( bs instanceof BuildTrigger) {
-                    BuildTrigger bt = (BuildTrigger)bs;
-                    for(AbstractProject p : bt.getChildProjects()) {
-                        listener.getLogger().println("  scheduling build for " + p.getDisplayName());
-                        p.scheduleBuild(0, new LegacyCodeCause());
+                    BuildTrigger bt = (BuildTrigger) bs;
+                    
+                    for (AbstractProject p : bt.getChildProjects()) {
+                        listener.getLogger().println(
+                            Messages.Promotion_RunnerImpl_SchedulingBuild(
+                                HyperlinkNote.encodeTo('/' + p.getUrl(), p.getFullName())
+                            )
+                        );
+
+                        p.scheduleBuild(0, new PromotionCause(promotionRun, promotedBuild));
                     }
                 } else if(!bs.perform(Promotion.this, launcher, listener)) {
                     listener.getLogger().println("failed build " + bs + " " + getResult());
