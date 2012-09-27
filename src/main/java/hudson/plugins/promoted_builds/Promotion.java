@@ -145,7 +145,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
                 PromotedBuildAction pba = getTarget().getAction(PromotedBuildAction.class);
 
                 for (PromotionProcess pp : pba.getPendingPromotions()) {
-                    pp.considerPromotion(getTarget());
+                    pp.considerPromotion2(getTarget());
                 }
             }
         }
