@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import hudson.CopyOnWrite;
 import hudson.Extension;
 import hudson.Util;
+import hudson.console.HyperlinkNote;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
@@ -250,7 +251,7 @@ public class DownstreamPassCondition extends PromotionCondition {
                                 }
 
                                 if(u!=null && p.considerPromotion2(u)!=null)
-                                    listener.getLogger().println("Promoted "+u);
+                                    listener.getLogger().println("Promoted "+HyperlinkNote.encodeTo('/'+u.getUrl(),u.getFullDisplayName()));
                             } catch (IOException e) {
                                 e.printStackTrace(listener.error("Failed to promote a build"));
                             }

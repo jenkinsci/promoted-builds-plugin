@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.EnvVars;
+import hudson.console.HyperlinkNote;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -117,7 +118,8 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         protected Result doRun(BuildListener listener) throws Exception {
             AbstractBuild<?, ?> target = getTarget();
 
-            listener.getLogger().println("Promoting "+target);
+            listener.getLogger().println("Promoting "+
+                    HyperlinkNote.encodeTo('/' + target.getUrl(), target.getFullDisplayName()));
 
             // start with SUCCESS, unless someone makes it a failure
             setResult(Result.SUCCESS);
