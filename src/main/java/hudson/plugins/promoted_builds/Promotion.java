@@ -17,6 +17,7 @@ import hudson.slaves.WorkspaceList;
 import hudson.slaves.WorkspaceList.Lease;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildTrigger;
+import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
 
 import java.io.File;
@@ -143,9 +144,15 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
                 // we should evaluate any other pending promotions in case
                 // they had a condition on this promotion
                 PromotedBuildAction pba = getTarget().getAction(PromotedBuildAction.class);
-
                 for (PromotionProcess pp : pba.getPendingPromotions()) {
                     pp.considerPromotion2(getTarget());
+                }
+
+                // tickle PromotionTriggers
+                for (AbstractProject<?,?> p : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                    PromotionTrigger pt = p.getTrigger(PromotionTrigger.class);
+                    if (pt!=null)
+                        pt.consider(Promotion.this);
                 }
             }
         }
