@@ -11,30 +11,21 @@ import hudson.console.HyperlinkNote;
  * triggered this build" (or something like that).
  */
 public class PromotionCause extends Cause.UpstreamCause {
-    /** The promotion that triggered the build. */
-    private Promotion promotion;
-    
-    /** The build that is being promoted. */
-    private Run promotedBuild;
+    /** The name of the promotion process. */
+    private String promotionProcessName;
 
-    /** URL to the job that was promoted. */
-    private String promotedBuildUrl;
-    
-    /** The name of the job that was promoted. */
-    private String promotedBuildProject;
-    
-    /** The number of the build that was promoted. */
-    private String promotedBuildNumber;
-    
+    /** URL to the promotion. */
+    private String promotionBuildUrl;
+
+    /** The build number of the promotion */
+    private int promotionBuildNumber;
+
     /* package */ PromotionCause(final Promotion promotion, final Run promotedBuild) {
         super(promotedBuild);
         
-        this.promotion = promotion;
-        this.promotedBuild = promotedBuild;
-
-        promotedBuildUrl = promotedBuild.getParent().getUrl();
-        promotedBuildProject = promotedBuild.getParent().getFullName();
-        promotedBuildNumber = Integer.toString(promotedBuild.getNumber());
+        promotionProcessName = promotion.getParent().getName();
+        promotionBuildUrl = promotion.getUrl();
+        promotionBuildNumber = promotion.getNumber();
     }
     
     // {{{ getShortDescription
@@ -42,9 +33,9 @@ public class PromotionCause extends Cause.UpstreamCause {
     @Override
     public String getShortDescription() {
         return Messages.PromotionCause_ShortDescription(
-            promotion.getParent().getName(),
-            promotedBuildProject,
-            promotedBuildNumber
+            promotionProcessName + " #" + promotionBuildNumber,
+            getUpstreamProject(),
+            Integer.toString(getUpstreamBuild())
         );
     }
     // }}}
@@ -55,9 +46,9 @@ public class PromotionCause extends Cause.UpstreamCause {
     public void print(final TaskListener listener) {
         listener.getLogger().println(
             Messages.PromotionCause_ShortDescription(
-                HyperlinkNote.encodeTo('/' + promotion.getUrl(), promotion.getParent().getName()),
-                HyperlinkNote.encodeTo('/' + promotedBuildUrl, promotedBuildProject),
-                HyperlinkNote.encodeTo('/' + promotedBuildUrl + promotedBuildNumber, promotedBuildNumber)
+                HyperlinkNote.encodeTo('/' + promotionBuildUrl,  promotionProcessName + " #" + promotionBuildNumber),
+                HyperlinkNote.encodeTo('/' + getUpstreamUrl(), getUpstreamProject()),
+                HyperlinkNote.encodeTo('/' + getUpstreamUrl() + getUpstreamBuild(), Integer.toString(getUpstreamBuild()))
             )
         );
     }
