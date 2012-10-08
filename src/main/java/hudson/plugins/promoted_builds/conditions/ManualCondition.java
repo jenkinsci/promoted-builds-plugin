@@ -7,11 +7,9 @@ import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
-import hudson.model.ItemGroup;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.User;
-import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
@@ -27,7 +25,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.acegisecurity.GrantedAuthority;
 import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -159,8 +156,6 @@ public class ManualCondition extends PromotionCondition {
                     ParameterDefinition d = getParameterDefinition(name);
                     if (d==null)
                         throw new IllegalArgumentException("No such parameter definition: " + name);
-
-                    ParameterValue value = d.createValue(req, jo);
 
                     paramValues.add(d.createValue(req, jo));
                 }
