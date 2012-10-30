@@ -299,6 +299,9 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      null if the build was not promoted, otherwise Future that kicks in when the build is completed.
      */
     public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build) throws IOException {
+        if (!isActive())
+            return null;    // not active
+
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
 
         // if it's already promoted, no need to do anything.
@@ -459,6 +462,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     @Override
     public String getShortUrl() {
         return "";
+    }
+
+    public boolean isActive() {
+        return !isDisabled();
     }
 
     @Extension
