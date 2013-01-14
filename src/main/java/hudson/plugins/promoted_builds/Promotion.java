@@ -115,7 +115,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
-            String customWorkspace = getProject().getCustomWorkspace();
+            String customWorkspace = Promotion.this.getProject().getCustomWorkspace();
             if (customWorkspace != null)
                 // we allow custom workspaces to be concurrently used between jobs.
                 return Lease.createDummyLease(
