@@ -7,7 +7,7 @@
       <!-- list promotions that are already attained -->
       <j:forEach var="c" items="${it.processes}">
         <h2>
-          <img src="${rootURL}/plugin/promoted-builds/icons/32x32/${c.getIcon()}.png"/> ${c.name}
+          <img src="${resURL}/plugin/promoted-builds/icons/32x32/${c.getIcon()}.png"/> ${c.name}
         </h2>
         
         <!-- history of this promotion process -->

@@ -4,7 +4,6 @@ import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause.UserCause;
-import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.util.Iterators;
 import org.kohsuke.stapler.StaplerRequest;
@@ -20,6 +19,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
+import jenkins.model.Jenkins;
 
 /**
  * Promotion status of a build wrt a specific {@link PromotionProcess}.
@@ -95,11 +95,11 @@ public final class Status {
         } else {
             Promotion l = getLast();
             if (l!=null && l.getResult()!= Result.SUCCESS)
-                return Hudson.RESOURCE_PATH+"/images/"+size+"/error.png";
+                return Jenkins.RESOURCE_PATH+"/images/"+size+"/error.png";
 
             baseName = p.getIcon();
         }
-        return "/plugin/promoted-builds/icons/"+size+"/"+ baseName +".png";
+        return Jenkins.RESOURCE_PATH+"/plugin/promoted-builds/icons/"+size+"/"+ baseName +".png";
     }
 
     /**
