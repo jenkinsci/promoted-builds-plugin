@@ -9,14 +9,19 @@ import hudson.model.Cause;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.Action;
+import hudson.model.Environment;
+import hudson.model.ParameterValue;
 import hudson.model.TaskListener;
 import hudson.model.TopLevelItem;
+import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.security.PermissionScope;
 import hudson.slaves.WorkspaceList;
 import hudson.slaves.WorkspaceList.Lease;
 import hudson.tasks.BuildStep;
+import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildTrigger;
 import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
@@ -137,11 +142,43 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
 
             if(!preBuild(listener,project.getBuildSteps()))
                 return Result.FAILURE;
-
-            if(!build(listener,project.getBuildSteps(),target))
-                return Result.FAILURE;
-
-            return null;
+            
+            try {
+            	PromotionTargetAction targetAction = getAction(PromotionTargetAction.class);
+            	AbstractBuild<?, ?> build = targetAction.resolve();
+	            List<ManualApproval> approvals = build.getActions(ManualApproval.class);
+	            for(ManualApproval approval : approvals) {
+	            	List<ParameterValue> params = approval.badge.getParameterValues();
+					
+	            	for(ParameterValue value : params) {
+	            		BuildWrapper wrapper = value.createBuildWrapper(Promotion.this);
+	            		if(wrapper != null) {
+	            			Environment e = wrapper.setUp(Promotion.this, launcher, listener);
+	            			
+	            			if(e==null)
+	                            return Result.FAILURE;
+	            			
+	                        buildEnvironments.add(e);
+	            		}
+	            	}
+	            }
+	
+	            if(!build(listener,project.getBuildSteps(),target))
+	                return Result.FAILURE;
+	
+	            return null;
+            } finally {
+            	boolean failed = false;
+            	
+            	for(int i = buildEnvironments.size()-1; i >= 0; i--) {
+            		if (!buildEnvironments.get(i).tearDown(Promotion.this,listener)) {
+                        failed=true;
+                    }
+            	}
+            	
+            	if(failed)
+            		return Result.FAILURE;
+            }
         }
 
         protected void post2(BuildListener listener) throws Exception {
