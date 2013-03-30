@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.plugins.promoted__builds.PromotionProcess>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector"/>
+  <concurrentBuild>false</concurrentBuild>
+  <conditions>
+    <hudson.plugins.promoted__builds.conditions.ManualCondition>
+      <users></users>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>extension</name>
+          <description>File ext for artifact.</description>
+          <defaultValue>txt</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.plugins.promoted__builds.conditions.ManualCondition>
+  </conditions>
+  <icon>star-gold</icon>
+  <buildSteps>
+    <hudson.plugins.promoted__builds.KeepBuildForeverAction/>
+    <hudson.tasks.Shell>
+      <command>cp build.txt promoted.$extension</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>promoted.*</artifacts>
+      <latestOnly>false</latestOnly>
+    </hudson.tasks.ArtifactArchiver>
+  </buildSteps>
+</hudson.plugins.promoted__builds.PromotionProcess>
