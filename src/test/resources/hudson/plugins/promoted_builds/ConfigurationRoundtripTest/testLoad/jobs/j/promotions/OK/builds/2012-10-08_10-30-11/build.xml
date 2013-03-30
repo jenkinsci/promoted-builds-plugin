@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.plugins.promoted__builds.Promotion>
+  <actions>
+    <hudson.plugins.promoted__builds.PromotionTargetAction>
+      <jobName>j</jobName>
+      <number>2</number>
+    </hudson.plugins.promoted__builds.PromotionTargetAction>
+  </actions>
+  <number>1</number>
+  <result>SUCCESS</result>
+  <duration>109</duration>
+  <charset>UTF-8</charset>
+  <keepLog>false</keepLog>
+  <builtOn></builtOn>
+  <hudsonVersion>1.448</hudsonVersion>
+  <scm class="hudson.scm.NullChangeLogParser"/>
+  <culprits/>
+</hudson.plugins.promoted__builds.Promotion>

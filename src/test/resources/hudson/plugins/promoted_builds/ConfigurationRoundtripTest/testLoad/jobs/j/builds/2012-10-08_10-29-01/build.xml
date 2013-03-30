@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<build>
+  <actions>
+    <hudson.model.CauseAction>
+      <causes>
+        <hudson.model.Cause_-UserIdCause/>
+      </causes>
+    </hudson.model.CauseAction>
+    <hudson.plugins.promoted__builds.PromotedBuildAction>
+      <owner class="build" reference="../../.."/>
+      <statuses>
+        <hudson.plugins.promoted__builds.Status>
+          <name>OK</name>
+          <badges>
+            <hudson.plugins.promoted__builds.conditions.ManualCondition_-Badge>
+              <authenticationName>anonymous</authenticationName>
+              <values>
+                <hudson.model.StringParameterValue>
+                  <name>extension</name>
+                  <description>File ext for artifact.</description>
+                  <value>stuff</value>
+                </hudson.model.StringParameterValue>
+              </values>
+            </hudson.plugins.promoted__builds.conditions.ManualCondition_-Badge>
+          </badges>
+          <timestamp>
+            <time>1349706611025</time>
+            <timezone>America/New_York</timezone>
+          </timestamp>
+          <promotion>1</promotion>
+          <promotionAttempts>
+            <int>1</int>
+          </promotionAttempts>
+        </hudson.plugins.promoted__builds.Status>
+      </statuses>
+    </hudson.plugins.promoted__builds.PromotedBuildAction>
+    <hudson.plugins.promoted__builds.conditions.ManualCondition_-ManualApproval>
+      <name>OK</name>
+      <badge reference="../../hudson.plugins.promoted__builds.PromotedBuildAction/statuses/hudson.plugins.promoted__builds.Status/badges/hudson.plugins.promoted__builds.conditions.ManualCondition_-Badge"/>
+    </hudson.plugins.promoted__builds.conditions.ManualCondition_-ManualApproval>
+  </actions>
+  <number>2</number>
+  <result>SUCCESS</result>
+  <duration>39</duration>
+  <charset>UTF-8</charset>
+  <keepLog>true</keepLog>
+  <builtOn></builtOn>
+  <hudsonVersion>1.448</hudsonVersion>
+  <scm class="hudson.scm.NullChangeLogParser"/>
+  <culprits/>
+</build>
