@@ -132,6 +132,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         activeProcessNames.add(name);
         processes.add(p);
         buildActiveProcess();
+        p.onCreatedFromScratch();
         return p;
     }
 
