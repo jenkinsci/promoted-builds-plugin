@@ -217,6 +217,9 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
      * Finds a config by name.
      */
     public PromotionProcess getItem(String name) {
+        if (processes == null) {
+            return null;
+        }
         for (PromotionProcess c : processes) {
             if(c.getName().equals(name))
                 return c;

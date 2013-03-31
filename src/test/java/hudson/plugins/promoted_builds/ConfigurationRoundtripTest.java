@@ -26,7 +26,9 @@ package hudson.plugins.promoted_builds;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import hudson.tasks.JavadocArchiver;
+import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.recipes.LocalData;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -64,4 +66,14 @@ public class ConfigurationRoundtripTest extends HudsonTestCase {
         assertTrue(ja.isKeepAll());
         assertEquals("star-blue", proc.icon);
     }
+
+    @LocalData
+    @Bug(17341)
+    public void testLoad() throws Exception {
+        FreeStyleProject j = jenkins.getItemByFullName("j", FreeStyleProject.class);
+        assertNotNull(j);
+        Promotion p = j.getProperty(JobPropertyImpl.class).getItem("OK").getBuildByNumber(1);
+        assertNotNull(p);
+    }
+
 }
