@@ -3,6 +3,7 @@ package hudson.plugins.promoted_builds;
 import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Cause.UserCause;
 import hudson.model.Result;
 import hudson.util.Iterators;
@@ -77,7 +78,10 @@ public final class Status {
      * Gets the {@link PromotionProcess} that this object deals with.
      */
     public PromotionProcess getProcess() {
-        JobPropertyImpl jp = parent.getProject().getProperty(JobPropertyImpl.class);
+        assert parent != null : name;
+        AbstractProject<?,?> project = parent.getProject();
+        assert project != null : parent;
+        JobPropertyImpl jp = project.getProperty(JobPropertyImpl.class);
         if(jp==null)    return null;
         return jp.getItem(name);
     }
