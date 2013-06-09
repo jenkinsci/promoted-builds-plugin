@@ -7,17 +7,16 @@
       <!-- list promotions that are already attained -->
       <j:forEach var="p" items="${it.promotions}">
         <h2>
-          <img src="${rootURL}${p.getIcon('32x32')}"/> ${p.name} (${p.class})
+          <img src="${rootURL}${p.getIcon('32x32')}"/> ${p.name}
         </h2>
 
         <!-- history of this promotion -->
         <l:pane title="${%Promotion History}" width="100">
           <j:forEach var="attempt" items="${p.promotionBuilds}">
-          	<i:formatDate value="${attempt.timestamp.time}" type="both" dateStyle="medium" timeStyle="medium" var="buildTime"/>
             <tr><td>
               <a href="${p.name}/promotionBuild/${attempt.number}/">
                 <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
-                 alt="${attempt.iconColor.description}"/> ${attempt.fullDisplayName} @ ${buildTime}
+                 alt="${attempt.iconColor.description}"/> ${attempt.fullDisplayName}
               </a>
             </td></tr>
           </j:forEach>
@@ -39,7 +38,6 @@
 	      	<j:if test="${!p.isManuallyApproved()}">
 		      <j:choose>
 		        <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
-		        	<h1>xxx ${it.class}</h1>
 		          <form style="float:right" method="post" action="${p.name}/build">
 		            <f:submit value="${%Re-execute promotion}"/>
 		          </form>
