@@ -1,12 +1,16 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
-  <l:pane title="${%Manually Approved}" width="100">
-    <tr><td colspan="4">${%Approved by} ${it.userName}</td></tr>
-    <j:if test="${!it.parameterValues.isEmpty()}">
-      <f:section title="${%Parameters}">
-        <j:forEach var="parameterValue" items="${it.parameterValues}">
-          <st:include it="${parameterValue}" page="value.jelly" />
-        </j:forEach>
-      </f:section>
-    </j:if>
-  </l:pane>
+  <l:pane title="${%Manually Approved} by ${it.userName} @ ${p.class}" width="100"><tr><td>
+    <f:form method="post" action="${h.encode(p.name)}/build" name="build">
+        <j:if test="${!p.last.parameterDefinitionsWithValue.isEmpty()}">
+          <f:section title="${%Parameters}">
+            <j:forEach var="parameterDefinition" items="${p.last.parameterDefinitionsWithValue}">
+              <st:include it="${parameterDefinition}" page="${parameterDefinition.descriptor.valuePage}" />
+            </j:forEach>
+          </f:section>
+        </j:if>
+        <f:block>
+          <f:submit value="${%Re-execute promotion}" />
+        </f:block>
+    </f:form>
+  </td></tr></l:pane>
 </j:jelly>
