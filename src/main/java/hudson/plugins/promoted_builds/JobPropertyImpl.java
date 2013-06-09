@@ -16,6 +16,7 @@ import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -222,7 +223,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
             return null;
         }
         for (PromotionProcess c : processes) {
-            if(c.getName().equals(name))
+            if( StringUtils.equals( c.getName(),name))
                 return c;
         }
         return null;
