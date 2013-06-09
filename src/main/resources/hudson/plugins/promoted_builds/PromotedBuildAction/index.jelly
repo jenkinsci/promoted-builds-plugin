@@ -14,10 +14,9 @@
         <l:pane title="${%Promotion History}" width="100">
           <j:forEach var="attempt" items="${p.promotionBuilds}">
             <tr><td>
-              <a href="${p.name}/promotionBuild/${attempt.number}/">
+              <a href="${p.name}/promotionBuild/${attempt.number}/console">
                 <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
-                 alt="${attempt.iconColor.description}"/> ${attempt.fullDisplayName}
-              </a>
+                 alt="${attempt.iconColor.description}"/> ${attempt.displayName} (${attempt.timestamp.time})</a> by ${attempt.userName}
             </td></tr>
           </j:forEach>
         </l:pane>

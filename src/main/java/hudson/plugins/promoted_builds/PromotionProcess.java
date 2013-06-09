@@ -379,18 +379,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause, List<ParameterValue> params) {
         assert build.getProject()==getOwner();
 
-        // Get the parameters, if any, used in the target build and make these
-        // available as part of the promotion steps
-        List<ParametersAction> parameters = build.getActions(ParametersAction.class);
-
-        // Create list of actions to pass to scheduled build
         List<Action> actions = new ArrayList<Action>();
-        actions.addAll(parameters);
+        Promotion.buildParametersAction(actions, build, params);
         
         actions.add(new PromotionTargetAction(build));
-        if (params!=null && params.size()> 0){
-        	actions.add(new PromotionParametersAction(params));
-        }
+
         // remember what build we are promoting
         return super.scheduleBuild2(0, cause, actions.toArray(new Action[actions.size()]));
     }
