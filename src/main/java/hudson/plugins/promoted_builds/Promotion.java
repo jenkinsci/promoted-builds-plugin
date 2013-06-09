@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -109,7 +110,16 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
     }
     
     public List<ParameterValue> getParameterValues(){
-    	return getAction(PromotionParametersAction.class).getParameters();
+    	PromotionParametersAction parametersAction=getAction(PromotionParametersAction.class);
+    	if (parametersAction!=null){
+    		return parametersAction.getParameters();
+    	}
+    	for (PromotionBadge badget:getStatus().getBadges()){
+    		if (badget instanceof ManualCondition.Badge){
+    			return ((ManualCondition.Badge) badget).getParameterValues();
+    		}
+    	}
+    	return Collections.emptyList();
     }
     
     public List<ParameterDefinition> getParameterDefinitionsWithValue(){
