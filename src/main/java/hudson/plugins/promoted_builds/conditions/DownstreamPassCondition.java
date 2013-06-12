@@ -117,17 +117,24 @@ public class DownstreamPassCondition extends PromotionCondition {
         return r;
     }
 
-    /**
-     * Short-cut for {@code getJobList().contains(job)}.
-     */
-    public boolean contains(AbstractProject<?,?> job) {
-        if(!jobs.contains(job.getFullName()))    return false;   // quick rejection test
+    public boolean contains(ItemGroup ctx, AbstractProject<?,?> job) {
+        // quick rejection test
+        if(!jobs.contains(job.getName())) return false;
 
-        for (String name : Util.tokenize(jobs,",")) {
-            if(name.trim().equals(job.getFullName()))
-                return true;
+        String name = job.getFullName();
+        for (AbstractProject<?, ?> project : getJobList(ctx)) {
+            if (project.getFullName().equals(name)) return true;
         }
         return false;
+    }
+
+
+    /**
+     * Short-cut for {@code getJobList().contains(job)}.
+     * @deprecated use {@link #contains(hudson.model.ItemGroup, hudson.model.AbstractProject)}
+     */
+    public boolean contains(AbstractProject<?,?> job) {
+        return contains(Jenkins.getInstance(), job);
     }
 
     public static final class Badge extends PromotionBadge {
@@ -214,7 +221,7 @@ public class DownstreamPassCondition extends PromotionCondition {
                         for (PromotionCondition cond : p.conditions) {
                             if (cond instanceof DownstreamPassCondition) {
                                 DownstreamPassCondition dpcond = (DownstreamPassCondition) cond;
-                                if(dpcond.contains(build.getParent())) {
+                                if(dpcond.contains(j.getParent(), build.getParent())) {
                                     considerPromotion = true;
                                     break;
                                 }
