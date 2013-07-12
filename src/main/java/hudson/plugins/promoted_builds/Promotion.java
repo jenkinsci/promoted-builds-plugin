@@ -5,11 +5,9 @@ import hudson.console.HyperlinkNote;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Cause;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.model.Action;
 import hudson.model.Environment;
 import hudson.model.ParameterValue;
 import hudson.model.TaskListener;
@@ -23,7 +21,6 @@ import hudson.slaves.WorkspaceList.Lease;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildTrigger;
-import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
 
 import java.io.File;
@@ -31,6 +28,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map.Entry;
+import org.kohsuke.stapler.export.Exported;
 
 /**
  * Records a promotion process.
@@ -58,6 +56,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
      * @return
      *      null if there's no such object. For example, if the build has already garbage collected.
      */
+    @Exported
     public AbstractBuild<?,?> getTarget() {
         PromotionTargetAction pta = getAction(PromotionTargetAction.class);
         return pta.resolve(this);
