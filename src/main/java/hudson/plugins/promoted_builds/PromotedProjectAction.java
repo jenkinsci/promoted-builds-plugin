@@ -2,17 +2,21 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Api;
 import hudson.model.PermalinkProjectAction;
 import hudson.model.ProminentProjectAction;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 /**
  * For customizing project top-level GUI.
  * @author Kohsuke Kawaguchi
  */
+@ExportedBean
 public class PromotedProjectAction implements ProminentProjectAction, PermalinkProjectAction {
 	
 	//TODO externalize to a plugin property?
@@ -26,6 +30,11 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
         this.property = property;
     }
 
+    public Api getApi() {
+        return new Api(this);
+    }
+
+    @Exported
     public List<PromotionProcess> getProcesses() {
         return property.getActiveItems();
     }

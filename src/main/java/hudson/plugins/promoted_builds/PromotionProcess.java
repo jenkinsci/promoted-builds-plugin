@@ -455,13 +455,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return (DescriptorImpl)Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
 
-    /**
-     * We don't directly bind {@link PromotionProcess} to the UI,
-     * so instead claim that our URL is the same as our parent.
-     */
     @Override
     public String getShortUrl() {
-        return "";
+        // Must be overridden since JobPropertyImpl.getUrlChildPrefix is "" not "process" as you might expect (also see e50f0f5 in 1.519)
+        return "process/" + Util.rawEncode(getName()) + '/';
     }
 
     public boolean isActive() {
