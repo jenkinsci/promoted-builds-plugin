@@ -145,6 +145,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
             try {
             	PromotionTargetAction targetAction = getAction(PromotionTargetAction.class);
             	AbstractBuild<?, ?> build = targetAction.resolve();
+                // TODO why would it ever be true that build != target?
 	            List<ManualApproval> approvals = build.getActions(ManualApproval.class);
 	            for(ManualApproval approval : approvals) {
 	            	List<ParameterValue> params = approval.badge.getParameterValues();
