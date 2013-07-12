@@ -260,6 +260,7 @@ public final class Status {
     /**
      * Gets all the promotion builds.
      */
+    @Exported
     public List<Promotion> getPromotionBuilds() {
         List<Promotion> builds = new ArrayList<Promotion>();
         PromotionProcess p = getProcess();
