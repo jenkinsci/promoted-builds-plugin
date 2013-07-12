@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 /**
  * Promotion status of a build wrt a specific {@link PromotionProcess}.
@@ -28,6 +30,7 @@ import jenkins.model.Jenkins;
  * @author Kohsuke Kawaguchi
  * @see PromotedBuildAction#statuses
  */
+@ExportedBean
 public final class Status {
     /**
      * Matches with {@link PromotionProcess#name}.
@@ -63,6 +66,7 @@ public final class Status {
         this.badges = badges.toArray(new PromotionBadge[badges.size()]);
     }
 
+    @Exported
     public String getName() {
         return name;
     }
@@ -77,6 +81,7 @@ public final class Status {
     /**
      * Gets the {@link PromotionProcess} that this object deals with.
      */
+    @Exported
     public PromotionProcess getProcess() {
         assert parent != null : name;
         AbstractProject<?,?> project = parent.getProject();
@@ -193,6 +198,7 @@ public final class Status {
     /**
      * Gets the badges indicating how did a build qualify for a promotion.
      */
+    @Exported
     public List<PromotionBadge> getBadges() {
         return Arrays.asList(badges);
     }

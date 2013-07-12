@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.kohsuke.stapler.export.Exported;
 
 /**
  * {@link PromotionCondition} that tests if certain downstream projects have passed.
@@ -141,6 +142,7 @@ public class DownstreamPassCondition extends PromotionCondition {
         /**
          * Downstream builds that certified this build. Should be considered read-only.
          */
+        @Exported
         public final List<Fingerprint.BuildPtr> builds = new ArrayList<Fingerprint.BuildPtr>();
 
         void add(AbstractBuild<?,?> b) {

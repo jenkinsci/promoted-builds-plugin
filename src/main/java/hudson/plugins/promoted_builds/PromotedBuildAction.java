@@ -16,12 +16,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.export.ExportedBean;
 
 /**
  * {@link Action} for {@link AbstractBuild} indicating that it's promoted.
  *
  * @author Kohsuke Kawaguchi
  */
+@ExportedBean
 public final class PromotedBuildAction implements BuildBadgeAction {
     public final AbstractBuild<?,?> owner;
 
@@ -91,6 +94,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     /**
      * Gets the read-only view of all the promotions that this build achieved.
      */
+    @Exported
     public List<Status> getPromotions() {
         return statuses.getView();
     }

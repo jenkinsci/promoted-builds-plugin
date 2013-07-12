@@ -2,6 +2,7 @@ package hudson.plugins.promoted_builds;
 
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
+import org.kohsuke.stapler.export.ExportedBean;
 
 /**
  * Captures the information about how/when the promotion criteria is satisfied.
@@ -11,6 +12,7 @@ import hudson.model.AbstractBuild;
  *
  * @author Kohsuke Kawaguchi
  */
+@ExportedBean
 public abstract class PromotionBadge {
 
     /**

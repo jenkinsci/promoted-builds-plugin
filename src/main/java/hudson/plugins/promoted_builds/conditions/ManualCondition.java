@@ -27,6 +27,7 @@ import org.acegisecurity.GrantedAuthority;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.export.Exported;
 
 /**
  * {@link PromotionCondition} that requires manual promotion.
@@ -195,6 +196,7 @@ public class ManualCondition extends PromotionCondition {
             this.values = values;
         }
 
+        @Exported
         public String getUserName() {
             if (authenticationName == null)
                 return "N/A";
@@ -203,6 +205,7 @@ public class ManualCondition extends PromotionCondition {
             return u != null ? u.getDisplayName() : authenticationName;
         }
 
+        @Exported
         public List<ParameterValue> getParameterValues() {
             return values != null ? values : Collections.EMPTY_LIST;
         }
