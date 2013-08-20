@@ -89,6 +89,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
         e.put("PROMOTED_JOB_NAME", target.getParent().getName());
+        e.put("PROMOTED_JOB_FULL_NAME", target.getParent().getFullName());
         e.put("PROMOTED_NUMBER", Integer.toString(target.getNumber()));
         e.put("PROMOTED_ID", target.getId());
         EnvVars envScm = new EnvVars();
