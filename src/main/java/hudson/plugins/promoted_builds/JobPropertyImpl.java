@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,7 +100,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
             // apply configuration
             p.configure(req,c);
-            processes.add(p);
+            safeAddToProcessesList(p);
         }
         init();
     }
@@ -115,7 +116,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
             for (File subdir : subdirs) {
                 try {
                     PromotionProcess p = (PromotionProcess) Items.load(this, subdir);
-                    processes.add(p);
+                    safeAddToProcessesList(p);
                 } catch (IOException e) {
                     LOGGER.log(Level.WARNING, "Failed to load promotion process in "+subdir,e);
                 }
@@ -128,17 +129,42 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     /**
      * Adds a new promotion process of the given name.
      */
-    public PromotionProcess addProcess(String name) throws IOException {
+    public synchronized PromotionProcess addProcess(String name) throws IOException {
         PromotionProcess p = new PromotionProcess(this, name);
         activeProcessNames.add(name);
-        processes.add(p);
+        safeAddToProcessesList(p);
         buildActiveProcess();
         p.onCreatedFromScratch();
         return p;
     }
 
+    private synchronized void safeAddToProcessesList(PromotionProcess p) {
+        int index = 0;
+        boolean found = false;
+        for (ListIterator<PromotionProcess> i = processes.listIterator(); i.hasNext();) {
+            PromotionProcess process = i.next();
+            if (p.getName().equalsIgnoreCase(process.getName())) {
+                found = true;
+                try {
+                    i.set(p);
+                    break;
+                } catch (UnsupportedOperationException e) {
+                    // shouldn't end up here but Java Runtime Spec allows for this case
+                    // we don't care about ConcurrentModificationException because we are done
+                    // with the iterator once we find the first element.
+                    processes.set(index, p);
+                    break;
+                }
+            }
+            index++;
+        }
+        if (!found) {
+            processes.add(p);
+        }
+    }
+
     @Override
-    protected void setOwner(AbstractProject<?,?> owner) {
+    protected synchronized void setOwner(AbstractProject<?,?> owner) {
         super.setOwner(owner);
 
         // readResolve is too early because we don't have our parent set yet,
@@ -174,7 +200,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     /**
      * Return the string in the case as specified in {@link #activeProcessNames}.
      */
-    private String getActiveProcessName(String s) {
+    private synchronized String getActiveProcessName(String s) {
         for (String n : activeProcessNames) {
             if (n.equalsIgnoreCase(s))
                 return n;
@@ -182,7 +208,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         return s;   // huh?
     }
 
-    private boolean isActiveProcessNameIgnoreCase(String s) {
+    private synchronized boolean isActiveProcessNameIgnoreCase(String s) {
         for (String n : activeProcessNames)
             if (n.equalsIgnoreCase(s))
                 return true;
@@ -197,7 +223,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
      * @return
      *      non-null and non-empty. Read-only.
      */
-    public List<PromotionProcess> getItems() {
+    public synchronized List<PromotionProcess> getItems() {
         return processes;
     }
 
@@ -218,7 +244,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     /**
      * Finds a config by name.
      */
-    public PromotionProcess getItem(String name) {
+    public synchronized PromotionProcess getItem(String name) {
         if (processes == null) {
             return null;
         }
