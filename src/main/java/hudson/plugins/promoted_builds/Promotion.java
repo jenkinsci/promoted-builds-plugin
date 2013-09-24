@@ -8,6 +8,7 @@ import hudson.model.BuildListener;
 import hudson.model.Node;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.model.User;
 import hudson.model.Environment;
 import hudson.model.ParameterValue;
 import hudson.model.TaskListener;
@@ -92,6 +93,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         e.put("PROMOTED_JOB_FULL_NAME", target.getParent().getFullName());
         e.put("PROMOTED_NUMBER", Integer.toString(target.getNumber()));
         e.put("PROMOTED_ID", target.getId());
+        User u = Jenkins.getInstance().getMe();
+        e.put("PROMOTED_USER", u.getDisplayName());
+        e.put("PROMOTED_EMAIL", u.getProperty(hudson.tasks.Mailer.UserProperty.class).getAddress());
         EnvVars envScm = new EnvVars();
         target.getProject().getScm().buildEnvVars( target, envScm );
         for ( Entry<String, String> entry : envScm.entrySet() )
