@@ -8,8 +8,9 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.AutoCompletionCandidates;
+import hudson.model.ParameterValue;
 import hudson.model.Cause;
-import hudson.model.Cause.LegacyCodeCause;
+import hudson.model.Cause.UserCause;
 import hudson.model.DependencyGraph;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
@@ -28,6 +29,7 @@ import hudson.model.Run;
 import hudson.model.Saveable;
 import hudson.model.labels.LabelAtom;
 import hudson.model.labels.LabelExpression;
+import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -314,7 +316,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             return null; // not this time
 
         LOGGER.fine("Promotion condition of "+build+" is met: "+qualification);
-        Future<Promotion> f = promote2(build, new LegacyCodeCause(), qualification); // TODO: define promotion cause
+        Future<Promotion> f = promote2(build, new UserCause(), qualification); // TODO: define promotion cause
         if (f==null)
             LOGGER.warning(build+" qualifies for a promotion but the queueing failed.");
         return f;
@@ -363,7 +365,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public boolean scheduleBuild(AbstractBuild<?,?> build) {
-        return scheduleBuild(build,new LegacyCodeCause());
+        return scheduleBuild(build,new UserCause());
     }
 
     /**
@@ -374,20 +376,29 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return scheduleBuild2(build,cause)!=null;
     }
 
-    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
+    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause, List<ParameterValue> params) {
         assert build.getProject()==getOwner();
 
-        // Get the parameters, if any, used in the target build and make these
-        // available as part of the promotion steps
-        List<ParametersAction> parameters = build.getActions(ParametersAction.class);
-
-        // Create list of actions to pass to scheduled build
         List<Action> actions = new ArrayList<Action>();
-        actions.addAll(parameters);
+        Promotion.buildParametersAction(actions, build, params);
+        
         actions.add(new PromotionTargetAction(build));
 
         // remember what build we are promoting
         return super.scheduleBuild2(0, cause, actions.toArray(new Action[actions.size()]));
+    }
+    
+    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
+        List<ParameterValue> params=new ArrayList<ParameterValue>();
+        List<ManualApproval> approvals = build.getActions(ManualApproval.class);
+        if (approvals!=null){
+	        for(ManualApproval approval : approvals) {
+	        	params.addAll(approval.badge.getParameterValues());
+	        }
+        }
+
+        // remember what build we are promoting
+        return scheduleBuild2(build, cause, params);
     }
 
     public boolean isInQueue(AbstractBuild<?,?> build) {

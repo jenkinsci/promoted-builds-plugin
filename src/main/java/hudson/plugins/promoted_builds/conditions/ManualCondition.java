@@ -13,6 +13,7 @@ import hudson.model.User;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
+import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -212,9 +213,12 @@ public class ManualCondition extends PromotionCondition {
 
         @Override
         public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
-            for (ParameterValue value : getParameterValues()) {
-                value.buildEnvVars(build, env);
-            }
+        	List<ParameterValue> params=((Promotion)build).getParameterValues();
+        	if (params!=null){
+    	    	for(ParameterValue value : params) {
+    	    		value.buildEnvVars(build, env);
+    	    	}
+        	}
         }
     }
 

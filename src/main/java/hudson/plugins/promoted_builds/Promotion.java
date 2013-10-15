@@ -2,17 +2,21 @@ package hudson.plugins.promoted_builds;
 
 import hudson.EnvVars;
 import hudson.console.HyperlinkNote;
+import hudson.model.Action;
+import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Node;
-import hudson.model.Result;
-import hudson.model.Run;
+import hudson.model.Cause.UserCause;
 import hudson.model.Environment;
+import hudson.model.Node;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParametersAction;
 import hudson.model.ParameterValue;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.TopLevelItem;
-import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
+import hudson.model.Run;
+import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.security.PermissionScope;
@@ -21,14 +25,18 @@ import hudson.slaves.WorkspaceList.Lease;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildTrigger;
+
 import jenkins.model.Jenkins;
+
+import org.kohsuke.stapler.export.Exported;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
-import org.kohsuke.stapler.export.Exported;
 
 /**
  * Records a promotion process.
@@ -104,6 +112,58 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
 
         return e;
     }
+    
+    
+    /**
+     * 
+     * @return user's name who triggered the promotion, or 'anonymous'
+     */
+    public String getUserName(){
+    	UserCause userClause=getCause(UserCause.class);
+    	if (userClause!=null && userClause.getUserName()!=null){
+    		return userClause.getUserName();
+    	}
+    	
+    	//fallback to badge lookup for compatibility 
+    	for (PromotionBadge badget:getStatus().getBadges()){
+    		if (badget instanceof ManualCondition.Badge){
+    			return ((ManualCondition.Badge) badget).getUserName();
+    		}
+    	}
+    	return "anonymous";
+    }
+    
+    public List<ParameterValue> getParameterValues(){
+    	List<ParameterValue> values=new ArrayList<ParameterValue>(); 
+    	ParametersAction parametersAction=getParametersActions(this);
+    	if (parametersAction!=null){
+    		ManualCondition manualCondition=(ManualCondition) getProject().getPromotionCondition(ManualCondition.class.getName());
+    		for (ParameterValue pvalue:parametersAction.getParameters()){
+    			if (manualCondition.getParameterDefinition(pvalue.getName())!=null){
+    				values.add(pvalue);
+    			}
+    		}
+    		return values;
+    	}
+    	
+    	//fallback to badge lookup for compatibility 
+    	for (PromotionBadge badget:getStatus().getBadges()){
+    		if (badget instanceof ManualCondition.Badge){
+    			return ((ManualCondition.Badge) badget).getParameterValues();
+    		}
+    	}
+    	return Collections.emptyList();
+    }
+    
+    public List<ParameterDefinition> getParameterDefinitionsWithValue(){
+    	List<ParameterDefinition> definitions=new ArrayList<ParameterDefinition>();
+    	ManualCondition manualCondition=(ManualCondition) getProject().getPromotionCondition(ManualCondition.class.getName());
+    	for (ParameterValue pvalue:getParameterValues()){
+    		ParameterDefinition pdef=manualCondition.getParameterDefinition(pvalue.getName());
+    		definitions.add(pdef.copyWithDefaultValue(pvalue));
+    	}
+    	return definitions;
+    }
 
     public void run() {
         getStatus().addPromotionAttempt(this);
@@ -143,25 +203,19 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
                 return Result.FAILURE;
             
             try {
-            	PromotionTargetAction targetAction = getAction(PromotionTargetAction.class);
-            	AbstractBuild<?, ?> build = targetAction.resolve();
-                // TODO why would it ever be true that build != target?
-	            List<ManualApproval> approvals = build.getActions(ManualApproval.class);
-	            for(ManualApproval approval : approvals) {
-	            	List<ParameterValue> params = approval.badge.getParameterValues();
-					
-	            	for(ParameterValue value : params) {
-	            		BuildWrapper wrapper = value.createBuildWrapper(Promotion.this);
-	            		if(wrapper != null) {
-	            			Environment e = wrapper.setUp(Promotion.this, launcher, listener);
-	            			
-	            			if(e==null)
-	                            return Result.FAILURE;
-	            			
-	                        buildEnvironments.add(e);
-	            		}
-	            	}
-	            }
+            	List<ParameterValue> params=getParameterValues();
+                
+            	if (params!=null){
+        	    	for(ParameterValue value : params) {
+        	    		BuildWrapper wrapper=value.createBuildWrapper(Promotion.this);
+        	    		if (wrapper!=null){
+        	    			Environment e = wrapper.setUp(Promotion.this, launcher, listener);
+                			if(e==null)
+                                return Result.FAILURE;
+                			buildEnvironments.add(e);
+        	    		}
+        	    	}
+            	}
 	
 	            if(!build(listener,project.getBuildSteps(),target))
 	                return Result.FAILURE;
@@ -250,5 +304,41 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
     public int compareTo(Promotion that) {
     	return that.getId().compareTo( this.getId() );
     }
-    
+    /**
+     * Factory method for creating {@link ParametersAction}
+     * @param parameters
+     * @return
+     */
+    public static ParametersAction createParametersAction(List<ParameterValue> parameters){
+    	return new ParametersAction(parameters);
+    }
+    public static ParametersAction getParametersActions(Promotion build){
+    	return build.getAction(ParametersAction.class);
+    }
+
+    /**
+     * Combine the target build parameters with the promotion build parameters
+     * @param actions
+     * @param build
+     * @param promotionParams
+     */
+	public static void buildParametersAction(List<Action> actions, AbstractBuild<?, ?> build, List<ParameterValue> promotionParams) {
+		List<ParameterValue> params=new ArrayList<ParameterValue>();
+		
+		//Add the target build parameters first, if the same parameter is not being provided bu the promotion build
+        List<ParametersAction> parameters = build.getActions(ParametersAction.class);
+        for(ParametersAction paramAction:parameters){
+        	for (ParameterValue pvalue:paramAction.getParameters()){
+        		if (!promotionParams.contains(pvalue)){
+        			params.add(pvalue);
+        		}
+        	}
+        }
+        
+        //Add all the promotion build parameters
+        params.addAll(promotionParams);
+        
+        // Create list of actions to pass to scheduled build
+        actions.add(new ParametersAction(params));
+	}
 }
