@@ -89,7 +89,7 @@ public class PromotionEnvironmentVariablesTest {
         }
 
         public String getUrlChildPrefix() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return "job";
         }
 
         public TopLevelItem getItem(String name) {
