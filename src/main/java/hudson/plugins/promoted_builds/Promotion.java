@@ -134,25 +134,27 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
     }
     
     public List<ParameterValue> getParameterValues(){
-    	List<ParameterValue> values=new ArrayList<ParameterValue>(); 
-    	ParametersAction parametersAction=getParametersActions(this);
-    	if (parametersAction!=null){
-    		ManualCondition manualCondition=(ManualCondition) getProject().getPromotionCondition(ManualCondition.class.getName());
-    		for (ParameterValue pvalue:parametersAction.getParameters()){
-    			if (manualCondition.getParameterDefinition(pvalue.getName())!=null){
-    				values.add(pvalue);
-    			}
-    		}
-    		return values;
-    	}
-    	
-    	//fallback to badge lookup for compatibility 
-    	for (PromotionBadge badget:getStatus().getBadges()){
-    		if (badget instanceof ManualCondition.Badge){
-    			return ((ManualCondition.Badge) badget).getParameterValues();
-    		}
-    	}
-    	return Collections.emptyList();
+      List<ParameterValue> values=new ArrayList<ParameterValue>(); 
+      ParametersAction parametersAction=getParametersActions(this);
+      if (parametersAction!=null){
+        ManualCondition manualCondition=(ManualCondition) getProject().getPromotionCondition(ManualCondition.class.getName());
+        if (manualCondition!=null){
+          for (ParameterValue pvalue:parametersAction.getParameters()){
+            if (manualCondition.getParameterDefinition(pvalue.getName())!=null){
+              values.add(pvalue);
+            }
+          }
+        }
+        return values;
+      }
+      
+      //fallback to badge lookup for compatibility 
+      for (PromotionBadge badget:getStatus().getBadges()){
+        if (badget instanceof ManualCondition.Badge){
+          return ((ManualCondition.Badge) badget).getParameterValues();
+        }
+      }
+      return Collections.emptyList();
     }
     
     public List<ParameterDefinition> getParameterDefinitionsWithValue(){
