@@ -80,19 +80,23 @@ public class DownstreamPassCondition extends PromotionCondition {
         OUTER:
         for (AbstractProject<?,?> j : getJobList(build.getProject().getParent())) {
             for( AbstractBuild<?,?> b : build.getDownstreamBuilds(j) ) {
-                Result r = b.getResult();
-                if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
-                    badge.add(b);
-                    continue OUTER;
+                if (!b.isBuilding()) {
+                    Result r = b.getResult();
+                    if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
+                        badge.add(b);
+                        continue OUTER;
+                    }
                 }
             }
 
             if (pdb!=null) {// if fingerprint doesn't have any, try the pseudo-downstream
                 for (AbstractBuild<?,?> b : pdb.listBuilds(j)) {
-                    Result r = b.getResult();
-                    if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
-                        badge.add(b);
-                        continue OUTER;
+                    if (!b.isBuilding()) {
+                        Result r = b.getResult();
+                        if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
+                            badge.add(b);
+                            continue OUTER;
+                        }
                     }
                 }
             }
