@@ -7,12 +7,33 @@
       </f:entry>
       <f:entry title="Icon">
         <select class="setting-input" name="icon">
-          <f:option selected="${instance.icon=='star-gold'}"   value="star-gold">Gold star</f:option>
-          <f:option selected="${instance.icon=='star-blue'}"   value="star-blue">Blue star</f:option>
-          <f:option selected="${instance.icon=='star-green'}"  value="star-green">Green star</f:option>
-          <f:option selected="${instance.icon=='star-orange'}" value="star-orange">Orange star</f:option>
-          <f:option selected="${instance.icon=='star-purple'}" value="star-purple">Purple star</f:option>
-          <f:option selected="${instance.icon=='star-red'}"    value="star-red">Red star</f:option>
+          <f:option selected="${instance.icon=='star-gold'}"     value="star-gold">Gold star</f:option>
+          <f:option selected="${instance.icon=='star-gold-e'}"   value="star-gold-e">Gold empty star</f:option>
+          <f:option selected="${instance.icon=='star-gold-w'}"   value="star-gold-w">Gold white star</f:option>
+
+          <f:option selected="${instance.icon=='star-silver'}"   value="star-silver">silver star</f:option>
+          <f:option selected="${instance.icon=='star-silver-e'}" value="star-silver-e">silver empty star</f:option>
+          <f:option selected="${instance.icon=='star-silver-w'}" value="star-silver-w">silver white star</f:option>
+
+          <f:option selected="${instance.icon=='star-blue'}"     value="star-blue">Blue star</f:option>
+          <f:option selected="${instance.icon=='star-blue-e'}"   value="star-blue-e">Blue empty star</f:option>
+          <f:option selected="${instance.icon=='star-blue-w'}"   value="star-blue-w">Blue white star</f:option>
+
+          <f:option selected="${instance.icon=='star-green'}"    value="star-green">Green star</f:option>
+          <f:option selected="${instance.icon=='star-green-e'}"  value="star-green-e">Green empty star</f:option>
+          <f:option selected="${instance.icon=='star-green-w'}"  value="star-green-w">Green white star</f:option>
+
+          <f:option selected="${instance.icon=='star-orange'}"   value="star-orange">Orange star</f:option>
+          <f:option selected="${instance.icon=='star-orange-e'}" value="star-orange-e">Orange empty star</f:option>
+          <f:option selected="${instance.icon=='star-orange-w'}" value="star-orange-w">Orange white star</f:option>
+
+          <f:option selected="${instance.icon=='star-purple'}"   value="star-purple">Purple star</f:option>
+          <f:option selected="${instance.icon=='star-purple-e'}" value="star-purple-e">Purple empty star</f:option>
+          <f:option selected="${instance.icon=='star-purple-w'}" value="star-purple-w">Purple white star</f:option>
+
+          <f:option selected="${instance.icon=='star-red'}"      value="star-red">Red star</f:option>
+          <f:option selected="${instance.icon=='star-red-e'}"    value="star-red-e">Red empty star</f:option>
+          <f:option selected="${instance.icon=='star-red-w'}"    value="star-red-w">Red white star</f:option>
         </select>
       </f:entry>
 
