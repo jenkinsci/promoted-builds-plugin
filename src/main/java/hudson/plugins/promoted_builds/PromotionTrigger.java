@@ -95,7 +95,7 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
         /**
          * Fills in the available promotion processes.
          */
-        public ListBoxModel doFillProcessItems(@AncestorInPath Job defaultJob, @QueryParameter("jobName") String jobName) {
+        public ListBoxModel doFillProcessItems(@AncestorInPath Item defaultJob, @QueryParameter("jobName") String jobName) {
             defaultJob.checkPermission(Item.CONFIGURE);
 
             AbstractProject<?,?> j = null;
