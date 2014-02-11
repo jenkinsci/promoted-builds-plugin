@@ -100,7 +100,8 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         e.put("PROMOTED_JOB_FULL_NAME", target.getParent().getFullName());
         e.put("PROMOTED_NUMBER", Integer.toString(target.getNumber()));
         e.put("PROMOTED_ID", target.getId());
-        EnvVars envScm = new EnvVars();
+        e.put("PROMOTED_USER_NAME", getUserName());
+	EnvVars envScm = new EnvVars();
         target.getProject().getScm().buildEnvVars( target, envScm );
         for ( Entry<String, String> entry : envScm.entrySet() )
         {
