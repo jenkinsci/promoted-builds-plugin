@@ -63,7 +63,7 @@ public class PromotionEnvironmentVariablesTest {
         // Assert
         assertEquals("Folder/Project", env.get("PROMOTED_JOB_FULL_NAME"));
         assertEquals("Project", env.get("PROMOTED_JOB_NAME"));
-	assertEquals("anonymous", env.get("PROMOTED_USER_NAME"));       
+	assertEquals("SYSTEM", env.get("PROMOTED_USER_NAME"));       
  
         project.delete();
         parent.delete();
