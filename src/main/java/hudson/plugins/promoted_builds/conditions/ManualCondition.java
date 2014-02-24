@@ -7,6 +7,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
+import hudson.model.SimpleParameterDefinition;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.User;
@@ -15,15 +16,26 @@ import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import javax.servlet.ServletException;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
 import org.acegisecurity.GrantedAuthority;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.StaplerRequest;
@@ -135,6 +147,32 @@ public class ManualCondition extends PromotionCondition {
         }
         return false;
     }
+    public Future<Promotion> approve(AbstractBuild<?,?> build, PromotionProcess promotionProcess, List<ParameterValue> paramValues) throws IOException{
+        if (canApprove(promotionProcess, build)) {        	
+            // add approval to build
+        	ManualApproval approval=new ManualApproval(promotionProcess.getName(), paramValues);
+        	build.addAction(approval);
+            build.save();
+
+            // check for promotion
+            return promotionProcess.considerPromotion2(build, approval);
+        }
+        return null;
+    }
+    public List<ParameterValue> createDefaultValues(){
+        List<ParameterValue> paramValues = new ArrayList<ParameterValue>();
+
+        if (parameterDefinitions != null && !parameterDefinitions.isEmpty()) {
+        	for (ParameterDefinition d:parameterDefinitions){
+        		paramValues.add(d.getDefaultParameterValue());
+        	}
+        }
+        return paramValues;
+    }
+    public Future<Promotion> approve(AbstractBuild<?,?> build, PromotionProcess promotionProcess) throws IOException{
+        List<ParameterValue> paramValues = createDefaultValues();
+        return approve(build, promotionProcess, paramValues);
+    }
 
     /**
      * Web method to handle the approval action submitted by the user.
@@ -158,17 +196,11 @@ public class ManualCondition extends PromotionCondition {
                     ParameterDefinition d = getParameterDefinition(name);
                     if (d==null)
                         throw new IllegalArgumentException("No such parameter definition: " + name);
-
+                    
                     paramValues.add(d.createValue(req, jo));
                 }
             }
-
-            // add approval to build
-            build.addAction(new ManualApproval(promotionProcess.getName(), paramValues));
-            build.save();
-
-            // check for promotion
-            promotionProcess.considerPromotion2(build);
+            approve(build, promotionProcess, paramValues);
         }
 
         rsp.sendRedirect2("../../../..");

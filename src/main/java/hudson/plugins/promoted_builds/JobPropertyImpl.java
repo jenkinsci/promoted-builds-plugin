@@ -16,6 +16,7 @@ import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.StaplerRequest;
@@ -312,7 +313,16 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
     @Extension
     public static final class DescriptorImpl extends JobPropertyDescriptor {
-        public String getDisplayName() {
+    	
+        public DescriptorImpl() {
+			super();
+		}
+
+		public DescriptorImpl(Class<? extends JobProperty<?>> clazz) {
+			super(clazz);
+		}
+
+		public String getDisplayName() {
             return "Promote Builds When...";
         }
 
