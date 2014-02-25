@@ -11,9 +11,9 @@
           <f:option selected="${instance.icon=='star-gold-e'}"   value="star-gold-e">Gold empty star</f:option>
           <f:option selected="${instance.icon=='star-gold-w'}"   value="star-gold-w">Gold white star</f:option>
 
-          <f:option selected="${instance.icon=='star-silver'}"   value="star-silver">silver star</f:option>
-          <f:option selected="${instance.icon=='star-silver-e'}" value="star-silver-e">silver empty star</f:option>
-          <f:option selected="${instance.icon=='star-silver-w'}" value="star-silver-w">silver white star</f:option>
+          <f:option selected="${instance.icon=='star-silver'}"   value="star-silver">Silver star</f:option>
+          <f:option selected="${instance.icon=='star-silver-e'}" value="star-silver-e">Silver empty star</f:option>
+          <f:option selected="${instance.icon=='star-silver-w'}" value="star-silver-w">Silver white star</f:option>
 
           <f:option selected="${instance.icon=='star-blue'}"     value="star-blue">Blue star</f:option>
           <f:option selected="${instance.icon=='star-blue-e'}"   value="star-blue-e">Blue empty star</f:option>
