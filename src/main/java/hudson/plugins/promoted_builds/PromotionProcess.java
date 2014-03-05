@@ -299,8 +299,13 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *
      * @return
      *      null if the build was not promoted, otherwise Future that kicks in when the build is completed.
+     * @throws IOException 
      */
-    public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build) throws IOException {
+    public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build) throws IOException {
+		return considerPromotion2(build, (List<ParameterValue>)null);
+	}
+	
+    public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build, List<ParameterValue> params) throws IOException {
         if (!isActive())
             return null;    // not active
 
@@ -316,7 +321,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             return null; // not this time
 
         LOGGER.fine("Promotion condition of "+build+" is met: "+qualification);
-        Future<Promotion> f = promote2(build, new UserCause(), qualification); // TODO: define promotion cause
+        Future<Promotion> f = promote2(build, new UserCause(), qualification, params); // TODO: define promotion cause
         if (f==null)
             LOGGER.warning(build+" qualifies for a promotion but the queueing failed.");
         return f;
@@ -343,6 +348,9 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      Future to track the completion of the promotion.
      */
     public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
+    	return promote2(build, cause, qualification, null);
+    }
+    public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification, List<ParameterValue> params) throws IOException {
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
         // build is qualified for a promotion.
         if(a!=null) {
@@ -353,7 +361,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         }
 
         // schedule promotion activity.
-        return scheduleBuild2(build,cause);
+        return scheduleBuild2(build,cause, params);
     }
 
     /**
@@ -379,26 +387,20 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause, List<ParameterValue> params) {
         assert build.getProject()==getOwner();
 
-        List<Action> actions = new ArrayList<Action>();
-        Promotion.buildParametersAction(actions, build, params);
         
+        List<Action> actions = new ArrayList<Action>();
+        if (params!=null){
+        	Promotion.buildParametersAction(actions, build, params);
+        }
         actions.add(new PromotionTargetAction(build));
 
         // remember what build we are promoting
         return super.scheduleBuild2(0, cause, actions.toArray(new Action[actions.size()]));
     }
     
-    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
-        List<ParameterValue> params=new ArrayList<ParameterValue>();
-        List<ManualApproval> approvals = build.getActions(ManualApproval.class);
-        if (approvals!=null){
-	        for(ManualApproval approval : approvals) {
-	        	params.addAll(approval.badge.getParameterValues());
-	        }
-        }
 
-        // remember what build we are promoting
-        return scheduleBuild2(build, cause, params);
+    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
+        return scheduleBuild2(build, cause, null);
     }
 
     public boolean isInQueue(AbstractBuild<?,?> build) {
@@ -590,5 +592,9 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     private static final Logger LOGGER = Logger.getLogger(PromotionProcess.class.getName());
+
+	public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build, ManualApproval approval) throws IOException {
+		return considerPromotion2(build, approval.badge.getParameterValues());
+	}
 
 }
