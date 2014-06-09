@@ -248,7 +248,7 @@ public class DownstreamPassCondition extends PromotionCondition {
                                                     u.addAction(pdb=new PseudoDownstreamBuilds());
                                                 pdb.add(build);
                                                 u.save();
-                                                break;
+//                                                break;
                                             }
                                         }
                                     }
