@@ -52,6 +52,7 @@ public class PromotionEnvironmentVariablesTest {
         
         // Act
         FreeStyleBuild build = project.scheduleBuild2(0).get();
+        build.setDisplayName("1234");
         build.addAction(approvalAction);
         build.save();
         
@@ -63,8 +64,9 @@ public class PromotionEnvironmentVariablesTest {
         // Assert
         assertEquals("Folder/Project", env.get("PROMOTED_JOB_FULL_NAME"));
         assertEquals("Project", env.get("PROMOTED_JOB_NAME"));
-	assertEquals("SYSTEM", env.get("PROMOTED_USER_NAME"));       
- 
+	assertEquals("SYSTEM", env.get("PROMOTED_USER_NAME"));
+        assertEquals("1234", env.get("PROMOTED_DISPLAY_NAME"));
+
         project.delete();
         parent.delete();
     }
