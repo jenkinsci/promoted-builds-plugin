@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.448</version>
+    <version>1.532.3</version>
   </parent>
 
   <artifactId>promoted-builds</artifactId>
@@ -26,14 +26,16 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/promoted-builds-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/promoted-builds-plugin.git</developerConnection>
-    <url>http://github.com/jenkinsci/promoted-builds-plugin</url>
+    <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
   </scm>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>http://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
 
   <repositories>
     <repository>
@@ -46,12 +48,7 @@
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>maven-plugin</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.sonatype.sisu</groupId>
-          <artifactId>sisu-guava</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>2.0</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -59,20 +56,5 @@
       <version>1.8.5</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>11.0.1</version>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
-
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
 </project>  
-
