@@ -5,12 +5,18 @@ import hudson.model.AbstractProject;
 import hudson.model.Api;
 import hudson.model.PermalinkProjectAction;
 import hudson.model.ProminentProjectAction;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.kohsuke.stapler.HttpResponse;
+import org.kohsuke.stapler.HttpResponses;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 /**
  * For customizing project top-level GUI.
@@ -93,6 +99,12 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
         for (PromotionProcess pp : property.getActiveItems())
             r.add(pp.asPermalink());
         return r;
+    }
+
+    @RequirePOST
+    public HttpResponse doCreateProcess(@QueryParameter String name, StaplerRequest req) throws IOException {
+        property.createProcessFromXml(name, req.getInputStream());
+        return HttpResponses.ok();
     }
 
     public String getIconFileName() {

@@ -104,4 +104,21 @@ public class RemoteApiTest {
         assertEquals(0, promotion.getActiveItems().size());
     }
 
+    @Test public void create() throws Exception {
+        FreeStyleProject p = r.createFreeStyleProject("p");
+        JobPropertyImpl promotion = new JobPropertyImpl(p);
+        p.addProperty(promotion);
+        assertEquals(0, promotion.getItems().size());
+        assertEquals(0, promotion.getActiveItems().size());
+        JenkinsRule.WebClient wc = r.createWebClient();
+        WebRequestSettings req = new WebRequestSettings(new URL(wc.createCrumbedUrl("job/p/promotion/createProcess") + "&name=promo"), HttpMethod.POST);
+        req.setRequestBody("<hudson.plugins.promoted__builds.PromotionProcess><conditions><hudson.plugins.promoted__builds.conditions.SelfPromotionCondition><evenIfUnstable>true</evenIfUnstable></hudson.plugins.promoted__builds.conditions.SelfPromotionCondition></conditions></hudson.plugins.promoted__builds.PromotionProcess>");
+        wc.getPage(req);
+        assertEquals(1, promotion.getItems().size());
+        assertEquals("not yet in use", 0, promotion.getActiveItems().size());
+        PromotionProcess proc = promotion.getItem("promo");
+        assertNotNull(proc);
+        assertTrue(proc.conditions.get(SelfPromotionCondition.class).isEvenIfUnstable());
+    }
+
 }
