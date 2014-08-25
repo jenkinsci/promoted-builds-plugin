@@ -33,6 +33,7 @@ import hudson.security.AuthorizationMatrixProperty;
 import hudson.security.Permission;
 import hudson.security.ProjectMatrixAuthorizationStrategy;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,6 +89,19 @@ public class RemoteApiTest {
         wc.login("alice");
         wc.goToXml("job/p/config.xml");
         wc.goToXml("job/p/promotion/process/promo/config.xml");
+    }
+
+    @Test public void delete() throws Exception {
+        FreeStyleProject p = r.createFreeStyleProject("p");
+        JobPropertyImpl promotion = new JobPropertyImpl(p);
+        p.addProperty(promotion);
+        promotion.addProcess("promo").save();
+        assertEquals(1, promotion.getItems().size());
+        assertEquals(1, promotion.getActiveItems().size());
+        JenkinsRule.WebClient wc = r.createWebClient();
+        wc.getPage(wc.addCrumb(new WebRequestSettings(new URL(r.getURL(), "job/p/promotion/process/promo/doDelete"), HttpMethod.POST)));
+        assertEquals(0, promotion.getItems().size());
+        assertEquals(0, promotion.getActiveItems().size());
     }
 
 }

@@ -14,6 +14,7 @@ import hudson.model.Items;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
+import hudson.model.listeners.ItemListener;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -265,11 +266,12 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     }
 
     public void onDeleted(PromotionProcess process) {
-        // TODO delete the persisted directory?
+        setOwner(owner);
+        ItemListener.fireOnDeleted(process);
     }
 
     public void onRenamed(PromotionProcess item, String oldName, String newName) throws IOException {
-        // TODO should delete the persisted directory?
+        setOwner(owner);
     }
 
     public String getUrl() {
