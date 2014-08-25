@@ -30,6 +30,7 @@ import hudson.model.Saveable;
 import hudson.model.labels.LabelAtom;
 import hudson.model.labels.LabelExpression;
 import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
+import hudson.security.ACL;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -146,6 +147,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     public AbstractProject<?,?> getOwner() {
         return getParent().getOwner();
+    }
+
+    @Override public ACL getACL() {
+        return getOwner().getACL();
     }
 
     /**
