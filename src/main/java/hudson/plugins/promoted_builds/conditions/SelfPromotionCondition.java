@@ -44,22 +44,22 @@ import java.io.IOException;
  * @author Kohsuke Kawaguchi
  */
 public class SelfPromotionCondition extends PromotionCondition {
-    private final boolean evenIfUnstable;
+    private final ResultCondition resultCondition;
 
     @DataBoundConstructor
-    public SelfPromotionCondition(boolean evenIfUnstable) {
-        this.evenIfUnstable = evenIfUnstable;
+    public SelfPromotionCondition(ResultCondition resultCondition) {
+        this.resultCondition = resultCondition;
     }
 
-    public boolean isEvenIfUnstable() {
-        return evenIfUnstable;
+    public ResultCondition getResultCondition() {
+        return resultCondition;
     }
 
     @Override
     public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?, ?> build) {
         if (!build.isBuilding()) {
             Result r = build.getResult();
-            if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
+            if (resultCondition.isMet(r)) {
                 return new SelfPromotionBadge();
             }
         }

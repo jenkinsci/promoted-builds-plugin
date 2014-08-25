@@ -51,26 +51,25 @@ public class DownstreamPassCondition extends PromotionCondition {
      * Every job has to have at least one successful build for us to promote a build.
      */
     private final String jobs;
+    private final ResultCondition resultCondition;
 
-    private final boolean evenIfUnstable;
-
-    public DownstreamPassCondition(String jobs) {
-        this(jobs, false);
+    public DownstreamPassCondition(String jobs, ResultCondition resultCondition) {
+        this.jobs = jobs;
+        this.resultCondition = resultCondition;
     }
 
-    public DownstreamPassCondition(String jobs, boolean evenIfUnstable) {
-        this.jobs = jobs;
-        this.evenIfUnstable = evenIfUnstable;
+    public DownstreamPassCondition(String jobs) {
+        this(jobs, ResultCondition.SUCCESS);
     }
 
     public String getJobs() {
         return jobs;
     }
 
-    public boolean isEvenIfUnstable() {
-        return evenIfUnstable;
+    public ResultCondition getResultCondition() {
+        return resultCondition;
     }
-    
+
     @Override
     public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?,?> build) {
         Badge badge = new Badge();
@@ -82,7 +81,7 @@ public class DownstreamPassCondition extends PromotionCondition {
             for( AbstractBuild<?,?> b : build.getDownstreamBuilds(j) ) {
                 if (!b.isBuilding()) {
                     Result r = b.getResult();
-                    if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
+                    if (resultCondition.isMet(r)) {
                         badge.add(b);
                         continue OUTER;
                     }
@@ -93,7 +92,7 @@ public class DownstreamPassCondition extends PromotionCondition {
                 for (AbstractBuild<?,?> b : pdb.listBuilds(j)) {
                     if (!b.isBuilding()) {
                         Result r = b.getResult();
-                        if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
+                        if (resultCondition.isMet(r)) {
                             badge.add(b);
                             continue OUTER;
                         }
@@ -165,8 +164,8 @@ public class DownstreamPassCondition extends PromotionCondition {
         }
 
         public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return new DownstreamPassCondition(
-                    formData.getString("jobs"), formData.getBoolean("evenIfUnstable"));
+            return new DownstreamPassCondition(formData.getString("jobs"),
+                                               ResultCondition.valueOf(formData.getString("resultCondition")));
         }
 
         public AutoCompletionCandidates doAutoCompleteJobs(@QueryParameter String value, @AncestorInPath AbstractProject project) {

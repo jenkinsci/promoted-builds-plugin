@@ -26,8 +26,8 @@ public class ParameterizedSelfPromotionCondition extends SelfPromotionCondition 
     private final String parameterValue;
 
     @DataBoundConstructor
-    public ParameterizedSelfPromotionCondition(boolean evenIfUnstable, String parameterName, String parameterValue) {
-        super(evenIfUnstable);
+    public ParameterizedSelfPromotionCondition(ResultCondition resultCondition, String parameterName, String parameterValue) {
+        super(resultCondition);
         this.parameterName = parameterName;
         this.parameterValue = parameterValue;
     }

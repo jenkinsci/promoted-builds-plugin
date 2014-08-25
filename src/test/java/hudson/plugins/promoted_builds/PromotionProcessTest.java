@@ -11,6 +11,7 @@ import hudson.tasks.Fingerprinter;
 import hudson.tasks.Recorder;
 import hudson.tasks.Shell;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
+import hudson.plugins.promoted_builds.conditions.ResultCondition;
 import net.sf.json.JSONObject;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.kohsuke.stapler.Stapler;
@@ -129,7 +130,7 @@ public class PromotionProcessTest extends HudsonTestCase {
                         .accumulate("icon", "star-gold")
                         .accumulate("conditions",new JSONObject()
                             .accumulate("hudson-plugins-promoted_builds-conditions-SelfPromotionCondition",
-                                    new JSONObject().accumulate("evenIfUnstable", false)));
+                                    new JSONObject().accumulate("resultCondition", ResultCondition.SUCCESS)));
                 PromotionProcess p = PromotionProcess.fromJson(Stapler.getCurrentRequest(), o);
                 assertEquals("foo", p.getName());
                 assertEquals("star-gold", p.getIcon());

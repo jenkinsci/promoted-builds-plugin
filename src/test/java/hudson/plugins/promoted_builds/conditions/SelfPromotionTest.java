@@ -10,6 +10,7 @@ import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
+import hudson.plugins.promoted_builds.conditions.ResultCondition;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
@@ -28,10 +29,10 @@ public class SelfPromotionTest extends HudsonTestCase {
         p.addProperty(promotion);
 
         PromotionProcess promo1 = promotion.addProcess("promo1");
-        promo1.conditions.add(new SelfPromotionCondition(false));
+        promo1.conditions.add(new SelfPromotionCondition(ResultCondition.SUCCESS));
 
         PromotionProcess promo2 = promotion.addProcess("promo2");
-        promo2.conditions.add(new SelfPromotionCondition(false));
+        promo2.conditions.add(new SelfPromotionCondition(ResultCondition.SUCCESS));
 
         // ensure that the data survives the roundtrip
         configRoundtrip(p);
@@ -66,10 +67,10 @@ public class SelfPromotionTest extends HudsonTestCase {
         p.addProperty(promotion);
 
         PromotionProcess promo1 = promotion.addProcess("promo1");
-        promo1.conditions.add(new SelfPromotionCondition(false));
+        promo1.conditions.add(new SelfPromotionCondition(ResultCondition.SUCCESS));
 
         PromotionProcess promo2 = promotion.addProcess("promo2");
-        promo2.conditions.add(new SelfPromotionCondition(true));
+        promo2.conditions.add(new SelfPromotionCondition(ResultCondition.UNSTABLE_OR_BETTER));
 
         // ensure that the data survives the roundtrip
         configRoundtrip(p);
@@ -105,10 +106,10 @@ public class SelfPromotionTest extends HudsonTestCase {
         p.addProperty(promotion);
 
         PromotionProcess promo1 = promotion.addProcess("promo1");
-        promo1.conditions.add(new SelfPromotionCondition(false));
+        promo1.conditions.add(new SelfPromotionCondition(ResultCondition.SUCCESS));
 
         PromotionProcess promo2 = promotion.addProcess("promo2");
-        promo2.conditions.add(new SelfPromotionCondition(true));
+        promo2.conditions.add(new SelfPromotionCondition(ResultCondition.UNSTABLE_OR_BETTER));
 
         // ensure that the data survives the roundtrip
         configRoundtrip(p);
