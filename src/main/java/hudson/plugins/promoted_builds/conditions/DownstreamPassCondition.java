@@ -52,14 +52,16 @@ public class DownstreamPassCondition extends PromotionCondition {
      */
     private final String jobs;
     private final ResultCondition resultCondition;
+    private final boolean waitForIndirect;
 
-    public DownstreamPassCondition(String jobs, ResultCondition resultCondition) {
+    public DownstreamPassCondition(String jobs, ResultCondition resultCondition, boolean waitForIndirect) {
         this.jobs = jobs;
         this.resultCondition = resultCondition;
+        this.waitForIndirect = waitForIndirect;
     }
 
     public DownstreamPassCondition(String jobs) {
-        this(jobs, ResultCondition.SUCCESS);
+        this(jobs, ResultCondition.SUCCESS, false);
     }
 
     public String getJobs() {
@@ -68,6 +70,24 @@ public class DownstreamPassCondition extends PromotionCondition {
 
     public ResultCondition getResultCondition() {
         return resultCondition;
+    }
+
+    public boolean getWaitForIndirect() {
+        return waitForIndirect;
+    }
+
+    private boolean downstreamBuildsNeverStarted(AbstractProject<?,?> job, AbstractBuild<?,?> root) {
+        boolean ret = false;
+        for (AbstractProject<?,?> uj : job.getUpstreamProjects()) {
+            for (AbstractBuild<?,?> ub : root.getDownstreamBuilds(uj)) {
+                if (!ub.isBuilding() && ub.getResult() != Result.SUCCESS) {
+                    ret = true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return ret;
     }
 
     @Override
@@ -85,6 +105,13 @@ public class DownstreamPassCondition extends PromotionCondition {
                         badge.add(b);
                         continue OUTER;
                     }
+                }
+            }
+            if (waitForIndirect) {
+                /* Handle the case where (indirect) downstream jobs
+                   are only triggered if their upstream build was successful. */
+                if (downstreamBuildsNeverStarted(j, build)) {
+                    continue OUTER;
                 }
             }
 
@@ -115,16 +142,24 @@ public class DownstreamPassCondition extends PromotionCondition {
     public List<AbstractProject<?,?>> getJobList(ItemGroup context) {
         List<AbstractProject<?,?>> r = new ArrayList<AbstractProject<?,?>>();
         for (String name : Util.tokenize(jobs,",")) {
-            AbstractProject job = Hudson.getInstance().getItem(name.trim(), context, AbstractProject.class);
-            if(job!=null)   r.add(job);
+            AbstractProject<?,?> job = Hudson.getInstance().getItem(name.trim(), context, AbstractProject.class);
+            if (job != null) {
+                if (!r.contains(job)) {
+                    r.add(job);
+                }
+                if (waitForIndirect) {
+                    for (AbstractProject<?,?> ds : job.getTransitiveDownstreamProjects()) {
+                        if (!r.contains(ds)) {
+                            r.add(ds);
+                        }
+                    }
+                }
+            }
         }
         return r;
     }
 
     public boolean contains(ItemGroup ctx, AbstractProject<?,?> job) {
-        // quick rejection test
-        if(!jobs.contains(job.getName())) return false;
-
         String name = job.getFullName();
         for (AbstractProject<?, ?> project : getJobList(ctx)) {
             if (project.getFullName().equals(name)) return true;
@@ -165,7 +200,8 @@ public class DownstreamPassCondition extends PromotionCondition {
 
         public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return new DownstreamPassCondition(formData.getString("jobs"),
-                                               ResultCondition.valueOf(formData.getString("resultCondition")));
+                                               ResultCondition.valueOf(formData.getString("resultCondition")),
+                                               formData.getBoolean("waitForIndirect"));
         }
 
         public AutoCompletionCandidates doAutoCompleteJobs(@QueryParameter String value, @AncestorInPath AbstractProject project) {

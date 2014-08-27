@@ -5,4 +5,7 @@
   <f:entry title="${%Trigger when jobs are}" field="resultCondition">
     <f:enum>${it.displayName}</f:enum>
   </f:entry>
+  <f:entry title="${%Wait for indirect downstream jobs}" field="waitForIndirect">
+    <f:checkbox />
+  </f:entry>
 </j:jelly>
