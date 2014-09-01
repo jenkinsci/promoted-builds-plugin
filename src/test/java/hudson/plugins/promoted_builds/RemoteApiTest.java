@@ -29,6 +29,7 @@ import com.gargoylesoftware.htmlunit.WebRequestSettings;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
+import hudson.plugins.promoted_builds.conditions.ResultCondition;
 import hudson.security.AuthorizationMatrixProperty;
 import hudson.security.Permission;
 import hudson.security.ProjectMatrixAuthorizationStrategy;
@@ -56,16 +57,16 @@ public class RemoteApiTest {
         JobPropertyImpl promotion = new JobPropertyImpl(p);
         p.addProperty(promotion);
         PromotionProcess proc = promotion.addProcess("promo");
-        proc.conditions.add(new SelfPromotionCondition(true));
+        proc.conditions.add(new SelfPromotionCondition(ResultCondition.UNSTABLE_OR_BETTER));
         JenkinsRule.WebClient wc = r.createWebClient();
         String xml = wc.goToXml("job/p/promotion/process/promo/config.xml").getContent();
         assertTrue(xml, xml.contains("SelfPromotionCondition"));
-        assertTrue(xml, xml.contains("<evenIfUnstable>true</evenIfUnstable>"));
+        assertTrue(xml, xml.contains("<resultCondition>UNSTABLE_OR_BETTER</resultCondition>"));
         WebRequestSettings req = new WebRequestSettings(wc.createCrumbedUrl("job/p/promotion/process/promo/config.xml"), HttpMethod.POST);
-        req.setRequestBody(xml.replace("<evenIfUnstable>true</evenIfUnstable>", "<evenIfUnstable>false</evenIfUnstable>"));
-        assertTrue(proc.conditions.get(SelfPromotionCondition.class).isEvenIfUnstable());
+        req.setRequestBody(xml.replace("<resultCondition>UNSTABLE_OR_BETTER</resultCondition>", "<resultCondition>SUCCESS</resultCondition>"));
+        assertEquals(proc.conditions.get(SelfPromotionCondition.class).getResultCondition(), ResultCondition.UNSTABLE_OR_BETTER);
         wc.getPage(req);
-        assertFalse(proc.conditions.get(SelfPromotionCondition.class).isEvenIfUnstable());
+        assertEquals(proc.conditions.get(SelfPromotionCondition.class).getResultCondition(), ResultCondition.SUCCESS);
     }
 
     @Test public void acl() throws Exception {
@@ -112,13 +113,13 @@ public class RemoteApiTest {
         assertEquals(0, promotion.getActiveItems().size());
         JenkinsRule.WebClient wc = r.createWebClient();
         WebRequestSettings req = new WebRequestSettings(new URL(wc.createCrumbedUrl("job/p/promotion/createProcess") + "&name=promo"), HttpMethod.POST);
-        req.setRequestBody("<hudson.plugins.promoted__builds.PromotionProcess><conditions><hudson.plugins.promoted__builds.conditions.SelfPromotionCondition><evenIfUnstable>true</evenIfUnstable></hudson.plugins.promoted__builds.conditions.SelfPromotionCondition></conditions></hudson.plugins.promoted__builds.PromotionProcess>");
+        req.setRequestBody("<hudson.plugins.promoted__builds.PromotionProcess><conditions><hudson.plugins.promoted__builds.conditions.SelfPromotionCondition><resultCondition>UNSTABLE_OR_BETTER</resultCondition></hudson.plugins.promoted__builds.conditions.SelfPromotionCondition></conditions></hudson.plugins.promoted__builds.PromotionProcess>");
         wc.getPage(req);
         assertEquals(1, promotion.getItems().size());
         assertEquals("not yet in use", 0, promotion.getActiveItems().size());
         PromotionProcess proc = promotion.getItem("promo");
         assertNotNull(proc);
-        assertTrue(proc.conditions.get(SelfPromotionCondition.class).isEvenIfUnstable());
+        assertEquals(proc.conditions.get(SelfPromotionCondition.class).getResultCondition(), ResultCondition.UNSTABLE_OR_BETTER);
     }
 
 }
