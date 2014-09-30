@@ -37,6 +37,17 @@
         </select>
       </f:entry>
 
+      <j:set var="jdks" value="${app.JDKs}" />
+      <f:entry title="JDK"
+               description="${%JDK to be used for this project}">
+        <select class="setting-input validated" name="jdk" checkUrl="'${rootURL}/defaultJDKCheck?value='+this.value">
+          <option>${%UseSameAsJob}</option>
+          <j:forEach var="inst" items="${jdks}">
+            <f:option selected="${inst.name==instance.JDK.name}" value="${inst.name}">${inst.name}</f:option>
+          </j:forEach>
+        </select>
+      </f:entry>
+
       <f:optionalBlock name="hasAssignedLabel" title="${%Restrict where this promotion process can be run}"
                        checked="${instance.assignedLabelString!=null}" inline="true">
         <f:entry title="${%Label Expression}"

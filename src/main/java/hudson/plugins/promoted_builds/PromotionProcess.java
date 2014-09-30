@@ -69,12 +69,25 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * and ${rootURL}/plugin/promoted-builds/icons/32x32/, e.g. <code>"star-gold"</code>.
      */
     public String icon;
-    
+
+
+    /**
+     * Identifies {@link JDK} to be used.
+     * Null if no explicit configuration is required.
+     *
+     * <p>
+     * Can't store {@link JDK} directly because {@link Jenkins} and {@link Project}
+     * are saved independently.
+     *
+     * @see Jenkins#getJDK(String)
+     */
+    private String jdk;
+
     /**
      * The label that promotion process can be run on.
      */
     public String assignedLabel;
-    
+
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
 
     /*package*/ PromotionProcess(JobPropertyImpl property, String name) {
@@ -135,7 +148,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public AbstractProject getRootProject() {
     	return getParent().getOwner().getRootProject();
     }
-    
+
     @Override
     public JobPropertyImpl getParent() {
         return (JobPropertyImpl)super.getParent();
@@ -165,7 +178,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
         return null;
     }
-    
+
     public DescribableList<Publisher, Descriptor<Publisher>> getPublishersList() {
         // TODO: extract from the buildsSteps field? Or should I separate builders and publishers?
         return new DescribableList<Publisher,Descriptor<Publisher>>(this);
@@ -193,7 +206,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             return LabelAtom.escape(assignedLabel);
         }
     }
-   
+
     @Override public Label getAssignedLabel() {
         // Really would like to run on the exact node that the promoted build ran on,
         // not just the same label.. but at least this works if job is tied to one node:
@@ -203,7 +216,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     @Override public JDK getJDK() {
-        return getOwner().getJDK();
+        if (jdk == null) {
+          return getOwner().getJDK();
+        } else {
+          return Jenkins.getInstance().getJDK(jdk);
+        }
     }
 
     /**
@@ -218,12 +235,12 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             return ((FreeStyleProject) p).getCustomWorkspace();
         return null;
     }
-    
+
     /**
      * Get the icon name, without the extension. It will always return a non null
      * and non empty string, as <code>"star-gold"</code> is used for compatibility
      * for older promotions configurations.
-     * 
+     *
      * @return the icon name
      */
     public String getIcon() {
@@ -232,7 +249,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     /**
      * Handle compatibility with pre-1.8 configs.
-     * 
+     *
      * @param sIcon
      *      the name of the icon used by this promotion; if null or empty,
      *      we return the gold icon for compatibility with previous releases
@@ -304,12 +321,12 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *
      * @return
      *      null if the build was not promoted, otherwise Future that kicks in when the build is completed.
-     * @throws IOException 
+     * @throws IOException
      */
     public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build) throws IOException {
 		return considerPromotion2(build, (List<ParameterValue>)null);
 	}
-	
+
     public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build, List<ParameterValue> params) throws IOException {
         if (!isActive())
             return null;    // not active
@@ -343,7 +360,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public void promote(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
         promote2(build,cause,qualification);
     }
-    
+
     /**
      * Promote the given build by using the given qualification.
      *
@@ -392,7 +409,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause, List<ParameterValue> params) {
         assert build.getProject()==getOwner();
 
-        
+
         List<Action> actions = new ArrayList<Action>();
         if (params!=null){
         	Promotion.buildParametersAction(actions, build, params);
@@ -402,7 +419,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         // remember what build we are promoting
         return super.scheduleBuild2(0, cause, actions.toArray(new Action[actions.size()]));
     }
-    
+
 
     public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
         return scheduleBuild2(build, cause, null);
