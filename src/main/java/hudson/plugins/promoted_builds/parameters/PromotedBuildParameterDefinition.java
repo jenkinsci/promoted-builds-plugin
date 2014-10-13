@@ -117,6 +117,9 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
         List builds = new ArrayList();
 
         AbstractProject job = (AbstractProject) Jenkins.getInstance().getItem(projectName);
+        if (job == null) {
+            return builds;
+        }
 
         PromotedProjectAction promotedProjectAction  = job.getAction(PromotedProjectAction.class);
         if (promotedProjectAction == null) {
