@@ -27,6 +27,7 @@ import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
+import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
@@ -49,6 +50,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.export.Exported;
 
 /**
@@ -59,6 +61,7 @@ import org.kohsuke.stapler.export.Exported;
  */
 public class PromotedBuildParameterDefinition extends SimpleParameterDefinition {
     private final String projectName;
+    private final ItemGroup<?> context;
     private final String promotionProcessName;
 
     @DataBoundConstructor
@@ -66,6 +69,17 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
         super(name, description);
         this.projectName = jobName;
         this.promotionProcessName = process;
+
+        // this is for relative names to work
+        ItemGroup<?> context = null;
+        StaplerRequest req = Stapler.getCurrentRequest();
+        if (req != null) {
+            AbstractProject<?,?> p = req.findAncestorObject(AbstractProject.class);
+            if (p != null) {
+                context = p.getParent();
+            }
+        }
+        this.context = context;
     }
 
     @Override
@@ -113,10 +127,15 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
         return promotionProcessName;
     }
 
+    private static AbstractProject getProject(String projectName, ItemGroup context) {
+        // JENKINS-25011: also look for jobs in folders.
+        return Jenkins.getInstance().getItem(projectName, context, AbstractProject.class);
+    }
+
     public List getBuilds() {
         List builds = new ArrayList();
 
-        AbstractProject job = (AbstractProject) Jenkins.getInstance().getItem(projectName);
+        AbstractProject job = getProject(projectName, context);
 
         PromotedProjectAction promotedProjectAction  = job.getAction(PromotedProjectAction.class);
         if (promotedProjectAction == null) {
@@ -161,55 +180,67 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
         /**
          * Checks the job name.
          */
-        public FormValidation doCheckJobName(@AncestorInPath Item project, @QueryParameter String value ) {
+        public FormValidation doCheckJobName(
+                @AncestorInPath AbstractProject<?,?> project,
+                @QueryParameter String value
+        ) {
             if (!project.hasPermission(Item.CONFIGURE) && project.hasPermission(Item.EXTENDED_READ)) {
                 return FormValidation.ok();
             }
             project.checkPermission(Item.CONFIGURE);
 
+            ItemGroup parent = project.getParent();
             if (StringUtils.isNotBlank(value)) {
-                AbstractProject p = Jenkins.getInstance().getItem(value,project,AbstractProject.class);
-                if(p==null)
+                AbstractProject p = getProject(value, parent);
+                if (p==null) {
+                    // suggest full name so that getBuilds() can find item.
                     return FormValidation.error(hudson.tasks.Messages.BuildTrigger_NoSuchProject(value,
-                            AbstractProject.findNearest(value, project.getParent()).getRelativeNameFrom(project)));
+                            AbstractProject.findNearest(value, parent).getRelativeNameFrom(parent)));
+                }
 
             }
 
             return FormValidation.ok();
         }
 
-        public AutoCompletionCandidates doAutoCompleteJobName(@QueryParameter String value) {
-            AutoCompletionCandidates candidates = new AutoCompletionCandidates();
-            List<AbstractProject> jobs = Jenkins.getInstance().getItems(AbstractProject.class);
-            for (AbstractProject job: jobs) {
-                if (job.getFullName().startsWith(value)) {
-                    if (job.hasPermission(Item.READ)) {
-                        candidates.add(job.getFullName());
-                    }
-                }
+        public AutoCompletionCandidates doAutoCompleteJobName(
+                @AncestorInPath AbstractProject<?,?> project,
+                @QueryParameter String value
+        ) {
+            if (!project.hasPermission(Item.CONFIGURE) && project.hasPermission(Item.EXTENDED_READ)) {
+                return new AutoCompletionCandidates();
             }
-            return candidates;
+            project.checkPermission(Item.CONFIGURE);
+
+            ItemGroup parent = project.getParent();
+            return AutoCompletionCandidates.ofJobNames(Item.class, value, project, parent);
         }
 
         /**
          * Fills in the available promotion processes.
          */
-        public ListBoxModel doFillProcessItems(@AncestorInPath Job defaultJob, @QueryParameter("jobName") String jobName) {
-            if (!defaultJob.hasPermission(Item.CONFIGURE) && defaultJob.hasPermission(Item.EXTENDED_READ)) {
+        public ListBoxModel doFillProcessItems(
+                @AncestorInPath AbstractProject<?,?> project,
+                @QueryParameter("jobName") String jobName
+        ) {
+            if (!project.hasPermission(Item.CONFIGURE) && project.hasPermission(Item.EXTENDED_READ)) {
                 return new ListBoxModel();
             }
-            defaultJob.checkPermission(Item.CONFIGURE);
+            project.checkPermission(Item.CONFIGURE);
 
+            ItemGroup parent = project.getParent();
             AbstractProject<?,?> j = null;
-            if (jobName!=null)
-                j = Jenkins.getInstance().getItem(jobName,defaultJob,AbstractProject.class);
+            if (jobName != null) {
+                j = getProject(jobName, parent);
+            }
 
             ListBoxModel r = new ListBoxModel();
             if (j!=null) {
                 JobPropertyImpl pp = j.getProperty(JobPropertyImpl.class);
                 if (pp!=null) {
-                    for (PromotionProcess proc : pp.getActiveItems())
+                    for (PromotionProcess proc : pp.getActiveItems()) {
                         r.add(new Option(proc.getDisplayName(),proc.getName()));
+                    }
                 }
             }
             return r;
