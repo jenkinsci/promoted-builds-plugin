@@ -227,8 +227,12 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
             if (j!=null) {
                 JobPropertyImpl pp = j.getProperty(JobPropertyImpl.class);
                 if (pp!=null) {
-                    for (PromotionProcess proc : pp.getActiveItems())
+                    for (PromotionProcess proc : pp.getActiveItems()) {
+                        // Note: why not list all items instead of active ones?
+                        // this would allow to configure the job even
+                        // if a promotion hasn't happened (yet).
                         r.add(new Option(proc.getDisplayName(),proc.getName()));
+                    }
                 }
             }
             return r;
