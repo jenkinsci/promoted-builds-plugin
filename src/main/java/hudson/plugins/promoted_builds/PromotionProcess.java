@@ -394,9 +394,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
         
         List<Action> actions = new ArrayList<Action>();
-        if (params!=null){
-        	Promotion.buildParametersAction(actions, build, params);
-        }
+       	Promotion.buildParametersAction(actions, build, params);
         actions.add(new PromotionTargetAction(build));
 
         // remember what build we are promoting

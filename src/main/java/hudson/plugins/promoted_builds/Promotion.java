@@ -327,6 +327,10 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
      * @param promotionParams
      */
 	public static void buildParametersAction(List<Action> actions, AbstractBuild<?, ?> build, List<ParameterValue> promotionParams) {
+        if (promotionParams == null) {
+            promotionParams = new ArrayList<ParameterValue>();
+        }
+
 		List<ParameterValue> params=new ArrayList<ParameterValue>();
 		
 		//Add the target build parameters first, if the same parameter is not being provided bu the promotion build
