@@ -309,9 +309,8 @@ public final class Status {
         
         JSONObject formData = req.getSubmittedForm();
         
-        List<ParameterValue> paramValues=null;
+        List<ParameterValue> paramValues = new ArrayList<ParameterValue>();
         if (formData!=null){
-            paramValues = new ArrayList<ParameterValue>();
             ManualCondition manualCondition=(ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
             if (manualCondition!=null){
             	List<ParameterDefinition> parameterDefinitions=manualCondition.getParameterDefinitions();
@@ -330,9 +329,6 @@ public final class Status {
                     }
                 }
             }
-        }
-        if (paramValues==null){
-        	paramValues = new ArrayList<ParameterValue>();
         }
         Future<Promotion> f = getProcess().scheduleBuild2(getTarget(), new UserCause(), paramValues);
         if (f==null)

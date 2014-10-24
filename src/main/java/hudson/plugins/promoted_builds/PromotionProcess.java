@@ -45,6 +45,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -307,7 +308,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @throws IOException 
      */
     public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build) throws IOException {
-		return considerPromotion2(build, (List<ParameterValue>)null);
+        return considerPromotion2(build, Collections.<ParameterValue>emptyList());
 	}
 	
     public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build, List<ParameterValue> params) throws IOException {
@@ -353,7 +354,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      Future to track the completion of the promotion.
      */
     public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
-    	return promote2(build, cause, qualification, null);
+        return promote2(build, cause, qualification, Collections.<ParameterValue>emptyList());
     }
     public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification, List<ParameterValue> params) throws IOException {
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
@@ -391,12 +392,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause, List<ParameterValue> params) {
         assert build.getProject()==getOwner();
+        assert params != null;
 
-        
         List<Action> actions = new ArrayList<Action>();
-        if (params!=null){
-        	Promotion.buildParametersAction(actions, build, params);
-        }
+        Promotion.buildParametersAction(actions, build, params);
         actions.add(new PromotionTargetAction(build));
 
         // remember what build we are promoting
@@ -405,7 +404,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     
 
     public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
-        return scheduleBuild2(build, cause, null);
+        return scheduleBuild2(build, cause, Collections.<ParameterValue>emptyList());
     }
 
     public boolean isInQueue(AbstractBuild<?,?> build) {
