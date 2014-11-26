@@ -27,6 +27,10 @@ THE SOFTWARE.
 	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
 	xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
 	<f:entry title="${it.name}" description="${it.description}">
-		<a href="${rootURL}/${it.run.url}">${it.run}</a>
+        <div name="parameter">
+            <a href="${rootURL}/${it.run.url}">${it.run}</a>
+            <input type="hidden" name="name" value="${it.name}" />
+            <input type="hidden" name="runId" value="${it.run.externalizableId}" />
+        </div>
 	</f:entry>
 </j:jelly>
