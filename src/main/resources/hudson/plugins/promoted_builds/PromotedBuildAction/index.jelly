@@ -36,7 +36,8 @@
         <div>
           <!-- JENKINS-20492: show re-execute event when manually approved -->
 		      <j:choose>
-		        <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
+		      <!-- JENKINS-24271 Re-execute and Force permissions must be separated -->
+		        <j:when test="${it.getPromotionProcess(p.name)!=null and it.canReExecute()}">
 		          <form style="float:right" method="post" action="${p.name}/build">
 		            <f:submit value="${%Re-execute promotion}"/>
 		          </form>

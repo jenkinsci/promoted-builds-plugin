@@ -303,7 +303,8 @@ public final class Status {
      * Schedules a new build.
      */
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-        if(!getTarget().hasPermission(Promotion.PROMOTE))
+        // JENKINS-24271 Re-execute and Force permissions must be separated
+        if(!getTarget().hasPermission(Promotion.REEXECUTE))
             return;
         
         

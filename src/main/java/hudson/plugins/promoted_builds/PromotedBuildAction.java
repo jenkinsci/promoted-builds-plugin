@@ -130,9 +130,12 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         return !statuses.isEmpty();
     }
 
+    //JENKINS-24271 Re-execute and Force permissions must be separated
     public boolean canPromote() {
         return this.getProject().hasPermission(Promotion.PROMOTE);
     }
+
+    public boolean canReExecute() {return this.getProject().hasPermission(Promotion.REEXECUTE); }
 
     /**
      * Gets list of {@link PromotionProcess}s that are not yet attained.

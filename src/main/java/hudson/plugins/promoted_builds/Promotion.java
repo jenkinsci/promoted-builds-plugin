@@ -302,7 +302,13 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
     }
 
     public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
+
+    // JENKINS-24271 Re-execute and Force permissions must be separated
+    // This permission allows users to execute force promotion.
     public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", Messages._Promotion_PromotePermission_Description(), Jenkins.ADMINISTER, PermissionScope.RUN);
+
+    // This permission allows users to re-execute promotion.
+    public static final Permission REEXECUTE = new Permission(PERMISSIONS, "ReExecute", Messages._Promotion_ReExecutePermission_Description(), Jenkins.ADMINISTER, PermissionScope.RUN);
 
     @Override
     public int compareTo(Promotion that) {
