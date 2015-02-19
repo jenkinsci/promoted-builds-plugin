@@ -410,7 +410,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     @Override
     public void doBuild(StaplerRequest req, StaplerResponse rsp, @QueryParameter TimeDuration delay) throws IOException, ServletException {
-        throw HttpResponses.error(404, "Promotion processes may not be build directly");
+        throw HttpResponses.error(404, "Promotion processes may not be built directly");
     }
 
     public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
