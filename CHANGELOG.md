@@ -1,6 +1,12 @@
 
 ## Changelog
 
+##### Version 2.20 (Feb 16, 2015)
+
+*   [issue #20492](http://issues.jenkins-ci.org/browse/JENKINS-20492) partial fix, show re-execute button unconditionally
+*   fix an NPE in `getBuilds()` when projectName is incorrect
+*   added support for rebuild plugin
+
 ##### Version 2.19 (Oct 10, 2104)
 
 *   Prevent log file being cluttered with permission exceptions when users have Item.EXTENDED_READ but not Item.CONFIGURE
