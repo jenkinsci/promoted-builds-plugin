@@ -9,6 +9,7 @@ import hudson.console.HyperlinkNote;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
+import hudson.model.Cause;
 import hudson.model.Cause.UpstreamCause;
 import hudson.model.Fingerprint;
 import hudson.model.Fingerprint.BuildPtr;
@@ -37,6 +38,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import org.kohsuke.stapler.export.Exported;
 
 /**
@@ -238,18 +240,24 @@ public class DownstreamPassCondition extends PromotionCondition {
                                 AbstractBuild<?,?> u = build.getUpstreamRelationshipBuild(j);
                                 if (u==null) {
                                     // if the fingerprint doesn't tell us, perhaps the cause would tell us?
-                                    for (UpstreamCause uc : Util.filter(build.getCauses(), UpstreamCause.class)) {
-                                        if (uc.getUpstreamProject().equals(j.getFullName())) {
-                                            u = j.getBuildByNumber(uc.getUpstreamBuild());
-                                            if (u!=null) {
-                                                // remember that this build is a pseudo-downstream of the discovered build.
-                                                PseudoDownstreamBuilds pdb = u.getAction(PseudoDownstreamBuilds.class);
-                                                if (pdb==null)
-                                                    u.addAction(pdb=new PseudoDownstreamBuilds());
-                                                pdb.add(build);
-                                                u.save();
-                                                break;
+                                    final Stack<List<Cause>> stack = new Stack<List<Cause>>();
+                                    stack.push(build.getCauses());
+
+                                    while(!stack.isEmpty()) {
+                                        for (UpstreamCause uc : Util.filter(stack.pop(), UpstreamCause.class)) {
+                                            if (uc.getUpstreamProject().equals(j.getFullName())) {
+                                                u = j.getBuildByNumber(uc.getUpstreamBuild());
+                                                if (u!=null) {
+                                                    // remember that this build is a pseudo-downstream of the discovered build.
+                                                    PseudoDownstreamBuilds pdb = u.getAction(PseudoDownstreamBuilds.class);
+                                                    if (pdb==null)
+                                                        u.addAction(pdb=new PseudoDownstreamBuilds());
+                                                    pdb.add(build);
+                                                    u.save();
+                                                    break;
+                                                }
                                             }
+                                            stack.push(uc.getUpstreamCauses());
                                         }
                                     }
                                 }
