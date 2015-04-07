@@ -38,10 +38,14 @@ import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
+import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -403,6 +407,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return super.scheduleBuild2(0, cause, actions.toArray(new Action[actions.size()]));
     }
     
+
+    @Override
+    public void doBuild(StaplerRequest req, StaplerResponse rsp, @QueryParameter TimeDuration delay) throws IOException, ServletException {
+        throw HttpResponses.error(404, "Promotion processes may not be built directly");
+    }
 
     public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
         return scheduleBuild2(build, cause, null);
