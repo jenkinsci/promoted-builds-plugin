@@ -3,7 +3,7 @@
 
 ##### Version 2.21 (Apr 7, 2015)
 
-*   [issue #24782]((http://issues.jenkins-ci.org/browse/JENKINS-24782) Prevent phantom builds from being scheduled when PromotionProcesses are built directly. 
+*   [issue #24782](http://issues.jenkins-ci.org/browse/JENKINS-24782) Prevent phantom builds from being scheduled when PromotionProcesses are built directly. 
 
 ##### Version 2.20 (Feb 16, 2015)
 
