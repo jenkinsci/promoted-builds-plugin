@@ -7,10 +7,12 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParameterValue;
 import hudson.model.TaskListener;
+import hudson.model.User;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+import org.acegisecurity.context.SecurityContextHolder;
 import org.junit.Test;
 import org.junit.Rule;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -26,8 +28,14 @@ public class PromotionEnvironmentVariablesTest {
     @Rule public JenkinsRule r = new JenkinsRule();
     
     @Test
-    public void shouldSetJobAndJobFullNames() throws Descriptor.FormException, IOException, InterruptedException, ExecutionException {
+    public void shouldSetJobAndJobFullNames() throws Descriptor.FormException, IOException, InterruptedException, ExecutionException, Exception {
         // Assemble
+        r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
+        User u = User.get("foo");
+        u.setFullName("Foobar");
+
+        SecurityContextHolder.getContext().setAuthentication(u.impersonate());
+
         MockFolder parent = r.createFolder("Folder");
         FreeStyleProject project = parent.createProject(FreeStyleProject.class, "Project");
         
@@ -51,8 +59,8 @@ public class PromotionEnvironmentVariablesTest {
         // Assert
         assertEquals("Folder/Project", env.get("PROMOTED_JOB_FULL_NAME"));
         assertEquals("Project", env.get("PROMOTED_JOB_NAME"));
-        assertEquals("SYSTEM", env.get("PROMOTED_USER_NAME"));
-        assertEquals("SYSTEM", env.get("PROMOTED_USER_ID"));
+        assertEquals("Foobar", env.get("PROMOTED_USER_NAME"));
+        assertEquals("foo", env.get("PROMOTED_USER_ID"));
         assertEquals("1234", env.get("PROMOTED_DISPLAY_NAME"));
 
         project.delete();
