@@ -58,6 +58,22 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
         return list.size() > 0 ? list.get(0) : null;
     }
 
+    public List<PromotionProcess> getPromotionProcesses() {
+        List<PromotionProcess> processes = null;
+        processes = getProcesses();
+        if (processes == null) {
+            processes = new ArrayList<PromotionProcess>();
+        }
+        return processes;
+    }
+
+    public Status getStatus(PromotionProcess process) {
+        List<Promotion> list = getPromotions( process );
+        Promotion latest = list.size() > 0 ? list.get(0) : null;
+        Status status = latest != null ? latest.getStatus() : null;
+        return status;
+    }
+
     /**
      * Finds the last promoted build under the given criteria.
      */

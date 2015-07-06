@@ -271,6 +271,12 @@ public final class Status {
         return null;
     }
 
+    public Boolean isLastAnError() {
+      Promotion l = getLast();
+      return (l != null && l.getResult() != Result.SUCCESS);
+    }
+
+
     /**
      * Gets all the promotion builds.
      */
