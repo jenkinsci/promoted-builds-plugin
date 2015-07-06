@@ -29,6 +29,8 @@ import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 /**
  * Promotion status of a build wrt a specific {@link PromotionProcess}.
@@ -271,6 +273,7 @@ public final class Status {
         return null;
     }
 
+    @Restricted(NoExternalUse.class)
     public Boolean isLastAnError() {
       Promotion l = getLast();
       return (l != null && l.getResult() != Result.SUCCESS);
