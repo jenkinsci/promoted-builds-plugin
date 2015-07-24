@@ -251,7 +251,9 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         }
         File configXml = Items.getConfigFile(getRootDirFor(name)).getFile();
         File dir = configXml.getParentFile();
-        dir.mkdirs();
+        if (!dir.mkdirs()) {
+            throw new IOException("Cannot create directories for "+dir);
+        }
         try {
             IOUtils.copy(xml, configXml);
             PromotionProcess result = Items.whileUpdatingByXml(new Callable<PromotionProcess,IOException>() {
@@ -274,7 +276,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     /**
      * Gets {@link AbstractProject} that contains us.
      */
-    public AbstractProject<?,?> getOwner() {
+    public synchronized AbstractProject<?,?> getOwner() {
         return owner;
     }
 

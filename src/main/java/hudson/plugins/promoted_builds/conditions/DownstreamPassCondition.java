@@ -190,13 +190,13 @@ public class DownstreamPassCondition extends PromotionCondition {
                 }
             }
             AutoCompletionCandidates candidates = new AutoCompletionCandidates();
-            candidates.add(candidatesDownstreams.toArray(new String[0]));
+            candidates.add(candidatesDownstreams.toArray(new String[candidatesDownstreams.size()]));
             if(candidatesDownstreams.size() > 0 && candidatesOthers.size() > 0) {
                 candidates.add("- - -");
             }
             // Downstream jobs might not be set when user wants to set DownstreamPassCondition.
             // Better to show non-downstream candidates even if they are not downstreams at the moment.
-            candidates.add(candidatesOthers.toArray(new String[0]));
+            candidates.add(candidatesOthers.toArray(new String[candidatesOthers.size()]));
             return candidates;
         }
     }
@@ -275,16 +275,12 @@ public class DownstreamPassCondition extends PromotionCondition {
         }
 
         /**
-         * List of downstream jobs that we are interested in.
-         */
-        @CopyOnWrite
-        private static volatile Set<AbstractProject> DOWNSTREAM_JOBS = Collections.emptySet();
-
-        /**
          * Called whenever some {@link JobPropertyImpl} changes to update {@link #DOWNSTREAM_JOBS}.
+         * @deprecated Caches are not being used anymore
          */
+        @Deprecated
         public static void rebuildCache() {
-            DOWNSTREAM_JOBS = new HashSet<AbstractProject>();
+            // Do nothing
         }
     }
 
