@@ -53,4 +53,40 @@ public class PromotionCause extends Cause.UpstreamCause {
         );
     }
     // }}}
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + super.hashCode();
+        hash = 53 * hash + (this.promotionProcessName != null ? this.promotionProcessName.hashCode() : 0);
+        hash = 53 * hash + (this.promotionBuildUrl != null ? this.promotionBuildUrl.hashCode() : 0);
+        hash = 53 * hash + this.promotionBuildNumber;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final PromotionCause other = (PromotionCause) obj;
+        if ((this.promotionProcessName == null) ? (other.promotionProcessName != null) : !this.promotionProcessName.equals(other.promotionProcessName)) {
+            return false;
+        }
+        if ((this.promotionBuildUrl == null) ? (other.promotionBuildUrl != null) : !this.promotionBuildUrl.equals(other.promotionBuildUrl)) {
+            return false;
+        }
+        if (this.promotionBuildNumber != other.promotionBuildNumber) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

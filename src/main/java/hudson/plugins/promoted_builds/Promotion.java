@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.console.HyperlinkNote;
 import hudson.model.Action;
 import hudson.model.BuildListener;
@@ -194,10 +195,15 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
             String customWorkspace = Promotion.this.getProject().getCustomWorkspace();
-            if (customWorkspace != null)
+            if (customWorkspace != null) {
+                final FilePath rootPath = n.getRootPath();
+                if (rootPath == null) {
+                    throw new IOException("Cannot retrieve the root path of the node " + n);
+                }
                 // we allow custom workspaces to be concurrently used between jobs.
                 return Lease.createDummyLease(
-                        n.getRootPath().child(getEnvironment(listener).expand(customWorkspace)));
+                        rootPath.child(getEnvironment(listener).expand(customWorkspace)));
+            }
             return wsl.acquire(n.getWorkspaceFor((TopLevelItem)getTarget().getProject()),true);
         }
 
@@ -318,6 +324,26 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
     public int compareTo(Promotion that) {
     	return that.getId().compareTo( this.getId() );
     }
+
+    @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Promotion other = (Promotion) obj;
+        return this.getId().equals(other.getId());
+    }
+    
+    
+    
     /**
      * Factory method for creating {@link ParametersAction}
      * @param parameters

@@ -534,7 +534,6 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         static class AutoCompleteSeeder {
 
             private String source;
-            private Pattern quoteMatcher = Pattern.compile("(\\\"?)(.+?)(\\\"?+)(\\s*)");
 
             AutoCompleteSeeder(String source) {
                 this.source = source;

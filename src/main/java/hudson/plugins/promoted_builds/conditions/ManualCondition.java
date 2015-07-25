@@ -245,12 +245,16 @@ public class ManualCondition extends PromotionCondition {
 
         @Override
         public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
-        	List<ParameterValue> params=((Promotion)build).getParameterValues();
-        	if (params!=null){
-    	    	for(ParameterValue value : params) {
-    	    		value.buildEnvVars(build, env);
-    	    	}
-        	}
+            if (!(build instanceof Promotion)) {
+                throw new IllegalStateException ("Wrong build type. Expected a Promotion, but got "+build.getClass());
+            }
+            
+            List<ParameterValue> params = ((Promotion) build).getParameterValues();
+            if (params != null) {
+                for (ParameterValue value : params) {
+                    value.buildEnvVars(build, env);
+                }
+            }
         }
     }
 

@@ -116,13 +116,13 @@ public final class Status {
 			if(l != null && l.getResult() != Result.SUCCESS)
 				return Jenkins.RESOURCE_PATH + "/images/" + size + "/error.png";
 
-			baseName = l.getIcon();
+			baseName = l != null ? l.getIcon() : null;
 			if(baseName == null) {
 				baseName = p.getIcon();
 
 			}
 		}
-		return baseName != null && !"none".equals(baseName) ? Jenkins.RESOURCE_PATH + "/plugin/promoted-builds/icons/" + size + "/" + baseName + ".png" : null;
+		return !"none".equals(baseName) ? Jenkins.RESOURCE_PATH + "/plugin/promoted-builds/icons/" + size + "/" + baseName + ".png" : null;
 	}
 
     /**

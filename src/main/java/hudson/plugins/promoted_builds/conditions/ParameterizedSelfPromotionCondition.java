@@ -46,7 +46,6 @@ public class ParameterizedSelfPromotionCondition extends SelfPromotionCondition 
     public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?, ?> build) {
         if(super.isMet(promotionProcess, build) != null) {
 
-            Result r = build.getResult();
             Map<String, String> vars = build.getBuildVariables();
             if(vars.containsKey(parameterName) &&
                ((String)vars.get(parameterName)).equals(parameterValue)) {
