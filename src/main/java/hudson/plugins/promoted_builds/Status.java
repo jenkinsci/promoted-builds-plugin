@@ -106,24 +106,19 @@ public final class Status {
     public String getIcon(String size) {
         String baseName;
 
-		PromotionProcess p = getProcess();
-		if(p == null) {
-			// promotion process undefined (perhaps deleted?). fallback to the default icon
-			baseName = "star-gold";
-		}
-		else {
-			Promotion l = getLast();
-			if(l != null && l.getResult() != Result.SUCCESS)
-				return Jenkins.RESOURCE_PATH + "/images/" + size + "/error.png";
-
-			baseName = l != null ? l.getIcon() : null;
-			if(baseName == null) {
-				baseName = p.getIcon();
-
-			}
-		}
-		return !"none".equals(baseName) ? Jenkins.RESOURCE_PATH + "/plugin/promoted-builds/icons/" + size + "/" + baseName + ".png" : null;
-	}
+        PromotionProcess p = getProcess();
+        if (p == null) {
+            // promotion process undefined (perhaps deleted?). fallback to the default icon
+            baseName = "star-gold";
+        } else {
+            Promotion l = getLast();
+            if (l!=null && l.getResult()!= Result.SUCCESS) {
+              return Jenkins.RESOURCE_PATH+"/images/"+size+"/error.png";
+            }
+            baseName = p.getIcon();
+        }
+        return Jenkins.RESOURCE_PATH+"/plugin/promoted-builds/icons/"+size+"/"+ baseName +".png";
+    }
 
     /**
      * Gets the build that was qualified for a promotion.

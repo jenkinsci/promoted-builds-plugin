@@ -1,14 +1,11 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
   <j:if test="${it.hasPromotion()}">
     <j:forEach var="status" items="${it.getPromotions()}">
-      <j:set var="iconUrl" value="${rootURL}${status.getIcon('16x16')}"/>
-      <j:if test="${not empty iconUrl}">
-	      <a href="${link}promotion/">
-	        <img width="16" height="16"
-	          title="${status.name}"
-	          src="${iconUrl}"/>
-	      </a>
-      </j:if>	      
+      <a href="${link}promotion/">
+        <img width="16" height="16"
+          title="${status.name}"
+          src="${rootURL}${status.getIcon('16x16')}"/>
+      </a>
     </j:forEach>
   </j:if>
 </j:jelly>

@@ -46,13 +46,10 @@ import java.util.Map.Entry;
  */
 public class Promotion extends AbstractBuild<PromotionProcess,Promotion> 
 	implements Comparable<Promotion>{
-	
-	private String icon;
 
-	public Promotion(PromotionProcess job) throws IOException {
-		super(job);
-		this.icon = job.icon;
-	}
+    public Promotion(PromotionProcess job) throws IOException {
+        super(job);
+    }
 
     public Promotion(PromotionProcess job, Calendar timestamp) {
         super(job, timestamp);
@@ -91,13 +88,6 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         return getTarget().getAction(PromotedBuildAction.class).getPromotion(getParent().getName());
     }
 
-	public String getIcon() {
-		return icon;
-	}
-
-	public void setIcon(String icon) {
-		this.icon = icon;
-	}
     @Override
     public EnvVars getEnvironment(TaskListener listener) throws IOException, InterruptedException {
         EnvVars e = super.getEnvironment(listener);
