@@ -6,4 +6,7 @@
     <f:checkbox name="promotion.downstream.evenIfUnstable" checked="${instance.evenIfUnstable}"/>
     <label class="attach-previous">${%Trigger even if the build is unstable}</label>
   </f:entry>
+  <f:entry field="upstreamFilterStrategy" title="${%Which for multiple upstream}">
+    <f:enum field="upstreamFilterStrategy">${it.displayName}</f:enum>
+  </f:entry>
 </j:jelly>

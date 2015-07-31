@@ -114,7 +114,10 @@ public class ManualCondition extends PromotionCondition {
         if (!getUsersAsSet().isEmpty() && !isInUsersList() && !isInGroupList()) {
             return false;
         }
-        
+        //Check if user have promotion access
+        if (!promotionProcess.hasPermission(Promotion.PROMOTE)) {
+            return false;
+        }
         List<ManualApproval> approvals = build.getActions(ManualApproval.class);
 
         // For now, only allow approvals if this wasn't already approved

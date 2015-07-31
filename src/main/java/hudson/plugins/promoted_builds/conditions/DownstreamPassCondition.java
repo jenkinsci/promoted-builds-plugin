@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.export.Exported;
 
 /**
@@ -46,6 +47,47 @@ import org.kohsuke.stapler.export.Exported;
  */
 public class DownstreamPassCondition extends PromotionCondition {
     /**
+     * Which build should be used if triggered by multiple upstream builds.
+     * 
+     * Specified in buildstep configurations and the global configuration.
+     */
+    public enum UpstreamFilterStrategy {
+        /**
+         * Use global configuration.
+         * 
+         * The default value for buildstep configurations.
+         * Should not be specified in the global configuration.
+         * 
+         */
+        UseGlobalSetting(false, Messages._DownstreamPassCondition_UpstreamFilterStrategy_UseGlobalSetting()),
+        /**
+         * Use the oldest build.
+         * 
+         * The default value for the global configuration.
+         */
+        UseOldest(true, Messages._DownstreamPassCondition_UpstreamFilterStrategy_UseOldest()),
+        /**
+         * Use the newest build.
+         */
+        UseNewest(true, Messages._DownstreamPassCondition_UpstreamFilterStrategy_UseNewest()),
+        ;
+        
+        private final boolean forGlobalSetting;
+        private final Localizable displayName;
+        
+        UpstreamFilterStrategy(boolean forGlobalSetting, Localizable displayName) {
+            this.forGlobalSetting = forGlobalSetting;
+            this.displayName = displayName;
+        }
+        
+        public String getDisplayName() {
+            return displayName.toString();
+        }
+        
+        public boolean isForGlobalSetting() {
+            return forGlobalSetting;
+        }
+    };/**
      * List of downstream jobs that are used as the promotion criteria.
      * 
      * Every job has to have at least one successful build for us to promote a build.
@@ -53,16 +95,51 @@ public class DownstreamPassCondition extends PromotionCondition {
     private final String jobs;
 
     private final boolean evenIfUnstable;
-
+    private final UpstreamFilterStrategy upstreamFilterStrategy;
+    
     public DownstreamPassCondition(String jobs) {
-        this(jobs, false);
+        this(jobs, false, UpstreamFilterStrategy.UseGlobalSetting);
     }
 
     public DownstreamPassCondition(String jobs, boolean evenIfUnstable) {
-        this.jobs = jobs;
-        this.evenIfUnstable = evenIfUnstable;
+        this(jobs, evenIfUnstable, UpstreamFilterStrategy.UseGlobalSetting);
     }
 
+    public DownstreamPassCondition(String jobs, boolean evenIfUnstable, UpstreamFilterStrategy upstreamFilterStrategy ) {
+        this.jobs = jobs;
+        this.evenIfUnstable = evenIfUnstable;
+        this.upstreamFilterStrategy = upstreamFilterStrategy;
+    }
+    
+    /**
+     * @return Which build should be used if triggered by multiple upstream builds.
+     */
+    public UpstreamFilterStrategy getUpstreamFilterStrategy() {
+        return upstreamFilterStrategy;
+    }
+    
+    /**
+     * @return whether to use the newest upstream or not (use the oldest) when there are multiple upstreams.
+     */
+    public boolean isUseNewest() {
+        UpstreamFilterStrategy strategy = getUpstreamFilterStrategy();
+        if(strategy == null || strategy == UpstreamFilterStrategy.UseGlobalSetting) {
+            strategy = ((DescriptorImpl)getDescriptor()).getGlobalUpstreamFilterStrategy();
+        }
+        if(strategy == null){
+            return false;
+        }
+        switch(strategy) {
+        case UseOldest:
+            return false;
+        case UseNewest:
+            return true;
+        default:
+            // default behavior
+            return false;
+        }
+    }
+    
     public String getJobs() {
         return jobs;
     }
@@ -156,6 +233,30 @@ public class DownstreamPassCondition extends PromotionCondition {
 
     @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
+        private UpstreamFilterStrategy globalUpstreamFilterStrategy;
+        
+        public DescriptorImpl() {
+            super(DownstreamPassCondition.class);
+            globalUpstreamFilterStrategy = UpstreamFilterStrategy.UseOldest;
+            load();
+        }
+
+        public void setGlobalUpstreamFilterStrategy(UpstreamFilterStrategy globalUpstreamFilterStrategy) {
+            this.globalUpstreamFilterStrategy = globalUpstreamFilterStrategy;
+        }
+        
+        public UpstreamFilterStrategy getGlobalUpstreamFilterStrategy() {
+            return globalUpstreamFilterStrategy;
+        }
+        
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject json)
+                throws hudson.model.Descriptor.FormException {
+            setGlobalUpstreamFilterStrategy(UpstreamFilterStrategy.valueOf(json.getString("globalUpstreamFilterStrategy")));
+            save();
+            return super.configure(req, json);
+        }
+        
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }
@@ -166,7 +267,7 @@ public class DownstreamPassCondition extends PromotionCondition {
 
         public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return new DownstreamPassCondition(
-                    formData.getString("jobs"), formData.getBoolean("evenIfUnstable"));
+                    formData.getString("jobs"), formData.getBoolean("evenIfUnstable"),UpstreamFilterStrategy.valueOf(formData.getString("upstreamFilterStrategy")));
         }
 
         public AutoCompletionCandidates doAutoCompleteJobs(@QueryParameter String value, @AncestorInPath AbstractProject project) {
@@ -224,11 +325,21 @@ public class DownstreamPassCondition extends PromotionCondition {
                 if(jp!=null) {
                     for (PromotionProcess p : jp.getItems()) {
                         boolean considerPromotion = false;
+                        boolean breakToFirstMatch = true; // take oldest build
+
                         for (PromotionCondition cond : p.conditions) {
                             if (cond instanceof DownstreamPassCondition) {
                                 DownstreamPassCondition dpcond = (DownstreamPassCondition) cond;
                                 if(dpcond.contains(j.getParent(), build.getParent())) {
                                     considerPromotion = true;
+                                    UpstreamFilterStrategy upstreamFilterStrategy = dpcond.getUpstreamFilterStrategy();
+                                    if (upstreamFilterStrategy == UpstreamFilterStrategy.UseGlobalSetting) {
+                                        DownstreamPassCondition.DescriptorImpl d = (DownstreamPassCondition.DescriptorImpl)dpcond.getDescriptor();
+                                        if (d.getGlobalUpstreamFilterStrategy() == UpstreamFilterStrategy.UseNewest)
+                                          breakToFirstMatch = false;
+                                    } else if (upstreamFilterStrategy == UpstreamFilterStrategy.UseNewest)
+                                        breakToFirstMatch = false;
+                                    
                                     break;
                                 }
                             }
@@ -248,7 +359,8 @@ public class DownstreamPassCondition extends PromotionCondition {
                                                     u.addAction(pdb=new PseudoDownstreamBuilds());
                                                 pdb.add(build);
                                                 u.save();
-                                                break;
+                                                if ( breakToFirstMatch )
+                                                  break;
                                             }
                                         }
                                     }
