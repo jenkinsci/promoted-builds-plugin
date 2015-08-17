@@ -3,7 +3,9 @@ package hudson.plugins.promoted_builds;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
+import hudson.model.Item;
 import hudson.model.Job;
+import hudson.model.ListView;
 import hudson.model.Run;
 import hudson.views.ListViewColumn;
 import hudson.views.ListViewColumnDescriptor;
@@ -11,6 +13,10 @@ import hudson.views.ListViewColumnDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provides a promotion summary column for {@link ListView}s.
+ * @since TODO
+ */
 public class PromotionStatusColumn extends ListViewColumn {
 
     @DataBoundConstructor
@@ -18,13 +24,18 @@ public class PromotionStatusColumn extends ListViewColumn {
         super();
     }
 
-    public List<String> getPromotionIcons(Job job) {
+    public List<String> getPromotionIcons(final Item item) {
         List<String> icons = new ArrayList<String>();
-        Run b = job.getLastBuild();
-        PromotedBuildAction a = b.getAction(PromotedBuildAction.class);
-        for(Status s: a.getPromotions() ) {
-            icons.add(s.getIcon("16x16"));
-	}
+        if (item instanceof Job<?, ?>) {
+            final Job<?, ?> job = (Job<?, ?>) item;
+            final Run<?, ?> b = job.getLastBuild();
+            PromotedBuildAction a = b != null ? b.getAction(PromotedBuildAction.class) : null;
+            if (a != null) {
+                for (Status s : a.getPromotions()) {
+                    icons.add(s.getIcon("16x16"));
+                }
+            }
+        }
         return icons;
     }
 
@@ -39,6 +50,7 @@ public class PromotionStatusColumn extends ListViewColumn {
             return Messages.PromotionStatusColumn_DisplayName();
         }
 
+        @Override
         public boolean shownByDefault() {
             return false;
         }
