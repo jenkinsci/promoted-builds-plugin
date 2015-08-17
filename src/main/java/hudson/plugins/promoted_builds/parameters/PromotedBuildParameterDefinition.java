@@ -27,6 +27,7 @@ import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
+import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
@@ -116,7 +117,8 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
     public List getBuilds() {
         List builds = new ArrayList();
 
-        AbstractProject job = (AbstractProject) Jenkins.getInstance().getItem(projectName);
+        // JENKINS-25011: also look for jobs in folders.
+        AbstractProject job = Jenkins.getInstance().getItemByFullName(projectName, AbstractProject.class);
         if (job == null) {
             return builds;
         }
@@ -171,22 +173,34 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
             project.checkPermission(Item.CONFIGURE);
 
             if (StringUtils.isNotBlank(value)) {
-                AbstractProject p = Jenkins.getInstance().getItem(value,project,AbstractProject.class);
-                if(p==null)
+                // JENKINS-25011: also look for jobs in folders.
+                AbstractProject p = Jenkins.getInstance().getItemByFullName(value, AbstractProject.class);
+                if (p==null) {
+                    // suggest full name so that getBuilds() can find item.
                     return FormValidation.error(hudson.tasks.Messages.BuildTrigger_NoSuchProject(value,
-                            AbstractProject.findNearest(value, project.getParent()).getRelativeNameFrom(project)));
+                            AbstractProject.findNearest(value, project.getParent()).getFullName()));
+                }
 
             }
 
             return FormValidation.ok();
         }
 
-        public AutoCompletionCandidates doAutoCompleteJobName(@QueryParameter String value) {
+        public AutoCompletionCandidates doAutoCompleteJobName(@AncestorInPath Item project, @QueryParameter String value) {
+            if (!project.hasPermission(Item.CONFIGURE)) {
+                return new AutoCompletionCandidates();
+            }
+            project.checkPermission(Item.CONFIGURE);
+
+            ItemGroup parent = project.getParent();
             AutoCompletionCandidates candidates = new AutoCompletionCandidates();
-            List<AbstractProject> jobs = Jenkins.getInstance().getItems(AbstractProject.class);
+
+            // JENKINS-25011: look for jobs in all folders.
+            List<AbstractProject> jobs = Jenkins.getInstance().getAllItems(AbstractProject.class);
             for (AbstractProject job: jobs) {
-                if (job.getFullName().startsWith(value)) {
+                if (job.getFullName().contains(value)) {
                     if (job.hasPermission(Item.READ)) {
+                        // suggest full name so that getBuilds() can find item.
                         candidates.add(job.getFullName());
                     }
                 }
@@ -204,15 +218,21 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
             defaultJob.checkPermission(Item.CONFIGURE);
 
             AbstractProject<?,?> j = null;
-            if (jobName!=null)
-                j = Jenkins.getInstance().getItem(jobName,defaultJob,AbstractProject.class);
+            if (jobName != null) {
+                // JENKINS-25011: also look for jobs in folders.
+                j = Jenkins.getInstance().getItemByFullName(jobName, AbstractProject.class);
+            }
 
             ListBoxModel r = new ListBoxModel();
             if (j!=null) {
                 JobPropertyImpl pp = j.getProperty(JobPropertyImpl.class);
                 if (pp!=null) {
-                    for (PromotionProcess proc : pp.getActiveItems())
+                    for (PromotionProcess proc : pp.getActiveItems()) {
+                        // Note: why not list all items instead of active ones?
+                        // this would allow to configure the job even
+                        // if a promotion hasn't happened (yet).
                         r.add(new Option(proc.getDisplayName(),proc.getName()));
+                    }
                 }
             }
             return r;
