@@ -239,6 +239,14 @@ public class ManualCondition extends PromotionCondition {
         }
 
         @Exported
+        public String getUserId() {
+            if (authenticationName == null)
+                return "N/A";
+
+            return authenticationName;
+        }
+
+        @Exported
         public List<ParameterValue> getParameterValues() {
             return values != null ? values : Collections.EMPTY_LIST;
         }
