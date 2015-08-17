@@ -1,15 +1,4 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
-  <d:taglib uri="local">
-    <d:tag name="re-promote-button">
-      <j:choose>
-        <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
-          <form style="float:right" method="post" action="${p.name}/build">
-            <f:submit value="${%Re-execute promotion}"/>
-          </form>
-        </j:when>
-      </j:choose>
-    </d:tag>
-  </d:taglib>
   <l:layout title="${%Promotions} : ${it.project.displayName} ${it.owner.displayName}" xmlns:local="local">
     <st:include page="sidepanel.jelly" it="${it.owner}" />
     <l:main-panel>
@@ -25,10 +14,9 @@
         <l:pane title="${%Promotion History}" width="100">
           <j:forEach var="attempt" items="${p.promotionBuilds}">
             <tr><td>
-              <a href="${p.name}/promotionBuild/${attempt.number}/">
+              <a href="${p.name}/promotionBuild/${attempt.number}/console">
                 <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
-                 alt="${attempt.iconColor.description}"/> ${attempt.fullDisplayName}
-              </a>
+                 alt="${attempt.iconColor.description}"/> ${attempt.displayName} (${attempt.timestamp.time})</a> by ${attempt.userName}
             </td></tr>
           </j:forEach>
         </l:pane>
@@ -46,8 +34,15 @@
         <!-- promotion activity -->
         <h4>Status</h4>
         <div>
+          <!-- JENKINS-20492: show re-execute event when manually approved -->
+		      <j:choose>
+		        <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
+		          <form style="float:right" method="post" action="${p.name}/build">
+		            <f:submit value="${%Re-execute promotion}"/>
+		          </form>
+		        </j:when>
+		      </j:choose>
           <j:choose>
-            <local:re-promote-button />
             <j:when test="${p.isPromotionSuccessful()}">
               <img src="${imagesURL}/16x16/blue.png" alt="Unstable" width="16" height="16" />
               ${%Successfully promoted} (<a href="${p.name}/lastSuccessful">${%log}</a>)

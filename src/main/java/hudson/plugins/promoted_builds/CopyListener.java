@@ -25,14 +25,14 @@ public class CopyListener extends ItemListener {
     public void onCopied(Item src, Item item) {
         JobPropertyImpl prop;
         if (src instanceof Job && (prop =
-                (JobPropertyImpl)((Job)src).getProperty(JobPropertyImpl.class)) != null) {
-            File[] subdirs = ((JobPropertyImpl)prop).getRootDir().listFiles(new FileFilter() {
+                ((Job<?,?>)src).getProperty(JobPropertyImpl.class)) != null) {
+            File[] subdirs = prop.getRootDir().listFiles(new FileFilter() {
                 public boolean accept(File child) {
                     return child.isDirectory();
                 }
             });
             if (subdirs != null) {
-                prop = (JobPropertyImpl)((Job)item).getProperty(JobPropertyImpl.class);
+                prop = ((Job<?,?>)item).getProperty(JobPropertyImpl.class);
                 for (File subdir : subdirs) try {
                     Util.copyFile(new File(subdir, "config.xml"),
                                   new File(prop.getRootDirFor(subdir.getName()), "config.xml"));

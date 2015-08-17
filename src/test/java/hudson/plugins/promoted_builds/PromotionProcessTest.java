@@ -14,8 +14,6 @@ import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import net.sf.json.JSONObject;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
-import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,6 +49,9 @@ public class PromotionProcessTest extends HudsonTestCase {
             "expr $BUILD_NUMBER % 2 - 1\n"  // expr exits with non-zero status if result is zero
         ));
         down.getPublishersList().replaceBy(recorders);
+        // TODO this and some tests in KeepBuildForeverActionTest will not work in 1.575+ because these ArtifactArchiver/Fingerprinter constructors are deprecated.
+        // Would only work if using @LocalData to prepare test configuration; or if we insert at this point a call to ArtifactArchiver.Migrator:
+        // for (ItemListener l : ItemListener.all()) {l.onLoaded();}
 
         // not yet promoted while the downstream is failing
         FreeStyleBuild up1 = assertBuildStatusSuccess(up.scheduleBuild2(0).get());
@@ -115,13 +116,12 @@ public class PromotionProcessTest extends HudsonTestCase {
         }
     }
 
-    private void waitForCompletion(FreeStyleProject down, int n) throws InterruptedException {
+    private void waitForCompletion(FreeStyleProject down, int n) throws Exception {
         // wait for the build completion
         while (down.getBuildByNumber(n)==null)
-            Thread.sleep(1000);
-        while (down.getBuildByNumber(n).isBuilding())
-            Thread.sleep(1000);
-        Thread.sleep(1000); // give it a time to not promote
+            Thread.sleep(100);
+        waitUntilNoActivity();
+        assertFalse(down.getBuildByNumber(n).isBuilding());
     }
 
     public void testCaptureXml() throws Exception {

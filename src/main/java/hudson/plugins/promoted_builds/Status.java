@@ -5,8 +5,14 @@ import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Cause.UserCause;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParameterValue;
 import hudson.model.Result;
+import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.util.Iterators;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -75,6 +81,9 @@ public final class Status {
      * Gets the parent {@link Status} that owns this object.
      */
     public PromotedBuildAction getParent() {
+    	if (parent==null){
+    		parent=getTarget().getAction(PromotedBuildAction.class);
+    	}
         return parent;
     }
 
@@ -103,9 +112,9 @@ public final class Status {
             baseName = "star-gold";
         } else {
             Promotion l = getLast();
-            if (l!=null && l.getResult()!= Result.SUCCESS)
-                return Jenkins.RESOURCE_PATH+"/images/"+size+"/error.png";
-
+            if (l!=null && l.getResult()!= Result.SUCCESS) {
+              return Jenkins.RESOURCE_PATH+"/images/"+size+"/error.png";
+            }
             baseName = p.getIcon();
         }
         return Jenkins.RESOURCE_PATH+"/plugin/promoted-builds/icons/"+size+"/"+ baseName +".png";
@@ -286,13 +295,46 @@ public final class Status {
         return p.getBuildByNumber(number);
     }
 
+    public boolean isManuallyApproved(){
+    	ManualCondition manualCondition=(ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
+    	return manualCondition!=null;
+    }
     /**
      * Schedules a new build.
      */
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
         if(!getTarget().hasPermission(Promotion.PROMOTE))
             return;
-        Future<Promotion> f = getProcess().scheduleBuild2(getTarget(), new UserCause());
+        
+        
+        JSONObject formData = req.getSubmittedForm();
+        
+        List<ParameterValue> paramValues=null;
+        if (formData!=null){
+            paramValues = new ArrayList<ParameterValue>();
+            ManualCondition manualCondition=(ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
+            if (manualCondition!=null){
+            	List<ParameterDefinition> parameterDefinitions=manualCondition.getParameterDefinitions();
+                if (parameterDefinitions != null && !parameterDefinitions.isEmpty()) {
+                    JSONArray a = JSONArray.fromObject(formData.get("parameter"));
+
+                    for (Object o : a) {
+                        JSONObject jo = (JSONObject) o;
+                        String name = jo.getString("name");
+
+                        ParameterDefinition d = manualCondition.getParameterDefinition(name);
+                        if (d==null)
+                            throw new IllegalArgumentException("No such parameter definition: " + name);
+
+                        paramValues.add(d.createValue(req, jo));
+                    }
+                }
+            }
+        }
+        if (paramValues==null){
+        	paramValues = new ArrayList<ParameterValue>();
+        }
+        Future<Promotion> f = getProcess().scheduleBuild2(getTarget(), new UserCause(), paramValues);
         if (f==null)
             LOGGER.warning("Failing to schedule the promotion of "+getTarget());
         // TODO: we need better visual feed back so that the user knows that the build happened.

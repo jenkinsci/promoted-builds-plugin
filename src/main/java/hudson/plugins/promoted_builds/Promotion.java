@@ -1,18 +1,23 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.console.HyperlinkNote;
+import hudson.model.Action;
+import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Node;
-import hudson.model.Result;
-import hudson.model.Run;
+import hudson.model.Cause.UserCause;
 import hudson.model.Environment;
+import hudson.model.Node;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParametersAction;
 import hudson.model.ParameterValue;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.TopLevelItem;
-import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
+import hudson.model.Run;
+import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.security.PermissionScope;
@@ -21,14 +26,18 @@ import hudson.slaves.WorkspaceList.Lease;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildTrigger;
+
 import jenkins.model.Jenkins;
+
+import org.kohsuke.stapler.export.Exported;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
-import org.kohsuke.stapler.export.Exported;
 
 /**
  * Records a promotion process.
@@ -89,9 +98,12 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
         e.put("PROMOTED_JOB_NAME", target.getParent().getName());
+        e.put("PROMOTED_JOB_FULL_NAME", target.getParent().getFullName());
         e.put("PROMOTED_NUMBER", Integer.toString(target.getNumber()));
         e.put("PROMOTED_ID", target.getId());
-        EnvVars envScm = new EnvVars();
+        e.put("PROMOTED_DISPLAY_NAME", target.getDisplayName());
+        e.put("PROMOTED_USER_NAME", getUserName());
+	 EnvVars envScm = new EnvVars();
         target.getProject().getScm().buildEnvVars( target, envScm );
         for ( Entry<String, String> entry : envScm.entrySet() )
         {
@@ -102,6 +114,60 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         getStatus().buildEnvVars(this, e);
 
         return e;
+    }
+    
+    
+    /**
+     * 
+     * @return user's name who triggered the promotion, or 'anonymous'
+     */
+    public String getUserName(){
+    	UserCause userClause=getCause(UserCause.class);
+    	if (userClause!=null && userClause.getUserName()!=null){
+    		return userClause.getUserName();
+    	}
+    	
+    	//fallback to badge lookup for compatibility 
+    	for (PromotionBadge badget:getStatus().getBadges()){
+    		if (badget instanceof ManualCondition.Badge){
+    			return ((ManualCondition.Badge) badget).getUserName();
+    		}
+    	}
+    	return "anonymous";
+    }
+    
+    public List<ParameterValue> getParameterValues(){
+      List<ParameterValue> values=new ArrayList<ParameterValue>(); 
+      ParametersAction parametersAction=getParametersActions(this);
+      if (parametersAction!=null){
+        ManualCondition manualCondition=(ManualCondition) getProject().getPromotionCondition(ManualCondition.class.getName());
+        if (manualCondition!=null){
+          for (ParameterValue pvalue:parametersAction.getParameters()){
+            if (manualCondition.getParameterDefinition(pvalue.getName())!=null){
+              values.add(pvalue);
+            }
+          }
+        }
+        return values;
+      }
+      
+      //fallback to badge lookup for compatibility 
+      for (PromotionBadge badget:getStatus().getBadges()){
+        if (badget instanceof ManualCondition.Badge){
+          return ((ManualCondition.Badge) badget).getParameterValues();
+        }
+      }
+      return Collections.emptyList();
+    }
+    
+    public List<ParameterDefinition> getParameterDefinitionsWithValue(){
+    	List<ParameterDefinition> definitions=new ArrayList<ParameterDefinition>();
+    	ManualCondition manualCondition=(ManualCondition) getProject().getPromotionCondition(ManualCondition.class.getName());
+    	for (ParameterValue pvalue:getParameterValues()){
+    		ParameterDefinition pdef=manualCondition.getParameterDefinition(pvalue.getName());
+    		definitions.add(pdef.copyWithDefaultValue(pvalue));
+    	}
+    	return definitions;
     }
 
     public void run() {
@@ -119,10 +185,15 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
             String customWorkspace = Promotion.this.getProject().getCustomWorkspace();
-            if (customWorkspace != null)
+            if (customWorkspace != null) {
+                final FilePath rootPath = n.getRootPath();
+                if (rootPath == null) {
+                    throw new IOException("Cannot retrieve the root path of the node " + n);
+                }
                 // we allow custom workspaces to be concurrently used between jobs.
                 return Lease.createDummyLease(
-                        n.getRootPath().child(getEnvironment(listener).expand(customWorkspace)));
+                        rootPath.child(getEnvironment(listener).expand(customWorkspace)));
+            }
             return wsl.acquire(n.getWorkspaceFor((TopLevelItem)getTarget().getProject()),true);
         }
 
@@ -142,25 +213,19 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
                 return Result.FAILURE;
             
             try {
-            	PromotionTargetAction targetAction = getAction(PromotionTargetAction.class);
-            	AbstractBuild<?, ?> build = targetAction.resolve();
-                // TODO why would it ever be true that build != target?
-	            List<ManualApproval> approvals = build.getActions(ManualApproval.class);
-	            for(ManualApproval approval : approvals) {
-	            	List<ParameterValue> params = approval.badge.getParameterValues();
-					
-	            	for(ParameterValue value : params) {
-	            		BuildWrapper wrapper = value.createBuildWrapper(Promotion.this);
-	            		if(wrapper != null) {
-	            			Environment e = wrapper.setUp(Promotion.this, launcher, listener);
-	            			
-	            			if(e==null)
-	                            return Result.FAILURE;
-	            			
-	                        buildEnvironments.add(e);
-	            		}
-	            	}
-	            }
+            	List<ParameterValue> params=getParameterValues();
+                
+            	if (params!=null){
+        	    	for(ParameterValue value : params) {
+        	    		BuildWrapper wrapper=value.createBuildWrapper(Promotion.this);
+        	    		if (wrapper!=null){
+        	    			Environment e = wrapper.setUp(Promotion.this, launcher, listener);
+                			if(e==null)
+                                return Result.FAILURE;
+                			buildEnvironments.add(e);
+        	    		}
+        	    	}
+            	}
 	
 	            if(!build(listener,project.getBuildSteps(),target))
 	                return Result.FAILURE;
@@ -249,5 +314,65 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
     public int compareTo(Promotion that) {
     	return that.getId().compareTo( this.getId() );
     }
+
+    @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Promotion other = (Promotion) obj;
+        return this.getId().equals(other.getId());
+    }
     
+    
+    
+    /**
+     * Factory method for creating {@link ParametersAction}
+     * @param parameters
+     * @return
+     */
+    public static ParametersAction createParametersAction(List<ParameterValue> parameters){
+    	return new ParametersAction(parameters);
+    }
+    public static ParametersAction getParametersActions(Promotion build){
+    	return build.getAction(ParametersAction.class);
+    }
+
+    /**
+     * Combine the target build parameters with the promotion build parameters
+     * @param actions
+     * @param build
+     * @param promotionParams
+     */
+	public static void buildParametersAction(List<Action> actions, AbstractBuild<?, ?> build, List<ParameterValue> promotionParams) {
+        if (promotionParams == null) {
+            promotionParams = new ArrayList<ParameterValue>();
+        }
+
+		List<ParameterValue> params=new ArrayList<ParameterValue>();
+		
+		//Add the target build parameters first, if the same parameter is not being provided bu the promotion build
+        List<ParametersAction> parameters = build.getActions(ParametersAction.class);
+        for(ParametersAction paramAction:parameters){
+        	for (ParameterValue pvalue:paramAction.getParameters()){
+        		if (!promotionParams.contains(pvalue)){
+        			params.add(pvalue);
+        		}
+        	}
+        }
+        
+        //Add all the promotion build parameters
+        params.addAll(promotionParams);
+        
+        // Create list of actions to pass to scheduled build
+        actions.add(new ParametersAction(params));
+	}
 }

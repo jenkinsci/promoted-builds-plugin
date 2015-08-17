@@ -66,6 +66,9 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
          * Checks the job name.
          */
         public FormValidation doCheckJobName(@AncestorInPath Item project, @QueryParameter String value ) {
+            if (!project.hasPermission(Item.CONFIGURE) && project.hasPermission(Item.EXTENDED_READ)) {
+                return FormValidation.ok();
+            }
             project.checkPermission(Item.CONFIGURE);
 
             if (StringUtils.isNotBlank(value)) {
@@ -95,7 +98,10 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
         /**
          * Fills in the available promotion processes.
          */
-        public ListBoxModel doFillProcessItems(@AncestorInPath Job defaultJob, @QueryParameter("jobName") String jobName) {
+        public ListBoxModel doFillProcessItems(@AncestorInPath Item defaultJob, @QueryParameter("jobName") String jobName) {
+            if (!defaultJob.hasPermission(Item.CONFIGURE) && defaultJob.hasPermission(Item.EXTENDED_READ)) {
+                return new ListBoxModel();
+            }
             defaultJob.checkPermission(Item.CONFIGURE);
 
             AbstractProject<?,?> j = null;

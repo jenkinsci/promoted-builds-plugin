@@ -57,9 +57,11 @@ public class SelfPromotionCondition extends PromotionCondition {
 
     @Override
     public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?, ?> build) {
-        Result r = build.getResult();
-        if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
-            return new SelfPromotionBadge();
+        if (!build.isBuilding()) {
+            Result r = build.getResult();
+            if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
+                return new SelfPromotionBadge();
+            }
         }
         return null;
     }

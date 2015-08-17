@@ -8,8 +8,9 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.AutoCompletionCandidates;
+import hudson.model.ParameterValue;
 import hudson.model.Cause;
-import hudson.model.Cause.LegacyCodeCause;
+import hudson.model.Cause.UserCause;
 import hudson.model.DependencyGraph;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
@@ -28,6 +29,8 @@ import hudson.model.Run;
 import hudson.model.Saveable;
 import hudson.model.labels.LabelAtom;
 import hudson.model.labels.LabelExpression;
+import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
+import hudson.security.ACL;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -35,10 +38,14 @@ import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
+import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -144,6 +151,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     public AbstractProject<?,?> getOwner() {
         return getParent().getOwner();
+    }
+
+    @Override public ACL getACL() {
+        return getOwner().getACL();
     }
 
     /**
@@ -297,8 +308,13 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *
      * @return
      *      null if the build was not promoted, otherwise Future that kicks in when the build is completed.
+     * @throws IOException 
      */
-    public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build) throws IOException {
+    public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build) throws IOException {
+		return considerPromotion2(build, (List<ParameterValue>)null);
+	}
+	
+    public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build, List<ParameterValue> params) throws IOException {
         if (!isActive())
             return null;    // not active
 
@@ -314,7 +330,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             return null; // not this time
 
         LOGGER.fine("Promotion condition of "+build+" is met: "+qualification);
-        Future<Promotion> f = promote2(build, new LegacyCodeCause(), qualification); // TODO: define promotion cause
+        Future<Promotion> f = promote2(build, new UserCause(), qualification, params); // TODO: define promotion cause
         if (f==null)
             LOGGER.warning(build+" qualifies for a promotion but the queueing failed.");
         return f;
@@ -341,6 +357,9 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      Future to track the completion of the promotion.
      */
     public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
+    	return promote2(build, cause, qualification, null);
+    }
+    public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification, List<ParameterValue> params) throws IOException {
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
         // build is qualified for a promotion.
         if(a!=null) {
@@ -351,7 +370,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         }
 
         // schedule promotion activity.
-        return scheduleBuild2(build,cause);
+        return scheduleBuild2(build,cause, params);
     }
 
     /**
@@ -363,7 +382,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public boolean scheduleBuild(AbstractBuild<?,?> build) {
-        return scheduleBuild(build,new LegacyCodeCause());
+        return scheduleBuild(build,new UserCause());
     }
 
     /**
@@ -374,20 +393,26 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return scheduleBuild2(build,cause)!=null;
     }
 
-    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
+    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause, List<ParameterValue> params) {
         assert build.getProject()==getOwner();
 
-        // Get the parameters, if any, used in the target build and make these
-        // available as part of the promotion steps
-        List<ParametersAction> parameters = build.getActions(ParametersAction.class);
-
-        // Create list of actions to pass to scheduled build
+        
         List<Action> actions = new ArrayList<Action>();
-        actions.addAll(parameters);
+       	Promotion.buildParametersAction(actions, build, params);
         actions.add(new PromotionTargetAction(build));
 
         // remember what build we are promoting
         return super.scheduleBuild2(0, cause, actions.toArray(new Action[actions.size()]));
+    }
+    
+
+    @Override
+    public void doBuild(StaplerRequest req, StaplerResponse rsp, @QueryParameter TimeDuration delay) throws IOException, ServletException {
+        throw HttpResponses.error(404, "Promotion processes may not be built directly");
+    }
+
+    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
+        return scheduleBuild2(build, cause, null);
     }
 
     public boolean isInQueue(AbstractBuild<?,?> build) {
@@ -509,7 +534,6 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         static class AutoCompleteSeeder {
 
             private String source;
-            private Pattern quoteMatcher = Pattern.compile("(\\\"?)(.+?)(\\\"?+)(\\s*)");
 
             AutoCompleteSeeder(String source) {
                 this.source = source;
@@ -579,5 +603,9 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     private static final Logger LOGGER = Logger.getLogger(PromotionProcess.class.getName());
+
+	public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build, ManualApproval approval) throws IOException {
+		return considerPromotion2(build, approval.badge.getParameterValues());
+	}
 
 }

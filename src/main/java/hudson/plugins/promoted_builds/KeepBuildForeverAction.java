@@ -35,7 +35,9 @@ public class KeepBuildForeverAction extends Notifier {
             build.setResult(Result.FAILURE);
             return false;
         }
-        if ((build.getResult() != null) && build.getResult().isWorseThan(PROMOTION_RESULT_MUST_BE_AT_LEAST)) {
+        
+        final Result buildResult = build.getResult();
+        if (buildResult != null && buildResult.isWorseThan(PROMOTION_RESULT_MUST_BE_AT_LEAST)) {
             console.println(Messages.KeepBuildForEverAction_console_promotionNotGoodEnough(build.getResult()));
             return true;
         }
