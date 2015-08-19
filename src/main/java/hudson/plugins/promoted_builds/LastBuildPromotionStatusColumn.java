@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Provides a promotion summary column for {@link ListView}s.
+ * Provides a last build promotion summary column for {@link ListView}s.
  * @since TODO
  */
-public class PromotionStatusColumn extends ListViewColumn {
+public class LastBuildPromotionStatusColumn extends ListViewColumn {
 
     @DataBoundConstructor
-    public PromotionStatusColumn() {
+    public LastBuildPromotionStatusColumn() {
         super();
     }
 
@@ -47,7 +47,7 @@ public class PromotionStatusColumn extends ListViewColumn {
 
         @Override
         public String getDisplayName() {
-            return Messages.PromotionStatusColumn_DisplayName();
+            return Messages.LastBuildPromotionStatusColumn_DisplayName();
         }
 
         @Override
