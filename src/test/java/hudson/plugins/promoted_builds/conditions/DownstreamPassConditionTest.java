@@ -47,9 +47,9 @@ public final class DownstreamPassConditionTest {
     @Test
     @Bug(7739)
     public void shouldEvaluateUpstreamRecursively() throws Exception {
-        final FreeStyleProject job1 = j.createFreeStyleProject();
-        final FreeStyleProject job2 = j.createFreeStyleProject();
-        final FreeStyleProject job3 = j.createFreeStyleProject();
+        final FreeStyleProject job1 = j.createFreeStyleProject("job1");
+        final FreeStyleProject job2 = j.createFreeStyleProject("job2");
+        final FreeStyleProject job3 = j.createFreeStyleProject("job3");
 
         final JobPropertyImpl property = new JobPropertyImpl(job1);
         job1.addProperty(property);
