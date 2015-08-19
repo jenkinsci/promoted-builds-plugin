@@ -37,6 +37,7 @@ import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.plugins.promoted_builds.Status;
 import hudson.tasks.BuildTrigger;
+import jenkins.model.Jenkins;
 
 public final class DownstreamPassConditionTest {
 
@@ -58,6 +59,7 @@ public final class DownstreamPassConditionTest {
 
         job1.getPublishersList().add(new BuildTrigger(job2.getFullName(), Result.SUCCESS));
         job2.getPublishersList().add(new BuildTrigger(job3.getFullName(), Result.SUCCESS));
+        Jenkins.getInstance().rebuildDependencyGraph();
 
         final FreeStyleBuild run1 = j.buildAndAssertSuccess(job1);
         j.waitUntilNoActivity();
