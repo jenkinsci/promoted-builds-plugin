@@ -1,0 +1,9 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <td>
+    <j:forEach var="c" items="${it.getPromotionIcons(job)}">
+      <img src="${rootURL}${c}" border="0"/>
+    </j:forEach>
+  </td>
+</j:jelly>
+
