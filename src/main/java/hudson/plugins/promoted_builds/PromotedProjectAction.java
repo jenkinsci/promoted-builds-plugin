@@ -17,6 +17,8 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 import org.kohsuke.stapler.interceptor.RequirePOST;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 /**
  * For customizing project top-level GUI.
@@ -56,6 +58,27 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
     public AbstractBuild<?,?> getLatest(PromotionProcess p) {
     	List<Promotion> list = getPromotions( p );
         return list.size() > 0 ? list.get(0) : null;
+    }
+
+    @Restricted(NoExternalUse.class)
+    public List<PromotionProcess> getPromotionProcesses() {
+        List<PromotionProcess> processes = null;
+        processes = getProcesses();
+        if (processes == null) {
+            // assert ?
+            // this case should not happen, the action should get deleted
+            // when there is no process; but we're now safe for the UI.
+            processes = new ArrayList<PromotionProcess>();
+        }
+        return processes;
+    }
+
+    @Restricted(NoExternalUse.class)
+    public Status getStatus(PromotionProcess process) {
+        List<Promotion> list = getPromotions( process );
+        Promotion latest = list.size() > 0 ? list.get(0) : null;
+        Status status = latest != null ? latest.getStatus() : null;
+        return status;
     }
 
     /**
