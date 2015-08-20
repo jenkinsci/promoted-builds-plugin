@@ -1,0 +1,6 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <th>
+    ${%PromotionStatusColumn.Header}
+  </th>
+</j:jelly>
