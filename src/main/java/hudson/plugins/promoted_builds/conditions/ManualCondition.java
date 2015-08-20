@@ -234,14 +234,15 @@ public class ManualCondition extends PromotionCondition {
             if (authenticationName == null)
                 return "N/A";
 
-            User u = User.get(authenticationName, false);
+            User u = User.get(authenticationName, false, null);
             return u != null ? u.getDisplayName() : authenticationName;
         }
 
         @Exported
         public String getUserId() {
-            if (authenticationName == null)
+            if (authenticationName == null) {
                 return "N/A";
+            }
 
             return authenticationName;
         }

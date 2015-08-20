@@ -6,6 +6,7 @@ import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Cause.UserCause;
 import hudson.model.Cause.UserIdCause;
 import hudson.model.Environment;
 import hudson.model.Node;
@@ -16,6 +17,7 @@ import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.TopLevelItem;
 import hudson.model.Run;
+import hudson.model.User;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
@@ -37,6 +39,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import javax.annotation.Nonnull;
 
 /**
  * Records a promotion process.
@@ -128,42 +131,74 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
     
     
     /**
-     * 
-     * @return user's name who triggered the promotion, or 'anonymous'
+     * Get a user name of the person, who triggered the promotion.
+     * The method tries various sources like {@link UserIdCause} or {@link ManualCondition.Badge}.
+     * @return user's name who triggered the promotion, or 'anonymous' if the search fails
      */
-    public String getUserName(){
-        UserIdCause userClause=getCause(UserIdCause.class);
-    	if (userClause!=null && userClause.getUserName()!=null){
-    		return userClause.getUserName();
-    	}
-    	
-    	//fallback to badge lookup for compatibility 
-    	for (PromotionBadge badget:getStatus().getBadges()){
-    		if (badget instanceof ManualCondition.Badge){
-    			return ((ManualCondition.Badge) badget).getUserName();
-    		}
-    	}
-    	return "anonymous";
+    @Nonnull
+    public String getUserName() {
+        // Deprecated, but we still want to support it in order to maintain the compatiibility
+        final UserCause userCause = getCause(UserCause.class);
+        final String nameFromUserCause = userCause != null ? userCause.getUserName() : null;
+        if (nameFromUserCause != null) {
+            return nameFromUserCause;
+        }
+
+        // Modern UserIdCause
+        final UserIdCause userIdCause = getCause(UserIdCause.class);
+        final String nameFromUserIdCause = userIdCause != null ? userIdCause.getUserName() : null;
+        if (nameFromUserIdCause != null) {
+            return nameFromUserIdCause;
+        }
+
+        //fallback to badge lookup for compatibility 
+        for (PromotionBadge badget : getStatus().getBadges()) {
+            if (badget instanceof ManualCondition.Badge) {
+                final String nameFromBadge = ((ManualCondition.Badge) badget).getUserName();
+                if (nameFromBadge != null) {
+                    return nameFromBadge;
+                }
+            }
+        }
+        return Jenkins.ANONYMOUS.getName();
     }
     
 
     /**
-     *
-     * @return user's id who triggered the promotion, or 'anonymous'
+     * Gets ID of the {@link User}, who triggered the promotion.
+     * The method tries various sources like {@link UserIdCause} or {@link ManualCondition.Badge}.
+     * @return ID of the user who triggered the promotion.
+     *         If the search fails, returns ID of {@link User#getUnknown()}.
+     * @since 2.22 
      */
+    @Nonnull
     public String getUserId() {
-        UserIdCause userClause=getCause(UserIdCause.class);
-      if (userClause!=null && userClause.getUserId()!=null){
-        return userClause.getUserId();
-      }
+        // Deprecated, but we still want to support it in order to maintain the compatiibility
+        // We try to convert the cause to the user ID by using a search by the full name, not reliable
+        final UserCause userCause = getCause(UserCause.class);
+        final String nameFromUserCause = userCause != null ? userCause.getUserName(): null;
+        final User user = nameFromUserCause != null ? User.get(nameFromUserCause, false, null) : null;
+        if (user != null) {
+            return user.getId();
+        }
+
+        // Modern UserIdCause
+        final UserIdCause userIdCause = getCause(UserIdCause.class);
+        final String idFromUserIdCause = userIdCause != null ? userIdCause.getUserId(): null;
+        if (idFromUserIdCause != null) {
+            return idFromUserIdCause;
+        }
 
         //fallback to badge lookup for compatibility 
-      for (PromotionBadge badget:getStatus().getBadges()){
-            if (badget instanceof ManualCondition.Badge){
-        return ((ManualCondition.Badge) badget).getUserId();
+        for (PromotionBadge badget : getStatus().getBadges()) {
+            if (badget instanceof ManualCondition.Badge) {
+                final String idFromBadge = ((ManualCondition.Badge) badget).getUserId();
+                if (idFromBadge != null) {
+                    return idFromBadge;
+                }
             }
-      }
-      return "anonymous";
+        }
+        return User.getUnknown().getId();
     }
 
     public List<ParameterValue> getParameterValues(){
@@ -180,7 +215,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         }
         return values;
       }
-
+      
       //fallback to badge lookup for compatibility 
       for (PromotionBadge badget:getStatus().getBadges()){
         if (badget instanceof ManualCondition.Badge){
