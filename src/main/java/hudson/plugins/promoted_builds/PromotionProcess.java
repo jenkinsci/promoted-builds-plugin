@@ -81,7 +81,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *
      * @see Jenkins#getJDK(String)
      */
-    private String jdk;
+    private String jdkForPromotion;
 
     /**
      * The label that promotion process can be run on.
@@ -136,6 +136,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         } else {
             assignedLabel = null;
         }
+        jdkForPromotion = c.getString("jdkForPromotion");
         save();
     }
 
@@ -216,7 +217,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     @Override public JDK getJDK() {
-        return getOwner().getJDK();
+        if (jdkForPromotion == null) {
+          return getOwner().getJDK();
+        } else {
+          return Jenkins.getInstance().getJDK(jdkForPromotion);
+        }
     }
 
     /**
