@@ -2,4 +2,23 @@
   <p>
     Defines the job from which the user can pick runs. The last run achieving the promotion will be the default.
   </p>
+  <p>
+    The implementation provides a support of multi-level addressing including special markups
+    for the relative addressing. Effectively, the resolution order is following:
+    <ul>
+      <li><b>Optional</b> Legacy behavior, which existed till 2.22. 
+          It is disabled by default. 
+          If enabled and there is an item for the name on the top Jenkins level, it will be returned.
+          <br/>
+          Use <code>hudson.plugins.promoted_builds.util.ItemPathResolver.enableResolutionAgainstRoot</code> 
+          Boolean system property to enable it.   
+      <li>If the path starts with &quot;/&quot;, a global addressing will be used</li>
+      <li>If the path starts with &quot;./&quot; or &quot;../&quot;, a relative addressing will be used</li>
+      <li>If there is no prefix, a relative addressing will be tried. If it
+          fails, the method falls back to a global one</li>
+    </ul>
+    For the relative and absolute addressing the engine supports &quot;.&quot; and
+    &quot;..&quot; markers within the path.
+    The first one points to the current element, the second one - to the upper element. 
+  </p>
 </div>
