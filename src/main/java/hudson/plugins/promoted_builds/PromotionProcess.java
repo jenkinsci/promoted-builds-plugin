@@ -217,7 +217,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     @Override public JDK getJDK() {
-        if (jdkForPromotion == null) {
+        if (jdkForPromotion == null || "UseOwner".equals(jdkForPromotion)) {
           return getOwner().getJDK();
         } else {
           return Jenkins.getInstance().getJDK(jdkForPromotion);

@@ -127,6 +127,7 @@ public class PromotionProcessTest extends HudsonTestCase {
                 JSONObject o = new JSONObject()
                         .accumulate("name", "foo")
                         .accumulate("icon", "star-gold")
+                        .accumulate("jdkForPromotion", null)
                         .accumulate("conditions",new JSONObject()
                             .accumulate("hudson-plugins-promoted_builds-conditions-SelfPromotionCondition",
                                     new JSONObject().accumulate("evenIfUnstable", false)));
