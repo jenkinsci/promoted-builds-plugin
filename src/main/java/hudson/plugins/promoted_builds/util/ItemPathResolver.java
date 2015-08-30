@@ -42,7 +42,7 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
  * Implements an engine, which allows to resolve {@link Item}s by their paths.
  * The engine supports both relative and absolute addressing.
  * @author Oleg Nenashev
- * @since TODO
+ * @since 2.22
  */
 public class ItemPathResolver {
        

@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * Provides a last build promotion summary column for {@link ListView}s.
- * @since TODO
+ * @since 2.22
  */
 public class LastBuildPromotionStatusColumn extends ListViewColumn {
 

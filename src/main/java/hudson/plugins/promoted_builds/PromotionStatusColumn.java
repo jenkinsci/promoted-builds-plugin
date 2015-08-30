@@ -11,6 +11,11 @@ import hudson.views.ListViewColumnDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Show promotion statuses of the project.
+ * @see LastBuildPromotionStatusColumn
+ * @since 2.22
+ */
 public class PromotionStatusColumn extends ListViewColumn {
 
     @DataBoundConstructor

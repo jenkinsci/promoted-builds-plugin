@@ -155,7 +155,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
      * @param base Base item for the relative addressing
      * @return List of {@link AbstractBuild}s, which have been promoted.
      *         May return an empty list if {@link Jenkins} instance is not ready
-     * @since TODO
+     * @since 2.22
      */
     @Nonnull
     public List<Run<?,?>> getRuns(@CheckForNull Item base) {
