@@ -1,0 +1,11 @@
+<j:jelly xmlns:j="jelly:core">
+  <dt>$${PROMOTION_ENV,var="VARIABLENAME"}</dt>
+  <dd>
+    Expands to an environment variable (specified here as VARIABLENAME) from the 
+    <a href="https://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin">Promotion build</a> environment.
+    If current build is not a promotion, returns empty string. 
+    <p/>
+    Note that this does not include any variables set by the build scripts themselves, 
+    only those set by Jenkins and other plugins.
+  </dd>
+</j:jelly>
