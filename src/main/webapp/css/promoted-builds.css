@@ -1,0 +1,11 @@
+.promoted-builds {
+  overflow: hidden;
+}
+
+.promoted-builds h2 img {
+  margin-right: 4px;
+}
+
+.promoted-builds td.history-entry img {
+  margin-right: 4px;
+}

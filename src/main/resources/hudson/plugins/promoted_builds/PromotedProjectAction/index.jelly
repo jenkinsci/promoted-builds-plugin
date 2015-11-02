@@ -1,53 +1,54 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project">
+
   <l:layout title="Promotions : ${it.owner.displayName}">
+
+    <l:header>
+      <link type="text/css" rel="stylesheet" href="${resURL}/plugin/promoted-builds/css/promoted-builds.css" />
+    </l:header>
+
     <st:include page="sidepanel.jelly" it="${it.owner}" />
+
     <l:main-panel>
-      <h1>Promotions</h1>
+      <div class="promoted-builds">
+        <h1>Promotions</h1>
 
-      <!-- list promotions that are already attained -->
-      <j:forEach var="c" items="${it.processes}">
-        <h2>
-          <img src="${resURL}/plugin/promoted-builds/icons/32x32/${c.getIcon()}.png"/>
-          <a href="process/${c.name}" class="model-link">${c.name}</a>
-        </h2>
-        
-        <!-- history of this promotion process -->
-        <l:pane title="${%Promotion History}" width="90">
-          <j:forEach var="attempt" items="${it.getPromotionsSummary(c)}">
-            <tr><td>
-              <a href="../${attempt.target.number}/promotion/${c.name}/promotionBuild/${attempt.number}/" class="model-link">
-                <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
-                 alt="${attempt.iconColor.description}"/> ${c.name} #${attempt.number}
-              </a>
-              	promoted build
-              	<a href="../${attempt.target.number}/" class="model-link">
-              		 #${attempt.target.number}
-              	</a>
-              	on ${attempt.time}
-            </td></tr>
-          </j:forEach>
-        </l:pane>
-        
-        <!-- permalink last promotion -->
-        <j:set var="b" value="${it.getLatest(c)}" />
-	    <j:choose>
-	      <j:when test="${b!=null}">
-	        <p>
-	          Last promoted build is <t:buildLink job="${b.project}" number="${b.number}" />
-	          (<a href="latest/${c.name}/">permalink</a>)
-	        </p>
-	      </j:when>
-	      <j:otherwise>
-	        <p>
-	          No build promoted so far.
-	        </p>
-	      </j:otherwise>
-	    </j:choose>
-	    
-      </j:forEach>
-      
+        <!-- list promotions that are already attained -->
+        <j:forEach var="c" items="${it.processes}">
+          <h2>
+            <img src="${resURL}/plugin/promoted-builds/icons/32x32/${c.getIcon()}.png"/> <a href="process/${c.name}" class="model-link">${c.name}</a>
+          </h2>
 
-      
+          <!-- history of this promotion process -->
+          <l:pane title="${%Promotion History}">
+            <j:forEach var="attempt" items="${it.getPromotionsSummary(c)}">
+              <tr>
+                <td class="history-entry">
+                  <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}" alt="${attempt.iconColor.description}"/>
+                  <a href="../${attempt.target.number}/promotion/${c.name}/promotionBuild/${attempt.number}/" class="model-link">${c.name} #${attempt.number}</a>
+                  promoted build <a href="../${attempt.target.number}/" class="model-link"> #${attempt.target.number}</a> on ${attempt.time}
+                </td>
+              </tr>
+            </j:forEach>
+          </l:pane>
+
+          <!-- permalink last promotion -->
+          <j:set var="b" value="${it.getLatest(c)}" />
+          <j:choose>
+            <j:when test="${b!=null}">
+              <p>
+                Last promoted build is <t:buildLink job="${b.project}" number="${b.number}" />
+                (<a href="latest/${c.name}/">permalink</a>)
+              </p>
+            </j:when>
+            <j:otherwise>
+              <p>
+                No build promoted so far.
+              </p>
+            </j:otherwise>
+          </j:choose>
+
+        </j:forEach>
+      </div>
     </l:main-panel>
   </l:layout>
 </j:jelly>
