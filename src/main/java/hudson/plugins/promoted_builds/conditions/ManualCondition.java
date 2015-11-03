@@ -105,6 +105,7 @@ public class ManualCondition extends PromotionCondition {
         return null;
     }
 
+    
     /**
      * Verifies that the currently logged in user (or anonymous) has permission
      * to approve the promotion and that the promotion has not already been
@@ -129,7 +130,7 @@ public class ManualCondition extends PromotionCondition {
     /*
      * Check if user is listed in user list as a specific user
      */
-    private boolean isInUsersList() {
+    public boolean isInUsersList() {
         // Current user must be in users list or users list is empty
         Set<String> usersSet = getUsersAsSet();
         return usersSet.contains(Hudson.getAuthentication().getName());
@@ -138,7 +139,7 @@ public class ManualCondition extends PromotionCondition {
     /*
      * Check if user is a member of a groups as listed in the user / group field
      */
-    private boolean isInGroupList() {
+    public boolean isInGroupList() {
         Set<String> groups = getUsersAsSet();
         GrantedAuthority[] authorities = Hudson.getAuthentication().getAuthorities();
         for (GrantedAuthority authority : authorities) {

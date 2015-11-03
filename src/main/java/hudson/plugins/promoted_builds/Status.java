@@ -312,8 +312,14 @@ public final class Status {
      * Schedules a new build.
      */
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-        if(!getTarget().hasPermission(Promotion.PROMOTE))
-            return;
+        
+        ManualCondition manualCondition=(ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
+        
+        if(!getTarget().hasPermission(Promotion.PROMOTE)) {
+            if (!manualCondition.getUsersAsSet().isEmpty() && !manualCondition.isInUsersList()
+                    && !manualCondition.isInGroupList())
+                return;
+        }
         
         
         JSONObject formData = req.getSubmittedForm();
@@ -321,7 +327,6 @@ public final class Status {
         List<ParameterValue> paramValues=null;
         if (formData!=null){
             paramValues = new ArrayList<ParameterValue>();
-            ManualCondition manualCondition=(ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
             if (manualCondition!=null){
             	List<ParameterDefinition> parameterDefinitions=manualCondition.getParameterDefinitions();
                 if (parameterDefinitions != null && !parameterDefinitions.isEmpty()) {
