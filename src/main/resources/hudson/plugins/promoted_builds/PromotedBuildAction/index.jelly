@@ -35,14 +35,17 @@
         <h4>Status</h4>
         <div>
           <!-- JENKINS-20492: show re-execute event when manually approved -->
-		      <j:choose>
-		        <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
-		          <form style="float:right" method="post" action="${p.name}/build">
-		            <f:submit value="${%Re-execute promotion}"/>
-		          </form>
-		        </j:when>
-		      </j:choose>
-          <j:choose>
+			<j:if test="${!p.isManuallyApproved()}">
+				<j:choose>
+				<!-- JENKINS-24271 Re-execute and Force permissions must be separated -->
+					<j:when test="${it.getPromotionProcess(p.name)!=null and it.canReExecute()}">
+						<form style="float:right" method="post" action="${p.name}/build">
+							<f:submit value="${%Re-execute promotion}"/>
+						</form>
+					</j:when>
+				</j:choose>
+			</j:if>
+			<j:choose>
             <j:when test="${p.isPromotionSuccessful()}">
               <img src="${imagesURL}/16x16/blue.png" alt="Unstable" width="16" height="16" />
               ${%Successfully promoted} (<a href="${p.name}/lastSuccessful">${%log}</a>)
