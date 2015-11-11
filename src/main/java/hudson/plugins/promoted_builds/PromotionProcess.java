@@ -154,6 +154,15 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     /**
+     * JENKINS-27716: Since 1.585, the promotion must explicitly indicate that
+     * it can be disabled. Otherwise, promotions which trigger automatically
+     * upon build completion will execute, even if they're archived.
+     */
+    @Override public boolean supportsMakeDisabled() {
+        return true;
+    }
+
+    /**
      * Get the promotion condition by referencing it fully qualified class name
      */
     public PromotionCondition getPromotionCondition(String promotionClassName) {
