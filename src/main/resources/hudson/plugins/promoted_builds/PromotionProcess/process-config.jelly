@@ -5,6 +5,9 @@
       <f:entry title="Name" field="name">
         <f:textbox />
       </f:entry>
+      <f:entry title="Visible" field="isVisible">
+        <f:textbox />
+      </f:entry>
       <f:entry title="Icon">
         <select class="setting-input" name="icon">
           <f:option selected="${instance.icon=='star-gold'}"     value="star-gold">Gold star</f:option>

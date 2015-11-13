@@ -3,6 +3,7 @@ package hudson.plugins.promoted_builds.conditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import hudson.CopyOnWrite;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Util;
 import hudson.console.HyperlinkNote;
@@ -39,6 +40,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+
+import javax.annotation.CheckForNull;
+
 import org.kohsuke.stapler.export.Exported;
 
 /**
@@ -78,9 +82,9 @@ public class DownstreamPassCondition extends PromotionCondition {
         Badge badge = new Badge();
 
         PseudoDownstreamBuilds pdb = build.getAction(PseudoDownstreamBuilds.class);
-
+        EnvVars buildEnvironment = new EnvVars(build.getBuildVariables());
         OUTER:
-        for (AbstractProject<?,?> j : getJobList(build.getProject().getParent())) {
+        for (AbstractProject<?,?> j : getJobList(build.getProject().getParent(), buildEnvironment)) {
             for( AbstractBuild<?,?> b : build.getDownstreamBuilds(j) ) {
                 if (!b.isBuilding()) {
                     Result r = b.getResult();
@@ -101,8 +105,9 @@ public class DownstreamPassCondition extends PromotionCondition {
                         }
                     }
                 }
+                
             }
-
+            
             // none of the builds of this job passed.
             return null;
         }
@@ -111,22 +116,59 @@ public class DownstreamPassCondition extends PromotionCondition {
     }
 
     /**
+     *  @deprecated use {@link #getJobList(hudson.model.ItemGroup, hudson.model.AbstractProject, hudson.EnvVars)} 
      * List of downstream jobs that we need to monitor.
      *
      * @return never null.
      */
-    public List<AbstractProject<?,?>> getJobList(ItemGroup context) {
+    public List<AbstractProject<?,?>> getJobList(ItemGroup context){
+    	return getJobList(context, null);
+    }
+    /**
+     * 
+     * List of downstream jobs that we need to monitor resolving variables.
+     * @since 2.33
+     * @return never null.
+     */
+    public List<AbstractProject<?,?>> getJobList(ItemGroup context, EnvVars buildEnvironment) {
         List<AbstractProject<?,?>> r = new ArrayList<AbstractProject<?,?>>();
-        for (String name : Util.tokenize(jobs,",")) {
+        String expandedJobs = getExpandedJobs(jobs, buildEnvironment);
+        
+        if (expandedJobs == null) return r;
+        
+        for (String name : Util.tokenize(expandedJobs,",")) {
             AbstractProject job = JenkinsHelper.getInstance().getItem(name.trim(), context, AbstractProject.class);
             if(job!=null)   r.add(job);
         }
         return r;
     }
+    private static String getExpandedJobs(@CheckForNull String jobs, @CheckForNull EnvVars environment){
+        if (environment == null) {
+            return jobs;
+        }
+        if (jobs == null){
+        	return null;
+        }
+        return environment.expand(jobs);
+    }
+    /**
+     * @deprecated use {@link #contains(hudson.model.ItemGroup, hudson.model.AbstractProject, hudson.EnvVars)} 
+     */
+    public boolean contains(ItemGroup ctx, AbstractProject<?,?> job){
+        return contains(ctx, job, null);
+    }
+    /**
+     * Checks if the configured jobs property contains job. Resolves jobs property first. 
+     * @since 2.33 
+     */
+    public boolean contains(ItemGroup ctx, AbstractProject<?,?> job, EnvVars environment) {
 
-    public boolean contains(ItemGroup ctx, AbstractProject<?,?> job) {
+        String expandedJobs = getExpandedJobs(jobs, environment);
+        
+        if (expandedJobs == null) return false;
+        
         // quick rejection test
-        if(!jobs.contains(job.getName())) return false;
+        if(!expandedJobs.contains(job.getName())) return false;
 
         String name = job.getFullName();
         for (AbstractProject<?, ?> project : getJobList(ctx)) {
@@ -219,6 +261,7 @@ public class DownstreamPassCondition extends PromotionCondition {
         @Override
         public void onCompleted(AbstractBuild<?,?> build, TaskListener listener) {
             // this is not terribly efficient,
+            EnvVars buildEnvironment = new EnvVars(build.getBuildVariables());
             for(AbstractProject<?,?> j : JenkinsHelper.getInstance().getAllItems(AbstractProject.class)) {
                 boolean warned = false; // used to avoid warning for the same project more than once.
 
@@ -229,7 +272,7 @@ public class DownstreamPassCondition extends PromotionCondition {
                         for (PromotionCondition cond : p.conditions) {
                             if (cond instanceof DownstreamPassCondition) {
                                 DownstreamPassCondition dpcond = (DownstreamPassCondition) cond;
-                                if(dpcond.contains(j.getParent(), build.getParent())) {
+                                if(dpcond.contains(j.getParent(), build.getParent(), buildEnvironment)) {
                                     considerPromotion = true;
                                     break;
                                 }
