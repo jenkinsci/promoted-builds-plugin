@@ -127,8 +127,10 @@ public class ManualCondition extends PromotionCondition {
         return true;
     }
 
+    //TODO: updated the access level to public for reuse in another class
     /*
      * Check if user is listed in user list as a specific user
+     * @since 2.24 
      */
     public boolean isInUsersList() {
         // Current user must be in users list or users list is empty

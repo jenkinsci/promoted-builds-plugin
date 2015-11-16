@@ -313,14 +313,13 @@ public final class Status {
      */
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
         
-        ManualCondition manualCondition=(ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
+        ManualCondition manualCondition = (ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
         
         if(!getTarget().hasPermission(Promotion.PROMOTE)) {
-            if (!manualCondition.getUsersAsSet().isEmpty() && !manualCondition.isInUsersList()
-                    && !manualCondition.isInGroupList())
+            if (manualCondition == null || (!manualCondition.getUsersAsSet().isEmpty() && !manualCondition.isInUsersList()
+                    && !manualCondition.isInGroupList()))
                 return;
         }
-        
         
         JSONObject formData = req.getSubmittedForm();
         
