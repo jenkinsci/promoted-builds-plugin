@@ -26,6 +26,11 @@ public class PromotionTargetAction extends InvisibleAction {
     }
 
     public AbstractBuild<?,?> resolve(PromotionProcess parent) {
+        AbstractBuild<?,?> build = this.resolve();
+        if (build !=null){
+            return build;
+        }
+        //In case of project renamed.
         AbstractProject<?,?> j = parent.getOwner();
         if (j==null)    return null;
         return j.getBuildByNumber(number);
