@@ -438,7 +438,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     public boolean isInQueue(AbstractBuild<?,?> build) {
         for (Item item : Hudson.getInstance().getQueue().getItems(this))
-            if (item.getAction(PromotionTargetAction.class).resolve(this)==build)
+            if (item.getAction(PromotionTargetAction.class).resolve()==build)
                 return true;
         return false;
     }

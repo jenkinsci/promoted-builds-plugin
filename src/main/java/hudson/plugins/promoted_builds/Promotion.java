@@ -71,7 +71,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
     @Exported
     public AbstractBuild<?,?> getTarget() {
         PromotionTargetAction pta = getAction(PromotionTargetAction.class);
-        return pta.resolve(this);
+        return pta.resolve();
     }
 
     @Override public AbstractBuild<?,?> getRootBuild() {

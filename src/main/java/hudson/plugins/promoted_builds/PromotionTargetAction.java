@@ -2,8 +2,8 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
+
 
 /**
  * Remembers what build it's promoting. Attached to {@link Promotion}.
@@ -13,25 +13,17 @@ import hudson.model.InvisibleAction;
 public class PromotionTargetAction extends InvisibleAction {
     private final String jobName;
     private final int number;
+    private final AbstractProject<?, ?> project;
 
     public PromotionTargetAction(AbstractBuild<?,?> build) {
         jobName = build.getParent().getFullName();
         number = build.getNumber();
+        project = build.getProject();
     }
 
     public AbstractBuild<?,?> resolve() {
-        AbstractProject<?,?> j = Hudson.getInstance().getItemByFullName(jobName, AbstractProject.class);
-        if (j==null)    return null;
-        return j.getBuildByNumber(number);
+        return project.getBuildByNumber(number);
     }
 
-    public AbstractBuild<?,?> resolve(PromotionProcess parent) {
-        AbstractProject<?,?> j = parent.getOwner();
-        if (j==null)    return null;
-        return j.getBuildByNumber(number);
-    }
 
-    public AbstractBuild<?,?> resolve(Promotion parent) {
-        return resolve(parent.getParent());
-    }
 }
