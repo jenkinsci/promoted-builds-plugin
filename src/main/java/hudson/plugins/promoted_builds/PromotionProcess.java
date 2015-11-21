@@ -320,7 +320,19 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @throws IOException 
      */
     public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build) throws IOException {
-		return considerPromotion2(build, (List<ParameterValue>)null);
+		LOGGER.fine("Considering the promotion of "+build+" via "+getName()+" without parmeters");
+		// If the build has manual approvals, use the parameters from it
+		List<ParameterValue> params = new ArrayList<ParameterValue>();
+		List<ManualApproval> approvals = build.getActions(ManualApproval.class);
+		for (ManualApproval approval : approvals) {
+			if (approval.name.equals(getName())) {
+				LOGGER.fine("Getting parameters from existing manual promotion");
+				params = approval.badge.getParameterValues();
+				LOGGER.finer("Using paramters: "+params.toString());
+			}
+		}
+
+		return considerPromotion2(build, params);
 	}
 	
     public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build, List<ParameterValue> params) throws IOException {
@@ -333,7 +345,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         if(a!=null && a.contains(this))
             return null;
 
-        LOGGER.fine("Considering the promotion of "+build+" via "+getName());
+        LOGGER.fine("Considering the promotion of "+build+" via "+getName()+" with parameters");
         Status qualification = isMet(build);
         if(qualification==null)
             return null; // not this time
