@@ -448,7 +448,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 // need to think about what the implications are.
 //
     public boolean isFingerprintConfigured() {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     protected void buildDependencyGraph(DependencyGraph graph) {
