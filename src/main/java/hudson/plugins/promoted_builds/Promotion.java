@@ -368,7 +368,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
 
     @Override
     public int compareTo(Promotion that) {
-    	return that.getId().compareTo( this.getId() );
+    	return that.getNumber().compareTo( this.getNumber() );
     }
 
     @Override
