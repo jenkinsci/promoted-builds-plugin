@@ -28,6 +28,10 @@
       <id>petehayes</id>
       <name>Peter Hayes</name>
     </developer>
+    <developer>
+      <id>oleg_nenashev</id>
+      <name>Oleg Nenashev</name>
+    </developer>
   </developers>
 
   <scm>
