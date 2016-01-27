@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.554.2</version>
+    <version>1.565</version>
   </parent>
 
   <artifactId>promoted-builds</artifactId>
@@ -13,8 +13,8 @@
 
   <name>Jenkins promoted builds plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin</url>
-  
-  <properties> 
+
+  <properties>
     <findbugs-maven-plugin.version>3.0.1</findbugs-maven-plugin.version>
     <findbugs.failOnError>true</findbugs.failOnError>
   </properties>
@@ -115,6 +115,19 @@
       <version>1.5.3</version>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>job-dsl</artifactId>
+      <version>1.42</version>
+      <type>jar</type>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jvnet.hudson</groupId>
+      <artifactId>xstream</artifactId>
+      <version>1.4.7-jenkins-1</version>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
   <build>
@@ -127,7 +140,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>${findbugs-maven-plugin.version}</version>
-        <configuration>    
+        <configuration>
           <failOnError>${findbugs.failOnError}</failOnError>
           <xmlOutput>true</xmlOutput>
         </configuration>
@@ -151,4 +164,4 @@
       </plugin>
     </plugins>
   </build>
-</project>  
+</project>
