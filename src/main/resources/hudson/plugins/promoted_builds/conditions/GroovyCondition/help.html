@@ -1,0 +1,38 @@
+<p>
+  Evaluates a custom Groovy script that can use the full
+  <a href="http://javadoc.jenkins-ci.org/">Jenkins API</a>
+  (including installed plugins) to consider whether a build qualifies.
+  The evaluation is done through the
+  <a href="https://wiki.jenkins-ci.org/display/JENKINS/Script+Security+Plugin">Script Security plugin</a>.
+</p>
+<p>
+  The script evaluation is not self-triggered and requires to enable a suitable
+  criteria (such as 'Promote immediately once...') in addition to this one.
+</p>
+<p>
+  Available variables are:
+  <ul>
+    <li><code>promotionProcess</code>
+      The promotion process containing the condition (hudson.plugins.promoted_builds.PromotionProcess)
+    </li>
+    <li><code>build</code>
+      The build being considered for promotion
+      (<a href="http://javadoc.jenkins-ci.org/index.html?hudson/model/AbstractBuild.html">hudson.model.AbstractBuild</a>)
+    </li>
+    <li><code>jenkins</code>
+      The
+      <a href="http://javadoc.jenkins-ci.org/index.html?jenkins/model/Jenkins.html">jenkins.model.Jenkins</a>
+      instance
+    </li>
+  </ul>
+</p>
+<p>
+  To signal the qualification of the build, return <code>true</code>
+  or a non-empty <code>java.util.Map&lt;String,String&gt;</code> to contribute to the Promotion
+  environment
+</p>
+<p>
+  Any script evaluation errors are redirected to the
+  <code>hudson.plugins.promoted_builds.conditions.GroovyCondition</code>
+  <a href="https://wiki.jenkins-ci.org/display/JENKINS/Logging">logger</a>
+</p>

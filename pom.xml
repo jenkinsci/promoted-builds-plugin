@@ -115,6 +115,12 @@
       <version>1.5.3</version>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>script-security</artifactId>
+      <version>1.16</version>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
   <build>
