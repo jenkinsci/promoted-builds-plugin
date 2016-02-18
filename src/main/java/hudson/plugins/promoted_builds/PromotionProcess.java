@@ -415,9 +415,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause, List<ParameterValue> params) {
-        assert build.getProject()==getOwner();
 
-        
         List<Action> actions = new ArrayList<Action>();
        	Promotion.buildParametersAction(actions, build, params);
         actions.add(new PromotionTargetAction(build));
