@@ -119,7 +119,6 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>script-security</artifactId>
       <version>1.16</version>
-      <optional>true</optional>
     </dependency>
   </dependencies>
 

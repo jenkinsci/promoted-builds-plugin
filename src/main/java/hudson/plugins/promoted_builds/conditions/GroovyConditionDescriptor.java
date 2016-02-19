@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * Declared outside GroovyCondition as it depends on the optional 'script-security' dependency
  */
-@Extension
+@Extension(optional = true)
 public final class GroovyConditionDescriptor extends PromotionConditionDescriptor {
 
     private static final Logger LOGGER = Logger.getLogger(GroovyConditionDescriptor.class.getName());
