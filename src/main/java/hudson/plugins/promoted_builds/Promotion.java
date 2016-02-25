@@ -31,15 +31,21 @@ import hudson.tasks.BuildTrigger;
 
 import jenkins.model.Jenkins;
 
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.export.Exported;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 
 /**
@@ -104,7 +110,37 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         e.put("PROMOTED_JOB_FULL_NAME", target.getParent().getFullName());
         e.put("PROMOTED_NUMBER", Integer.toString(target.getNumber()));
         e.put("PROMOTED_ID", target.getId());
-        e.put("PROMOTED_TIMESTAMP", target.getTimestampString2());
+        GlobalBuildPromotedBuilds globalBuildPromotedBuilds = GlobalBuildPromotedBuilds.get();
+        String dateFormat = globalBuildPromotedBuilds.getDateFormat();
+        String timeZone = globalBuildPromotedBuilds.getTimeZone();
+        SimpleDateFormat format = null;
+        TimeZone tz = null;
+
+        if (dateFormat != null && !StringUtils.isBlank(dateFormat)) {
+            try {
+                format = new SimpleDateFormat(dateFormat);
+            } catch (IllegalArgumentException e1) {
+                LOGGER.log(Level.WARNING, String.format("An illegal date format was introduced: %s. Default ISO 8601 yyyy-MM-dd'T'HH:mmZ will be used", dateFormat), e1);
+                format =  new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+            }
+        } else {
+            // Per ISO 8601
+            format =  new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        }
+
+        if (timeZone !=null && !StringUtils.isBlank(timeZone)) {
+            try {
+                tz = TimeZone.getTimeZone(timeZone);
+            } catch (IllegalArgumentException e2) {
+                LOGGER.log(Level.WARNING, String.format("An illegal time zone was introduced: %s. Default GMT time zone will be used", timeZone), e2);
+                tz = TimeZone.getTimeZone("GMT");
+            }
+        } else {
+            tz = TimeZone.getTimeZone("GMT");
+        }
+
+        format.setTimeZone(tz);
+        e.put("PROMOTED_TIMESTAMP", format.format(new Date()));
         e.put("PROMOTED_DISPLAY_NAME", target.getDisplayName());
         e.put("PROMOTED_USER_NAME", getUserName());
         e.put("PROMOTED_USER_ID", getUserId());
@@ -432,4 +468,6 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         // Create list of actions to pass to scheduled build
         actions.add(new ParametersAction(params));
 	}
+
+    private static final Logger LOGGER = Logger.getLogger(Promotion.class.getName());
 }
