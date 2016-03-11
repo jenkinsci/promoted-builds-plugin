@@ -14,10 +14,17 @@ freeStyleJob('test-job-complex') {
                 }
                 actions {
                     downstreamParameterized {
-                        trigger("deploy-application","SUCCESS",false,["buildStepFailure": "FAILURE","failure":"FAILURE","unstable":"UNSTABLE"]) {
-                            predefinedProp("ENVIRONMENT","dev-server")
-                            predefinedProp("APPLICATION_NAME", "\${PROMOTED_JOB_FULL_NAME}")
-                            predefinedProp("BUILD_ID","\${PROMOTED_NUMBER}")
+                        trigger("deploy-application") {
+                            block {
+                                buildStepFailure('FAILURE')
+                                failure('FAILURE')
+                                unstable('UNSTABLE')
+                            }
+                            parameters {
+                                predefinedProp("ENVIRONMENT","dev-server")
+                                predefinedProp("APPLICATION_NAME", "\${PROMOTED_JOB_FULL_NAME}")
+                                predefinedProp("BUILD_ID","\${PROMOTED_NUMBER}")
+                            }
                         }
                     }
                 }
@@ -32,10 +39,17 @@ freeStyleJob('test-job-complex') {
                 }
                 actions {
                     downstreamParameterized {
-                        trigger("deploy-application","SUCCESS",false,["buildStepFailure": "FAILURE","failure":"FAILURE","unstable":"UNSTABLE"]) {
-                            predefinedProp("ENVIRONMENT","test-server")
-                            predefinedProp("APPLICATION_NAME", "\${PROMOTED_JOB_FULL_NAME}")
-                            predefinedProp("BUILD_ID","\${PROMOTED_NUMBER}")
+                        trigger("deploy-application") {
+                            block {
+                                buildStepFailure('FAILURE')
+                                failure('FAILURE')
+                                unstable('UNSTABLE')
+                            }
+                            parameters {
+                                predefinedProp("ENVIRONMENT","test-server")
+                                predefinedProp("APPLICATION_NAME", "\${PROMOTED_JOB_FULL_NAME}")
+                                predefinedProp("BUILD_ID","\${PROMOTED_NUMBER}")
+                            }
                         }
                     }
                 }

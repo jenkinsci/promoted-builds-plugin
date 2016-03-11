@@ -40,7 +40,7 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
 
     @DslExtensionMethod(context = PropertiesContext.class)
     public Object promotions(Runnable closure, DslEnvironment dslEnvironment) throws FormException, IOException {
-        PromotionsContext context = new PromotionsContext();
+        PromotionsContext context = new PromotionsContext(dslEnvironment);
         executeInContext(closure, context);
         dslEnvironment.put("processNames", context.names);
         JobPropertyImpl jobProperty = new JobPropertyImpl(context.names);

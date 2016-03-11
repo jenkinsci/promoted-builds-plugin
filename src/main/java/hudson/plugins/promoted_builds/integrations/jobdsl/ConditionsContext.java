@@ -7,12 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javaposse.jobdsl.dsl.Context;
-import javaposse.jobdsl.dsl.FileJobManagement;
 import javaposse.jobdsl.dsl.helpers.BuildParametersContext;
 
-import org.apache.commons.io.FileUtils;
+import javaposse.jobdsl.plugin.DslEnvironment;
+
+import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 
 public class ConditionsContext implements Context {
+	private final DslEnvironment dslEnvironment;
 
 	// Self Promotion Condition
 	private boolean isSelfPromotion = false;
@@ -50,6 +52,10 @@ public class ConditionsContext implements Context {
 	
 	private String promotionNames = null;
 
+	public ConditionsContext(DslEnvironment dslEnvironment) {
+		this.dslEnvironment = dslEnvironment;
+	}
+
 	public void selfPromotion(Boolean evenIfUnstable) {
 		isSelfPromotion = true;
 		if (evenIfUnstable) {
@@ -83,8 +89,7 @@ public class ConditionsContext implements Context {
 
 	public void parameters(Closure<?> parametersClosure) {
 		// delegate to main BuildParametersContext
-		BuildParametersContext parametersContext = new BuildParametersContext(
-				new FileJobManagement(FileUtils.getTempDirectory()));
+		BuildParametersContext parametersContext = dslEnvironment.createContext(BuildParametersContext.class);
 		executeInContext(parametersClosure, parametersContext);
 		params.putAll(parametersContext.getBuildParameterNodes());
 	}
@@ -100,12 +105,6 @@ public class ConditionsContext implements Context {
 	public void upstream(String promotionNames) {
 		isUpstreamPromotion = true;
 		this.promotionNames = promotionNames;
-	}
-
-	private static void executeInContext(Closure<?> configClosure, Object context) {
-		configClosure.setDelegate(context);
-		configClosure.setResolveStrategy(Closure.DELEGATE_FIRST);
-		configClosure.call();
 	}
 
 	public Map<String, Node> getParams() {

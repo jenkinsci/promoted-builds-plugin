@@ -9,12 +9,20 @@ import com.google.common.base.Preconditions;
 
 import groovy.lang.Closure;
 import javaposse.jobdsl.dsl.Context;
+import javaposse.jobdsl.plugin.DslEnvironment;
+
+import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 
 public class PromotionsContext implements Context {
+    private final DslEnvironment dslEnvironment;
 
     Set<String> names = new HashSet<String>();
     
     Map<String,PromotionContext> promotionContexts = new HashMap<String,PromotionContext>();
+
+    public PromotionsContext(DslEnvironment dslEnvironment) {
+        this.dslEnvironment = dslEnvironment;
+    }
 
     /**
      * PromotionNodes:
@@ -41,19 +49,13 @@ public class PromotionsContext implements Context {
      * @return
      */
     public void promotion(Closure<?> promotionClosure) {
-        PromotionContext promotionContext = new PromotionContext();
+        PromotionContext promotionContext = new PromotionContext(dslEnvironment);
         executeInContext(promotionClosure, promotionContext);
         Preconditions.checkNotNull(promotionContext.getName(), "promotion name cannot be null");
         Preconditions.checkArgument(promotionContext.getName().length() > 0);
         names.add(promotionContext.getName());
         promotionContexts.put(promotionContext.getName(),promotionContext);
         
-    }
-
-    private static void executeInContext(Closure<?> configClosure, Object context) {
-        configClosure.setDelegate(context);
-        configClosure.setResolveStrategy(Closure.DELEGATE_FIRST);
-        configClosure.call();
     }
 
 }

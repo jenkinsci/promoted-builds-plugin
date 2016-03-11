@@ -12,12 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javaposse.jobdsl.dsl.Context;
-import javaposse.jobdsl.dsl.FileJobManagement;
 import javaposse.jobdsl.dsl.helpers.step.StepContext;
 
-import org.apache.commons.io.FileUtils;
+import javaposse.jobdsl.plugin.DslEnvironment;
+
+import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 
 class PromotionContext implements Context {
+    private final DslEnvironment dslEnvironment;
 
     private List<PromotionCondition> conditions = new ArrayList<PromotionCondition>();
     
@@ -41,9 +43,13 @@ class PromotionContext implements Context {
         this.restrict = restrict;
     }
 
+    public PromotionContext(DslEnvironment dslEnvironment) {
+        this.dslEnvironment = dslEnvironment;
+    }
+
     public void conditions(Closure<?> conditionClosure) {
         // delegate to ConditionsContext
-        ConditionsContext conditionContext = new ConditionsContext();
+        ConditionsContext conditionContext = new ConditionsContext(dslEnvironment);
         executeInContext(conditionClosure, conditionContext);
         if (conditionContext.isSelfPromotion()) {
             conditions.add(new SelfPromotionCondition(conditionContext.isEvenIfUnstable()));
@@ -73,15 +79,9 @@ class PromotionContext implements Context {
 
     public void actions(Closure<?> actionsClosure) {
         // delegate to StepContext
-        StepContext stepContext = new StepContext(new FileJobManagement(FileUtils.getTempDirectory()), null);
+        StepContext stepContext = dslEnvironment.createContext(StepContext.class);
         executeInContext(actionsClosure, stepContext);
         actions.addAll(stepContext.getStepNodes());
-    }
-
-    private static void executeInContext(Closure<?> configClosure, Object context) {
-        configClosure.setDelegate(context);
-        configClosure.setResolveStrategy(Closure.DELEGATE_FIRST);
-        configClosure.call();
     }
 
     public List<PromotionCondition> getConditions() {
