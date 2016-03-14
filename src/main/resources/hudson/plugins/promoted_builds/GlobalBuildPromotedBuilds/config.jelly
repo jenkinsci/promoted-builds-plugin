@@ -1,0 +1,11 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:section title="Build Pipeline Plugin">
+        <f:entry field="dateFormat" title="Date format">
+            <f:textbox />
+        </f:entry>
+        <f:entry field="timeZone" title="Time zone">
+            <f:textbox />
+        </f:entry>
+    </f:section>
+</j:jelly>
