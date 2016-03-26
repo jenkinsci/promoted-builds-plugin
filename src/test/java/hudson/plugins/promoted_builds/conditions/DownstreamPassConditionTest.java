@@ -59,7 +59,7 @@ public final class DownstreamPassConditionTest {
 
         job1.getPublishersList().add(new BuildTrigger(job2.getFullName(), Result.SUCCESS));
         job2.getPublishersList().add(new BuildTrigger(job3.getFullName(), Result.SUCCESS));
-        Jenkins.getInstance().rebuildDependencyGraph();
+        j.jenkins.rebuildDependencyGraph();
 
         final FreeStyleBuild run1 = j.buildAndAssertSuccess(job1);
         j.waitUntilNoActivity();
