@@ -2,8 +2,8 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
+import hudson.plugins.promoted_builds.util.JenkinsHelper;
 
 /**
  * Remembers what build it's promoting. Attached to {@link Promotion}.
@@ -20,7 +20,7 @@ public class PromotionTargetAction extends InvisibleAction {
     }
 
     public AbstractBuild<?,?> resolve() {
-        AbstractProject<?,?> j = Hudson.getInstance().getItemByFullName(jobName, AbstractProject.class);
+        AbstractProject<?,?> j = JenkinsHelper.getInstance().getItemByFullName(jobName, AbstractProject.class);
         if (j==null)    return null;
         return j.getBuildByNumber(number);
     }

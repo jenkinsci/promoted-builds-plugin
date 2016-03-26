@@ -287,7 +287,13 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                 return Lease.createDummyLease(
                         rootPath.child(getEnvironment(listener).expand(customWorkspace)));
             }
-            return wsl.acquire(n.getWorkspaceFor((TopLevelItem)getTarget().getProject()),true);
+            
+            TopLevelItem item = (TopLevelItem)getTarget().getProject();
+            FilePath workspace = n.getWorkspaceFor(item);
+            if (workspace == null) {
+                throw new IOException("Cannot retrieve workspace for " + item + " on the node " + n);
+            }
+            return wsl.acquire(workspace, true);
         }
 
         protected Result doRun(BuildListener listener) throws Exception {
