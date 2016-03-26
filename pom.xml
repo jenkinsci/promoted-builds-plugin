@@ -119,11 +119,12 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>job-dsl</artifactId>
       <version>1.44</version>
+      <optional>true</optional>
+    </dependency>
     <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>script-security</artifactId>
       <version>1.16</version>
-    </dependency>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jvnet.hudson</groupId>
