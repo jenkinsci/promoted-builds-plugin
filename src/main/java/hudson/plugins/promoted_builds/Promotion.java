@@ -54,8 +54,7 @@ import javax.annotation.Nonnull;
  *
  * @author Kohsuke Kawaguchi
  */
-public class Promotion extends AbstractBuild<PromotionProcess,Promotion> 
-	implements Comparable<Promotion>{
+public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
     public Promotion(PromotionProcess job) throws IOException {
         super(job);
@@ -403,11 +402,6 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
 
     public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
     public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", Messages._Promotion_PromotePermission_Description(), Jenkins.ADMINISTER, PermissionScope.RUN);
-
-    @Override
-    public int compareTo(Promotion that) {
-    	return Integer.compare(that.getNumber(),this.getNumber());
-    }
 
     @Override
     public int hashCode() {

@@ -275,7 +275,7 @@ public class ManualCondition extends PromotionCondition {
 
         @Exported
         public List<ParameterValue> getParameterValues() {
-            return values != null ? values : Collections.EMPTY_LIST;
+            return values != null ? values : Collections.<ParameterValue>emptyList();
         }
 
         @Override
