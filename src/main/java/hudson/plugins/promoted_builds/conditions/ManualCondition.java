@@ -55,10 +55,18 @@ public class ManualCondition extends PromotionCondition {
     public ManualCondition() {
     }
 
+    /*
+     * Restrict the Condition to specific user(s)
+     * @since 2.24
+     */
     public String getUsers() {
         return users;
     }
 
+    public void setUsers(String users) {
+        this.users = users;
+    }
+    
     public List<ParameterDefinition> getParameterDefinitions() {
         return parameterDefinitions;
     }
@@ -151,10 +159,10 @@ public class ManualCondition extends PromotionCondition {
         return false;
     }
     public Future<Promotion> approve(AbstractBuild<?,?> build, PromotionProcess promotionProcess, List<ParameterValue> paramValues) throws IOException{
-        if (canApprove(promotionProcess, build)) {        	
+        if (canApprove(promotionProcess, build)) {            
             // add approval to build
-        	ManualApproval approval=new ManualApproval(promotionProcess.getName(), paramValues);
-        	build.addAction(approval);
+            ManualApproval approval=new ManualApproval(promotionProcess.getName(), paramValues);
+            build.addAction(approval);
             build.save();
 
             // check for promotion
@@ -166,9 +174,9 @@ public class ManualCondition extends PromotionCondition {
         List<ParameterValue> paramValues = new ArrayList<ParameterValue>();
 
         if (parameterDefinitions != null && !parameterDefinitions.isEmpty()) {
-        	for (ParameterDefinition d:parameterDefinitions){
-        		paramValues.add(d.getDefaultParameterValue());
-        	}
+            for (ParameterDefinition d:parameterDefinitions){
+                paramValues.add(d.getDefaultParameterValue());
+            }
         }
         return paramValues;
     }
@@ -184,7 +192,7 @@ public class ManualCondition extends PromotionCondition {
             @AncestorInPath PromotionProcess promotionProcess,
             @AncestorInPath AbstractBuild<?,?> build) throws IOException, ServletException {
 
-	JSONObject formData = req.getSubmittedForm();
+    JSONObject formData = req.getSubmittedForm();
 
         if (canApprove(promotionProcess, build)) {
             List<ParameterValue> paramValues = new ArrayList<ParameterValue>();

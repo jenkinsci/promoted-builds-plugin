@@ -1,5 +1,23 @@
 package hudson.plugins.promoted_builds;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.Ancestor;
+import org.kohsuke.stapler.StaplerRequest;
+
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractBuild;
@@ -19,25 +37,9 @@ import hudson.model.JobPropertyDescriptor;
 import hudson.model.listeners.ItemListener;
 import hudson.remoting.Callable;
 import hudson.util.IOUtils;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.Ancestor;
-import org.kohsuke.stapler.StaplerRequest;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import jenkins.model.Jenkins;
 
 /**
  * Promotion processes defined for a project.
@@ -71,11 +73,23 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         this.owner = owner;
         init();
     }
+    /**
+     * Programmatic construction.
+     */
     public JobPropertyImpl(JobPropertyImpl other, AbstractProject<?,?> owner) throws Descriptor.FormException, IOException {
         this.owner = owner;
         this.activeProcessNames.addAll(other.activeProcessNames);
         loadAllProcesses(other.getRootDir()); 
     }
+
+    /**
+     * Programmatic construction.
+     */
+    @Restricted(NoExternalUse.class)
+    public JobPropertyImpl(Set<String> activeProcessNames) {
+        this.activeProcessNames.addAll(activeProcessNames);
+    }
+
     private JobPropertyImpl(StaplerRequest req, JSONObject json) throws Descriptor.FormException, IOException {
         // a hack to get the owning AbstractProject.
         // this is needed here so that we can load items
@@ -109,6 +123,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         }
         init();
     }
+    
     private void loadAllProcesses(File rootDir) throws IOException {
         File[] subdirs = rootDir.listFiles(new FileFilter() {
             public boolean accept(File child) {

@@ -122,9 +122,58 @@ These were retrieved from github [here][2].
 *   `PROMOTED_ID` - ID of the build being promoted
     *   ex: 2012-04-12_17-13-03
 *   `PROMOTED_USER_NAME` - the user who triggered the promotion
-*   `PROMOTED_JOB_FULL_NAME` - the full name of the promoted
-job
+*   `PROMOTED_JOB_FULL_NAME` - the full name of the promoted job
 
+## Job DSL support
+
+```groovy  
+freeStyleJob(String jobname) {
+  properties{
+    promotions {
+      promotion {
+        name(String promotionName)
+        icon(String iconName)
+        conditions {
+          selfPromotion(boolean evenIfUnstable = true)
+          parameterizedSelfPromotion(boolean evenIfUnstable = true, String parameterName, String parameterValue)
+          releaseBuild()
+          downstream(boolean evenIfUnstable = true, String jobs)
+          upstream(String promotionNames)
+          manual(String user){
+            parameters{
+              textParam(String parameterName, String defaultValue, String description)
+          }
+        }
+        actions {
+          shell(String command)
+        }
+      }
+    }
+  }
+}
+```
+
+See [StepContext](https://jenkinsci.github.io/job-dsl-plugin/#path/job-steps) in the API Viewer for full documentation about the possible actions.
+
+### Example
+
+```groovy
+freeStyleJob('test-job') {
+  properties{
+    promotions {
+      promotion {
+        name('Development')
+        conditions {
+          manual('testuser')
+        }
+        actions {
+          shell('echo hello;')
+        }
+      }
+    }
+  }
+}
+```
 
 ## Contributing
 
