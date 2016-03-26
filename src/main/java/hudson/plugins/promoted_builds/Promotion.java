@@ -184,7 +184,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         for (PromotionBadge badget : getStatus().getBadges()) {
             if (badget instanceof ManualCondition.Badge) {
                 final String nameFromBadge = ((ManualCondition.Badge) badget).getUserName();
-                if (nameFromBadge != null) {
+                if (!nameFromBadge.equals(ManualCondition.MISSING_USER_ID_DISPLAY_STRING)) {
                     return nameFromBadge;
                 }
             }
@@ -222,7 +222,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         for (PromotionBadge badget : getStatus().getBadges()) {
             if (badget instanceof ManualCondition.Badge) {
                 final String idFromBadge = ((ManualCondition.Badge) badget).getUserId();
-                if (idFromBadge != null) {
+                if (!idFromBadge.equals(ManualCondition.MISSING_USER_ID_DISPLAY_STRING)) {
                     return idFromBadge;
                 }
             }
