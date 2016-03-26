@@ -74,10 +74,12 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
 
             if (StringUtils.isNotBlank(value)) {
                 AbstractProject p = JenkinsHelper.getInstance().getItem(value,project,AbstractProject.class);
-                if(p==null)
-                    return FormValidation.error(hudson.tasks.Messages.BuildTrigger_NoSuchProject(value,
-                            AbstractProject.findNearest(value, project.getParent()).getRelativeNameFrom(project)));
-
+                if(p==null) {
+                    AbstractProject nearest = AbstractProject.findNearest(value, project.getParent());
+                    return FormValidation.error( nearest != null 
+                            ? hudson.tasks.Messages.BuildTrigger_NoSuchProject(value, nearest.getRelativeNameFrom(project))
+                            : Messages.Shared_noSuchProject(value));
+                }
             }
 
             return FormValidation.ok();

@@ -1,6 +1,8 @@
 package hudson.plugins.promoted_builds.conditions;
 
+import hudson.AbortException;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -38,9 +40,14 @@ public class FixedResultBuilder extends Builder {
         return buildResult;
     }
 
+    @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
-        build.getWorkspace().child("my.file").write("Hello world!", "UTF-8");
+        FilePath workspace = build.getWorkspace();
+        if (workspace == null) {
+            throw new AbortException("Workspace is missing in FixedResultBuilder");
+        }
+        workspace.child("my.file").write("Hello world!", "UTF-8");
         build.setResult(buildResult);
         return true;
     }

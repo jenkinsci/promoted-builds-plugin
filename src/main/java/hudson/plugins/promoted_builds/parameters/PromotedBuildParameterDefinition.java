@@ -229,7 +229,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
                     AbstractProject nearest = AbstractProject.findNearest(value, project.getParent());
                     return FormValidation.error( nearest != null
                             ? hudson.tasks.Messages.BuildTrigger_NoSuchProject(value, nearest.getFullName())
-                            : Messages.PromotedBuildParameterDefinition_noSucnProject(value));
+                            : hudson.plugins.promoted_builds.Messages.Shared_noSuchProject(value));
                 }
 
             }

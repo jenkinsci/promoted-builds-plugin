@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import antlr.ANTLRException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.BulkChange;
 import hudson.Extension;
 import hudson.Util;
@@ -603,7 +604,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             return PromotionProcess.getAll();
         }
 
-        // exposed for Jelly
+        @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "exposed for Jelly")
         public final Class<PromotionProcess> promotionProcessType = PromotionProcess.class;
 
         public FormValidation doCheckName(@QueryParameter String name) {

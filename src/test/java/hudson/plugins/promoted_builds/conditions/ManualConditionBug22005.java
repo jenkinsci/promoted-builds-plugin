@@ -39,7 +39,7 @@ public class ManualConditionBug22005 extends HudsonTestCase {
 	public void testPromotionProcess() throws Exception {
         FreeStyleProject p = createFreeStyleProject();
         
-        ExtensionList<Descriptor> list=Jenkins.getInstance().getExtensionList(Descriptor.class);
+        ExtensionList<Descriptor> list = hudson.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(p);
         p.addProperty(base);
@@ -80,7 +80,7 @@ public class ManualConditionBug22005 extends HudsonTestCase {
     public void testPromotionProcessViaWebClient() throws Exception {
         FreeStyleProject p = createFreeStyleProject();
         
-        ExtensionList<Descriptor> list=Jenkins.getInstance().getExtensionList(Descriptor.class);
+        ExtensionList<Descriptor> list = hudson.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(p);
         p.addProperty(base);
