@@ -30,6 +30,7 @@ import hudson.model.Saveable;
 import hudson.model.labels.LabelAtom;
 import hudson.model.labels.LabelExpression;
 import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
+import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import hudson.security.ACL;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
@@ -496,7 +497,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl)Jenkins.getInstance().getDescriptorOrDie(getClass());
+        return (DescriptorImpl)JenkinsHelper.getInstance().getDescriptorOrDie(getClass());
     }
 
     @Override

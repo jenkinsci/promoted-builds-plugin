@@ -26,6 +26,7 @@ import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
+import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.AncestorInPath;
@@ -173,7 +174,7 @@ public class DownstreamPassCondition extends PromotionCondition {
 
         public AutoCompletionCandidates doAutoCompleteJobs(@QueryParameter String value, @AncestorInPath AbstractProject project) {
             List<AbstractProject> downstreams = project.getDownstreamProjects();
-            List<Item> all = Jenkins.getInstance().getItems(Item.class);
+            List<Item> all = JenkinsHelper.getInstance().getItems(Item.class);
             List<String> candidatesDownstreams = Lists.newArrayList();
             List<String> candidatesOthers = Lists.newArrayList();
             for (Item i : all) {

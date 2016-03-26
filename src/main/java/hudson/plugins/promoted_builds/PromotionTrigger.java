@@ -5,6 +5,7 @@ import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
 import hudson.model.Job;
+import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
@@ -72,7 +73,7 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
             project.checkPermission(Item.CONFIGURE);
 
             if (StringUtils.isNotBlank(value)) {
-                AbstractProject p = Jenkins.getInstance().getItem(value,project,AbstractProject.class);
+                AbstractProject p = JenkinsHelper.getInstance().getItem(value,project,AbstractProject.class);
                 if(p==null)
                     return FormValidation.error(hudson.tasks.Messages.BuildTrigger_NoSuchProject(value,
                             AbstractProject.findNearest(value, project.getParent()).getRelativeNameFrom(project)));
@@ -84,7 +85,7 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
 
         public AutoCompletionCandidates doAutoCompleteJobName(@QueryParameter String value) {
             AutoCompletionCandidates candidates = new AutoCompletionCandidates();
-            List<AbstractProject> jobs = Jenkins.getInstance().getItems(AbstractProject.class);
+            List<AbstractProject> jobs = JenkinsHelper.getInstance().getItems(AbstractProject.class);
             for (AbstractProject job: jobs) {
                 if (job.getFullName().startsWith(value)) {
                     if (job.hasPermission(Item.READ)) {
@@ -106,7 +107,7 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
 
             AbstractProject<?,?> j = null;
             if (jobName!=null)
-                j = Jenkins.getInstance().getItem(jobName,defaultJob,AbstractProject.class);
+                j = JenkinsHelper.getInstance().getItem(jobName,defaultJob,AbstractProject.class);
 
             ListBoxModel r = new ListBoxModel();
             if (j!=null) {

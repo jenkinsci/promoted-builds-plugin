@@ -226,8 +226,10 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
                 final AbstractProject p = ItemPathResolver.getByPath(value, project, AbstractProject.class);
                 if (p==null) {
                     // suggest full name so that getBuilds() can find item.
-                    return FormValidation.error(hudson.tasks.Messages.BuildTrigger_NoSuchProject(value,
-                            AbstractProject.findNearest(value, project.getParent()).getFullName()));
+                    AbstractProject nearest = AbstractProject.findNearest(value, project.getParent());
+                    return FormValidation.error( nearest != null
+                            ? hudson.tasks.Messages.BuildTrigger_NoSuchProject(value, nearest.getFullName())
+                            : Messages.PromotedBuildParameterDefinition_noSucnProject(value));
                 }
 
             }

@@ -20,6 +20,7 @@ import hudson.model.TopLevelItem;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
+import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.security.PermissionScope;
@@ -102,7 +103,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         EnvVars e = super.getEnvironment(listener);
 
         // Augment environment with target build's information
-        String rootUrl = Jenkins.getInstance().getRootUrl();
+        String rootUrl = JenkinsHelper.getInstance().getRootUrl();
         AbstractBuild<?, ?> target = getTarget();
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
@@ -353,7 +354,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
                 }
 
                 // tickle PromotionTriggers
-                for (AbstractProject<?,?> p : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                for (AbstractProject<?,?> p : JenkinsHelper.getInstance().getAllItems(AbstractProject.class)) {
                     PromotionTrigger pt = p.getTrigger(PromotionTrigger.class);
                     if (pt!=null)
                         pt.consider(Promotion.this);
