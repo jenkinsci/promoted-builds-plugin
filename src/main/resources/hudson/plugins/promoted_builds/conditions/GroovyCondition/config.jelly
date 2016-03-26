@@ -1,0 +1,17 @@
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+  <f:property field="script"/>
+  <f:advanced>
+    <f:entry
+        field="unmetQualificationLabel"
+        title="${%Display label when condition not met}"
+    >
+      <f:textbox/>
+    </f:entry>
+    <f:entry
+        field="metQualificationLabel"
+        title="${%Display label when condition met}"
+    >
+      <f:textbox/>
+    </f:entry>
+  </f:advanced>
+</j:jelly>
