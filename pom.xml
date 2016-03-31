@@ -15,7 +15,7 @@
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin</url>
 
   <properties>
-    <findbugs-maven-plugin.version>3.0.1</findbugs-maven-plugin.version>
+    <findbugs-maven-plugin.version>3.0.3</findbugs-maven-plugin.version>
     <findbugs.failOnError>true</findbugs.failOnError>
   </properties>
 

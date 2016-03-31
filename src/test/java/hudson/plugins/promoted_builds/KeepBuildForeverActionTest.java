@@ -1,5 +1,7 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.AbortException;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -146,7 +148,11 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         }
         public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
                 throws InterruptedException, IOException {
-            build.getWorkspace().child("my.file").write("Hello world!", "UTF-8");
+            FilePath workspace = build.getWorkspace();
+            if (workspace == null) {
+                throw new AbortException("Workspace is null in " + FixedResultBuilder.class.getName());
+            }
+            workspace.child("my.file").write("Hello world!", "UTF-8");
             build.setResult(buildResult);
             return true;
         }

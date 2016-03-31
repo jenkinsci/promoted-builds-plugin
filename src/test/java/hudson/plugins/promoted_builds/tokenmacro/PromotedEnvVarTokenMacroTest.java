@@ -136,6 +136,7 @@ public class PromotedEnvVarTokenMacroTest {
         public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) 
                 throws InterruptedException, IOException {
             if (build instanceof Promotion) {
+                // TODO: It seems to be a bug in the test suite
                 AbstractBuild<?, ?> target = ((Promotion)build).getTarget();
                 return performWithParentBuild(build, listener);
             }

@@ -62,7 +62,7 @@ public final class DownstreamPassConditionInheritanceTest {
 
         pair1.getDerived().getPublishersList().add(new BuildTrigger(pair2.getDerived().getFullName(), Result.SUCCESS));
         pair2.getDerived().getPublishersList().add(new BuildTrigger(pair3.getDerived().getFullName(), Result.SUCCESS));
-        Jenkins.getInstance().rebuildDependencyGraph();
+        j.jenkins.rebuildDependencyGraph();
 
         final InheritanceBuild run1 = j.buildAndAssertSuccess(pair1.getDerived());
         j.assertBuildStatusSuccess(run1);

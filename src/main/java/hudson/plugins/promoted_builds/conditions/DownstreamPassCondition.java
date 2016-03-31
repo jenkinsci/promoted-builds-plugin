@@ -13,7 +13,6 @@ import hudson.model.Cause;
 import hudson.model.Cause.UpstreamCause;
 import hudson.model.Fingerprint;
 import hudson.model.Fingerprint.BuildPtr;
-import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
@@ -26,6 +25,7 @@ import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
+import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.AncestorInPath;
@@ -118,7 +118,7 @@ public class DownstreamPassCondition extends PromotionCondition {
     public List<AbstractProject<?,?>> getJobList(ItemGroup context) {
         List<AbstractProject<?,?>> r = new ArrayList<AbstractProject<?,?>>();
         for (String name : Util.tokenize(jobs,",")) {
-            AbstractProject job = Hudson.getInstance().getItem(name.trim(), context, AbstractProject.class);
+            AbstractProject job = JenkinsHelper.getInstance().getItem(name.trim(), context, AbstractProject.class);
             if(job!=null)   r.add(job);
         }
         return r;
@@ -173,7 +173,7 @@ public class DownstreamPassCondition extends PromotionCondition {
 
         public AutoCompletionCandidates doAutoCompleteJobs(@QueryParameter String value, @AncestorInPath AbstractProject project) {
             List<AbstractProject> downstreams = project.getDownstreamProjects();
-            List<Item> all = Jenkins.getInstance().getItems(Item.class);
+            List<Item> all = JenkinsHelper.getInstance().getItems(Item.class);
             List<String> candidatesDownstreams = Lists.newArrayList();
             List<String> candidatesOthers = Lists.newArrayList();
             for (Item i : all) {
@@ -219,7 +219,7 @@ public class DownstreamPassCondition extends PromotionCondition {
         @Override
         public void onCompleted(AbstractBuild<?,?> build, TaskListener listener) {
             // this is not terribly efficient,
-            for(AbstractProject<?,?> j : Hudson.getInstance().getAllItems(AbstractProject.class)) {
+            for(AbstractProject<?,?> j : JenkinsHelper.getInstance().getAllItems(AbstractProject.class)) {
                 boolean warned = false; // used to avoid warning for the same project more than once.
 
                 JobPropertyImpl jp = j.getProperty(JobPropertyImpl.class);

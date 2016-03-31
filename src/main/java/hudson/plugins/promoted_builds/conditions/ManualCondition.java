@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.annotation.Nonnull;
 
 import javax.servlet.ServletException;
 
@@ -51,6 +52,11 @@ import org.kohsuke.stapler.export.Exported;
 public class ManualCondition extends PromotionCondition {
     private String users;
     private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
+    
+    /**
+     * 
+     */
+    public final static String MISSING_USER_ID_DISPLAY_STRING = "N/A";
 
     public ManualCondition() {
     }
@@ -240,19 +246,28 @@ public class ManualCondition extends PromotionCondition {
             this.values = values;
         }
 
+        /**
+         * Gets name of the user, who has promoted the build.
+         * @return User name or {@link #MISSING_USER_ID_DISPLAY_STRING} if the user cannot be determined
+         */
         @Exported
+        @Nonnull
         public String getUserName() {
             if (authenticationName == null)
-                return "N/A";
+                return MISSING_USER_ID_DISPLAY_STRING;
 
             User u = User.get(authenticationName, false, null);
             return u != null ? u.getDisplayName() : authenticationName;
         }
 
+        /**
+         * Gets ID of the user, who has promoted the build.
+         * @return User id or {@link #MISSING_USER_ID_DISPLAY_STRING} if the user cannot be determined
+         */
         @Exported
         public String getUserId() {
             if (authenticationName == null) {
-                return "N/A";
+                return MISSING_USER_ID_DISPLAY_STRING;
             }
 
             return authenticationName;
@@ -260,7 +275,7 @@ public class ManualCondition extends PromotionCondition {
 
         @Exported
         public List<ParameterValue> getParameterValues() {
-            return values != null ? values : Collections.EMPTY_LIST;
+            return values != null ? values : Collections.<ParameterValue>emptyList();
         }
 
         @Override

@@ -20,6 +20,7 @@ import hudson.model.TopLevelItem;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
+import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.security.PermissionScope;
@@ -53,8 +54,7 @@ import javax.annotation.Nonnull;
  *
  * @author Kohsuke Kawaguchi
  */
-public class Promotion extends AbstractBuild<PromotionProcess,Promotion> 
-	implements Comparable<Promotion>{
+public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
     public Promotion(PromotionProcess job) throws IOException {
         super(job);
@@ -102,7 +102,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         EnvVars e = super.getEnvironment(listener);
 
         // Augment environment with target build's information
-        String rootUrl = Jenkins.getInstance().getRootUrl();
+        String rootUrl = JenkinsHelper.getInstance().getRootUrl();
         AbstractBuild<?, ?> target = getTarget();
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
@@ -183,7 +183,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         for (PromotionBadge badget : getStatus().getBadges()) {
             if (badget instanceof ManualCondition.Badge) {
                 final String nameFromBadge = ((ManualCondition.Badge) badget).getUserName();
-                if (nameFromBadge != null) {
+                if (!nameFromBadge.equals(ManualCondition.MISSING_USER_ID_DISPLAY_STRING)) {
                     return nameFromBadge;
                 }
             }
@@ -221,7 +221,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
         for (PromotionBadge badget : getStatus().getBadges()) {
             if (badget instanceof ManualCondition.Badge) {
                 final String idFromBadge = ((ManualCondition.Badge) badget).getUserId();
-                if (idFromBadge != null) {
+                if (!idFromBadge.equals(ManualCondition.MISSING_USER_ID_DISPLAY_STRING)) {
                     return idFromBadge;
                 }
             }
@@ -287,7 +287,13 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
                 return Lease.createDummyLease(
                         rootPath.child(getEnvironment(listener).expand(customWorkspace)));
             }
-            return wsl.acquire(n.getWorkspaceFor((TopLevelItem)getTarget().getProject()),true);
+            
+            TopLevelItem item = (TopLevelItem)getTarget().getProject();
+            FilePath workspace = n.getWorkspaceFor(item);
+            if (workspace == null) {
+                throw new IOException("Cannot retrieve workspace for " + item + " on the node " + n);
+            }
+            return wsl.acquire(workspace, true);
         }
 
         protected Result doRun(BuildListener listener) throws Exception {
@@ -353,7 +359,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
                 }
 
                 // tickle PromotionTriggers
-                for (AbstractProject<?,?> p : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                for (AbstractProject<?,?> p : JenkinsHelper.getInstance().getAllItems(AbstractProject.class)) {
                     PromotionTrigger pt = p.getTrigger(PromotionTrigger.class);
                     if (pt!=null)
                         pt.consider(Promotion.this);
@@ -402,11 +408,6 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion>
 
     public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
     public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", Messages._Promotion_PromotePermission_Description(), Jenkins.ADMINISTER, PermissionScope.RUN);
-
-    @Override
-    public int compareTo(Promotion that) {
-    	return Integer.compare(that.getNumber(),this.getNumber());
-    }
 
     @Override
     public int hashCode() {

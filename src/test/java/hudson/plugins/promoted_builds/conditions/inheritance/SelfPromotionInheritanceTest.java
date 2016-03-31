@@ -6,6 +6,7 @@ import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Result;
 import hudson.model.StringParameterDefinition;
 import hudson.model.StringParameterValue;
+import hudson.model.TaskListener;
 import hudson.plugins.project_inheritance.projects.InheritanceBuild;
 import hudson.plugins.project_inheritance.projects.InheritanceProject.IMode;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
@@ -201,7 +202,7 @@ public class SelfPromotionInheritanceTest  {
         
         // verify that the promotion's environment contains the parameter from the target build.
         Promotion pb = promo1.getBuildByNumber(1);
-        assertEquals(paramValue, pb.getEnvironment(null).get(paramName, null));
+        assertEquals(paramValue, pb.getEnvironment(TaskListener.NULL).get(paramName, null));
     }
 
     private FixedResultBuilder failureBuilder() {

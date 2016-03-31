@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import antlr.ANTLRException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.BulkChange;
 import hudson.Extension;
 import hudson.Util;
@@ -17,7 +18,6 @@ import hudson.model.Descriptor;
 import hudson.model.Descriptor.FormException;
 import hudson.model.Failure;
 import hudson.model.FreeStyleProject;
-import hudson.model.Hudson;
 import hudson.model.ItemGroup;
 import hudson.model.JDK;
 import hudson.model.Job;
@@ -30,6 +30,7 @@ import hudson.model.Saveable;
 import hudson.model.labels.LabelAtom;
 import hudson.model.labels.LabelExpression;
 import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
+import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import hudson.security.ACL;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
@@ -96,7 +97,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public static PromotionProcess fromJson(StaplerRequest req, JSONObject o) throws FormException, IOException {
         String name = o.getString("name");
         try {
-            Hudson.checkGoodName(name);
+            Jenkins.checkGoodName(name);
         } catch (Failure f) {
             throw new Descriptor.FormException(f.getMessage(), name);
         }
@@ -212,7 +213,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         // not just the same label.. but at least this works if job is tied to one node:
         if (assignedLabel == null) return getOwner().getAssignedLabel();
 
-        return Hudson.getInstance().getLabel(assignedLabel);
+        return JenkinsHelper.getInstance().getLabel(assignedLabel);
     }
 
     @Override public JDK getJDK() {
@@ -435,7 +436,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public boolean isInQueue(AbstractBuild<?,?> build) {
-        for (Item item : Hudson.getInstance().getQueue().getItems(this))
+        for (Item item : JenkinsHelper.getInstance().getQueue().getItems(this))
             if (item.getAction(PromotionTargetAction.class).resolve(this)==build)
                 return true;
         return false;
@@ -496,7 +497,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl)Jenkins.getInstance().getDescriptorOrDie(getClass());
+        return (DescriptorImpl)JenkinsHelper.getInstance().getDescriptorOrDie(getClass());
     }
 
     @Override
@@ -526,14 +527,14 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
                         Messages.JobPropertyImpl_LabelString_InvalidBooleanExpression(e.getMessage()));
             }
             // TODO: if there's an atom in the expression that is empty, report it
-            if (Hudson.getInstance().getLabel(value).isEmpty())
+            if (JenkinsHelper.getInstance().getLabel(value).isEmpty())
                 return FormValidation.warning(Messages.JobPropertyImpl_LabelString_NoMatch());
             return FormValidation.ok();
         }
 
         public AutoCompletionCandidates doAutoCompleteAssignedLabelString(@QueryParameter String value) {
             AutoCompletionCandidates c = new AutoCompletionCandidates();
-            Set<Label> labels = Hudson.getInstance().getLabels();
+            Set<Label> labels = JenkinsHelper.getInstance().getLabels();
             List<String> queries = new AutoCompleteSeeder(value).getSeeds();
 
             for (String term : queries) {
@@ -602,7 +603,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             return PromotionProcess.getAll();
         }
 
-        // exposed for Jelly
+        @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "exposed for Jelly")
         public final Class<PromotionProcess> promotionProcessType = PromotionProcess.class;
 
         public FormValidation doCheckName(@QueryParameter String name) {
@@ -612,7 +613,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             }
 
             try {
-                Hudson.checkGoodName(name);
+                Jenkins.checkGoodName(name);
             } catch (Failure f) {
                 return FormValidation.error(f.getMessage());
             }

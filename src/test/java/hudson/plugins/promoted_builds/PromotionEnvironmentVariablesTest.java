@@ -53,9 +53,7 @@ public class PromotionEnvironmentVariablesTest {
         
         Promotion promotion = promotionProcess.considerPromotion2(build).get();
         EnvVars env = promotion.getEnvironment(TaskListener.NULL);
-        
-        String rootUrl = r.jenkins.getRootUrl();
-        
+         
         // Assert
         assertEquals("Folder/Project", env.get("PROMOTED_JOB_FULL_NAME"));
         assertEquals("Project", env.get("PROMOTED_JOB_NAME"));

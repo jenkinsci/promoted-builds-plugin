@@ -6,9 +6,11 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Describable;
 import hudson.model.Hudson;
+import hudson.plugins.promoted_builds.util.JenkinsHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import jenkins.model.Jenkins;
 
 /**
  * Extension point for defining a promotion criteria.
@@ -49,14 +51,14 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
     }
 
     public PromotionConditionDescriptor getDescriptor() {
-        return (PromotionConditionDescriptor)Hudson.getInstance().getDescriptor(getClass());
+        return (PromotionConditionDescriptor)JenkinsHelper.getInstance().getDescriptor(getClass());
     }
 
     /**
      * Returns all the registered {@link PromotionConditionDescriptor}s.
      */
     public static DescriptorExtensionList<PromotionCondition,PromotionConditionDescriptor> all() {
-        return Hudson.getInstance().<PromotionCondition,PromotionConditionDescriptor>getDescriptorList(PromotionCondition.class);
+        return JenkinsHelper.getInstance().<PromotionCondition,PromotionConditionDescriptor>getDescriptorList(PromotionCondition.class);
     }
 
     /**
