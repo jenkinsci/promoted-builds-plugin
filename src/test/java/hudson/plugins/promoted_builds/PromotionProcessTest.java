@@ -2,7 +2,10 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.FreeStyleProject;
 import hudson.model.Items;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Result;
+import hudson.model.StringParameterDefinition;
 import hudson.model.FreeStyleBuild;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.tasks.ArtifactArchiver;
@@ -15,6 +18,7 @@ import net.sf.json.JSONObject;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.kohsuke.stapler.Stapler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -129,6 +133,7 @@ public class PromotionProcessTest extends HudsonTestCase {
             public Object call() throws Exception {
                 JSONObject o = new JSONObject()
                         .accumulate("name", "foo")
+                        .accumulate("isVisible", "")
                         .accumulate("icon", "star-gold")
                         .accumulate("conditions",new JSONObject()
                             .accumulate("hudson-plugins-promoted_builds-conditions-SelfPromotionCondition",
@@ -142,5 +147,54 @@ public class PromotionProcessTest extends HudsonTestCase {
                 return null;
             }
         });
+    }
+   
+    public void testIsVisibleByDefault() throws Exception {
+        FreeStyleProject project = createFreeStyleProject("project");
+        JobPropertyImpl jobProperty = new JobPropertyImpl(project);
+        project.addProperty(jobProperty);
+        PromotionProcess promotionProcess = jobProperty.addProcess( "Promotion");
+        assertTrue(promotionProcess.isVisible());
+    }
+    public void testIsVisibleFalseReturnsNotVisible() throws Exception{
+        FreeStyleProject project = createFreeStyleProject("project");
+        JobPropertyImpl jobProperty = new JobPropertyImpl(project);
+        project.addProperty(jobProperty);
+        PromotionProcess promotionProcess = jobProperty.addProcess( "Promotion");
+        promotionProcess.isVisible = "false";
+        assertFalse(promotionProcess.isVisible());
+    }
+    public void testIsVisibleTrueReturnsVisible() throws Exception{
+        FreeStyleProject project = createFreeStyleProject("project");
+        JobPropertyImpl jobProperty = new JobPropertyImpl(project);
+        project.addProperty(jobProperty);
+        PromotionProcess promotionProcess = jobProperty.addProcess( "Promotion");
+        promotionProcess.isVisible = "true";
+        assertTrue(promotionProcess.isVisible());
+    }
+    public void testIsVisibleResolvesDefaultParameterValue() throws Exception{
+        FreeStyleProject project = createFreeStyleProject("project");
+        final List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        ParametersDefinitionProperty parametersProperty = new ParametersDefinitionProperty(parameters);
+        parameters.add(new StringParameterDefinition("Visibility", "false"));
+        project.addProperty(parametersProperty);
+        JobPropertyImpl jobProperty = new JobPropertyImpl(project);
+        project.addProperty(jobProperty);
+        PromotionProcess promotionProcess = jobProperty.addProcess( "Promotion");
+        promotionProcess.isVisible = "${Visibility}";
+        assertFalse(promotionProcess.isVisible());
+    }
+    public void testIsVisibleResolvesDefaultParameterValueIndirectly() throws Exception{
+        FreeStyleProject project = createFreeStyleProject("project");
+        final List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        ParametersDefinitionProperty parametersProperty = new ParametersDefinitionProperty(parameters);
+        parameters.add(new StringParameterDefinition("IndirectVisibility", "false"));
+        parameters.add(new StringParameterDefinition("Visibility", "${IndirectVisibility}"));
+        project.addProperty(parametersProperty);
+        JobPropertyImpl jobProperty = new JobPropertyImpl(project);
+        project.addProperty(jobProperty);
+        PromotionProcess promotionProcess = jobProperty.addProcess( "Promotion");
+        promotionProcess.isVisible = "${Visibility}";
+        assertFalse(promotionProcess.isVisible());
     }
 }

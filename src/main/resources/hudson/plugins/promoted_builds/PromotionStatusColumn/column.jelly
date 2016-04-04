@@ -6,29 +6,31 @@
       <j:when test="${ppa!=null}">
         <j:set var="pp" value="${ppa.getPromotionProcesses()}"/>
         <j:forEach var="process" items="${pp}">
-          <j:set var="status" value="${ppa.getStatus(process)}"/>
-          <j:set var="icon" value="${process.getIcon()}"/>
-          <j:set var="iconUrl" value="${resURL}/plugin/promoted-builds/icons/${iconSize}/${icon}.png"/>
-          <img width="${iconSize}" height="${iconSize}"
-            title="${%PromotionProcess} ${process.name}"
-            src="${iconUrl}"/>
-          <j:choose>
-            <j:when test="${status!=null}">
-              <j:if test="${status.isLastAnError()}">
-                <j:set var="iconUrl" value="${resURL}/images/${iconSize}/error.png"/>
-                <img width="${iconSize}" height="${iconSize}"
-                  title="${%PromotionProcess} ${process.name} ${%PromotionProcess.failed}"
-                  src="${iconUrl}"/>
-              </j:if>
-              <j:set var="target" value="${status.getTarget()}"/>
-              <a href="${jobBaseUrl}${job.shortUrl}${target.number}/" class="model-link inside">
-                ${target.displayName}
-              </a>
-            </j:when>
-            <j:otherwise><!-- promotion has never happened / no builds -->
-              ${%Otherwise.noBuild}
-            </j:otherwise>
-          </j:choose>
+           <j:if test="${process.isVisible()}">
+	          <j:set var="status" value="${ppa.getStatus(process)}"/>
+	          <j:set var="icon" value="${process.getIcon()}"/>
+	          <j:set var="iconUrl" value="${resURL}/plugin/promoted-builds/icons/${iconSize}/${icon}.png"/>
+	          <img width="${iconSize}" height="${iconSize}"
+	            title="${%PromotionProcess} ${process.name}"
+	            src="${iconUrl}"/>
+	          <j:choose>
+	            <j:when test="${status!=null}">
+	              <j:if test="${status.isLastAnError()}">
+	                <j:set var="iconUrl" value="${resURL}/images/${iconSize}/error.png"/>
+	                <img width="${iconSize}" height="${iconSize}"
+	                  title="${%PromotionProcess} ${process.name} ${%PromotionProcess.failed}"
+	                  src="${iconUrl}"/>
+	              </j:if>
+	              <j:set var="target" value="${status.getTarget()}"/>
+	              <a href="${jobBaseUrl}${job.shortUrl}${target.number}/" class="model-link inside">
+	                ${target.displayName}
+	              </a>
+	            </j:when>
+	            <j:otherwise><!-- promotion has never happened / no builds -->
+	              ${%Otherwise.noBuild}
+	            </j:otherwise>
+	          </j:choose>
+	       </j:if>
         </j:forEach>
       </j:when>
       <j:otherwise><!-- job has no promotion process (no project action) -->
