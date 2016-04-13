@@ -61,7 +61,6 @@ public class PromotionsDslContextExtensionTest extends HudsonTestCase {
         TopLevelItem item = jenkins.getItem("copy-artifacts-test");
         File config = new File(item.getRootDir(), "promotions/Development/config.xml");
         String content = Files.toString(config, Charset.forName("UTF-8"));
-        System.out.println("CONTENT: " + content);
         assert content.contains("<selector class=\"hudson.plugins.copyartifact.SpecificBuildSelector\">");
     }
 

@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -15,6 +16,8 @@ import groovy.util.Node;
 import hudson.PluginManager;
 import hudson.PluginWrapper;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * XStream Converter for the PromotionProcess for the Job DSL Plugin
@@ -89,6 +92,7 @@ public class JobDslPromotionProcessConverter extends ReflectionConverter {
 
     private void convertNode(Node node, HierarchicalStreamWriter writer) {
         writer.startNode(node.name().toString());
+        writeNodeAttributes(node, writer);
         if (node.value() instanceof Collection) {
             for (Object subNode : (Collection) node.value()) {
                 convertNode((Node) subNode, writer);
@@ -97,6 +101,17 @@ public class JobDslPromotionProcessConverter extends ReflectionConverter {
             writer.setValue(node.value().toString());
         }
         writer.endNode();
+    }
+
+    private void writeNodeAttributes(Node node, HierarchicalStreamWriter writer) {
+        Map<?,?> attributes = node.attributes();
+        if (attributes != null) {
+            for (Map.Entry<?,?> entry : attributes.entrySet()) {
+                String key = ObjectUtils.toString(entry.getKey());
+                String value = ObjectUtils.toString(entry.getValue());
+                writer.addAttribute(key, value);
+            }
+        }
     }
 
     private String obtainClassOwnership() {
