@@ -83,6 +83,7 @@ public class ItemPathResolver {
      * The implementation retains the original behavior in {@link PromotedBuildParameterDefinition}, 
      * but this method also provides a support of multi-level addressing including special markups
      * for the relative addressing.
+     * </p>
      * Effectively, the resolution order is following:
      * <ul>
      *   <li><b>Optional</b> Legacy behavior, which can be enabled by {@link #ENABLE_LEGACY_RESOLUTION_AGAINST_ROOT}. 
@@ -95,9 +96,8 @@ public class ItemPathResolver {
      * For the relative and absolute addressing the engine supports &quot;.&quot; and
      * &quot;..&quot; markers within the path.
      * The first one points to the current element, the second one - to the upper element. 
-     * If the search cannot get a new top element (e.g. reached the root), the method returns <code>null</code>.
+     * If the search cannot get a new top element (e.g. reached the root), the method returns {@code null}.
      * 
-     * </p>
      * @param <T> Type of the {@link Item} to be retrieved
      * @param path Path string to the item. 
      * @param baseItem Base {@link Item} for the relative addressing. If null,

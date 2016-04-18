@@ -26,6 +26,8 @@ import org.kohsuke.stapler.export.ExportedBean;
  */
 @ExportedBean
 public final class PromotedBuildAction implements BuildBadgeAction {
+    
+    //TODO: bug: serialization of builds into the badge
     public final AbstractBuild<?,?> owner;
 
     /**

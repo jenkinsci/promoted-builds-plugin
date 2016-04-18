@@ -66,6 +66,9 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
 
         /**
          * Checks the job name.
+         * @param project Current project
+         * @param value Value to be validated
+         * @return Validation result
          */
         public FormValidation doCheckJobName(@AncestorInPath Item project, @QueryParameter String value ) {
             if (!project.hasPermission(Item.CONFIGURE) && project.hasPermission(Item.EXTENDED_READ)) {
@@ -101,6 +104,9 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
 
         /**
          * Fills in the available promotion processes.
+         * @param defaultJob Base job
+         * @param jobName Current name of the job specified in the form
+         * @return List of possible project names. May be empty
          */
         public ListBoxModel doFillProcessItems(@AncestorInPath Item defaultJob, @QueryParameter("jobName") String jobName) {
             if (!defaultJob.hasPermission(Item.CONFIGURE) && defaultJob.hasPermission(Item.EXTENDED_READ)) {

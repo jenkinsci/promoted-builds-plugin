@@ -283,7 +283,7 @@ public class DownstreamPassCondition extends PromotionCondition {
         }
 
         /**
-         * Called whenever some {@link JobPropertyImpl} changes to update {@link #DOWNSTREAM_JOBS}.
+         * Called whenever some {@link JobPropertyImpl} changes to update downstream jobs.
          * @deprecated Caches are not being used anymore
          */
         @Deprecated

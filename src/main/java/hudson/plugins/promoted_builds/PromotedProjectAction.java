@@ -104,8 +104,8 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
     /**
      * returns the summary of the latest promotions for a promotion process.
      * 
-     * @param promotionProcessName
-     * @return
+     * @param promotionProcess Name of the promotion process
+     * @return List of latest promotions
      */
     public List<Promotion> getPromotionsSummary(PromotionProcess promotionProcess){
     	List<Promotion> promotionList = this.getPromotions(promotionProcess);

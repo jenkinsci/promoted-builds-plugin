@@ -27,8 +27,9 @@ import javaposse.jobdsl.plugin.DslEnvironment;
 import javaposse.jobdsl.plugin.DslExtensionMethod;
 
 /**
- * The Job DSL Extension Point for the Promotions. See also {@linktourl https://github.com/jenkinsci/job-dsl-plugin/wiki/Extending-the-DSL}
- *
+ * The Job DSL Extension Point for the Promotions. 
+ * See also <a href="https://github.com/jenkinsci/job-dsl-plugin/wiki/Extending-the-DSL">Extending the DSL</a>
+ * 
  * @author Dennis Schulte
  */
 @Extension
