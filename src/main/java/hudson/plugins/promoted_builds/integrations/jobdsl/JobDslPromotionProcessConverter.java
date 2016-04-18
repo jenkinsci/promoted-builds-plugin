@@ -14,6 +14,7 @@ import com.thoughtworks.xstream.mapper.Mapper;
 import groovy.util.Node;
 import hudson.PluginManager;
 import hudson.PluginWrapper;
+import javax.annotation.CheckForNull;
 import jenkins.model.Jenkins;
 
 /**
@@ -99,6 +100,7 @@ public class JobDslPromotionProcessConverter extends ReflectionConverter {
         writer.endNode();
     }
 
+    @CheckForNull
     private String obtainClassOwnership() {
         if (this.classOwnership != null) {
             return this.classOwnership;

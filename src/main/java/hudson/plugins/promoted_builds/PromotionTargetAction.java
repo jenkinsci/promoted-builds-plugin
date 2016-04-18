@@ -4,6 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.InvisibleAction;
 import hudson.plugins.promoted_builds.util.JenkinsHelper;
+import javax.annotation.CheckForNull;
 
 /**
  * Remembers what build it's promoting. Attached to {@link Promotion}.
@@ -19,12 +20,14 @@ public class PromotionTargetAction extends InvisibleAction {
         number = build.getNumber();
     }
 
+    @CheckForNull
     public AbstractBuild<?,?> resolve() {
         AbstractProject<?,?> j = JenkinsHelper.getInstance().getItemByFullName(jobName, AbstractProject.class);
         if (j==null)    return null;
         return j.getBuildByNumber(number);
     }
 
+    @CheckForNull
     public AbstractBuild<?,?> resolve(PromotionProcess parent) {
         AbstractBuild<?,?> build = this.resolve();
         if (build !=null){

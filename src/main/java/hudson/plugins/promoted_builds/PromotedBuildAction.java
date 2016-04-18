@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
@@ -119,8 +120,9 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     
     /**
      * Finds the {@link Status} that has matching {@link Status#name} value.
-     * Or null if not found.
+     * Or {@code null} if not found.
      */
+    @CheckForNull
     public Status getPromotion(String name) {
         for (Status s : statuses)
             if(s.name.equals(name))
@@ -153,8 +155,10 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     }
 
     /**
-     * Get the specified promotion process by name
+     * Get the specified promotion process by name.
+     * @return The discovered process of {@code null} if the promotion cannot be found
      */
+    @CheckForNull
     public PromotionProcess getPromotionProcess(String name) {
         JobPropertyImpl pp = getProject().getProperty(JobPropertyImpl.class);
         if (pp==null)
