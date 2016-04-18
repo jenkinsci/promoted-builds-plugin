@@ -25,7 +25,7 @@
 package hudson.plugins.promoted_builds;
 
 import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebRequestSettings;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
@@ -61,7 +61,7 @@ public class RemoteApiTest {
         String xml = wc.goToXml("job/p/promotion/process/promo/config.xml").getContent();
         assertTrue(xml, xml.contains("SelfPromotionCondition"));
         assertTrue(xml, xml.contains("<evenIfUnstable>true</evenIfUnstable>"));
-        WebRequestSettings req = new WebRequestSettings(wc.createCrumbedUrl("job/p/promotion/process/promo/config.xml"), HttpMethod.POST);
+        WebRequest req = new WebRequest(wc.createCrumbedUrl("job/p/promotion/process/promo/config.xml"), HttpMethod.POST);
         req.setRequestBody(xml.replace("<evenIfUnstable>true</evenIfUnstable>", "<evenIfUnstable>false</evenIfUnstable>"));
         assertTrue(proc.conditions.get(SelfPromotionCondition.class).isEvenIfUnstable());
         wc.getPage(req);
@@ -99,7 +99,7 @@ public class RemoteApiTest {
         assertEquals(1, promotion.getItems().size());
         assertEquals(1, promotion.getActiveItems().size());
         JenkinsRule.WebClient wc = r.createWebClient();
-        wc.getPage(wc.addCrumb(new WebRequestSettings(new URL(r.getURL(), "job/p/promotion/process/promo/doDelete"), HttpMethod.POST)));
+        wc.getPage(wc.addCrumb(new WebRequest(new URL(r.getURL(), "job/p/promotion/process/promo/doDelete"), HttpMethod.POST)));
         assertEquals(0, promotion.getItems().size());
         assertEquals(0, promotion.getActiveItems().size());
     }
@@ -111,7 +111,7 @@ public class RemoteApiTest {
         assertEquals(0, promotion.getItems().size());
         assertEquals(0, promotion.getActiveItems().size());
         JenkinsRule.WebClient wc = r.createWebClient();
-        WebRequestSettings req = new WebRequestSettings(new URL(wc.createCrumbedUrl("job/p/promotion/createProcess") + "&name=promo"), HttpMethod.POST);
+        WebRequest req = new WebRequest(new URL(wc.createCrumbedUrl("job/p/promotion/createProcess") + "&name=promo"), HttpMethod.POST);
         req.setRequestBody("<hudson.plugins.promoted__builds.PromotionProcess><conditions><hudson.plugins.promoted__builds.conditions.SelfPromotionCondition><evenIfUnstable>true</evenIfUnstable></hudson.plugins.promoted__builds.conditions.SelfPromotionCondition></conditions></hudson.plugins.promoted__builds.PromotionProcess>");
         wc.getPage(req);
         assertEquals(1, promotion.getItems().size());
