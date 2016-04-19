@@ -62,6 +62,7 @@ public class RemoteApiTest {
         assertTrue(xml, xml.contains("SelfPromotionCondition"));
         assertTrue(xml, xml.contains("<evenIfUnstable>true</evenIfUnstable>"));
         WebRequest req = new WebRequest(wc.createCrumbedUrl("job/p/promotion/process/promo/config.xml"), HttpMethod.POST);
+        req.setEncodingType(null);
         req.setRequestBody(xml.replace("<evenIfUnstable>true</evenIfUnstable>", "<evenIfUnstable>false</evenIfUnstable>"));
         assertTrue(proc.conditions.get(SelfPromotionCondition.class).isEvenIfUnstable());
         wc.getPage(req);
@@ -112,6 +113,7 @@ public class RemoteApiTest {
         assertEquals(0, promotion.getActiveItems().size());
         JenkinsRule.WebClient wc = r.createWebClient();
         WebRequest req = new WebRequest(new URL(wc.createCrumbedUrl("job/p/promotion/createProcess") + "&name=promo"), HttpMethod.POST);
+        req.setEncodingType(null);
         req.setRequestBody("<hudson.plugins.promoted__builds.PromotionProcess><conditions><hudson.plugins.promoted__builds.conditions.SelfPromotionCondition><evenIfUnstable>true</evenIfUnstable></hudson.plugins.promoted__builds.conditions.SelfPromotionCondition></conditions></hudson.plugins.promoted__builds.PromotionProcess>");
         wc.getPage(req);
         assertEquals(1, promotion.getItems().size());
