@@ -1,0 +1,20 @@
+<div>
+	If you are using Inheritance Projects you can define promotions in base job. 
+	You can then choose some of the promotion processes to be visible in some derived jobs but not others. 
+	If parameter Visible evaluates to "true" or is empty, then it is visible, it is not visible otherwise. 
+	You can also use parameters, e.g. ${PARAMETER_NAME} to reference other parameters. 
+	Note that only default values of the parameters are evaluated, i.e. parameters of the jobs, not the builds are taken into account.	
+
+    <p>
+    
+
+    <h3> Example configuration</h3>
+    <ul>
+    <li><b>BASE</b> job which configures promotion process <b>Promotion</b> and also has inheritable parameter <b>IsPromotionVisible</b>. 
+    <b>Visible</b> property is set to reference <b>IsPromotionVisible</b>, i.e. its value is ${IsPromotionVisible}
+    It also makes sense to hide this parameter from the build screen by selecting <b>Hide behind button on build screen?</b> checkbox in advanced parameter properties.  
+    <li><b>DERIVEDEnabled</b> job which inherits from <b>BASE</b> but also references  <b>IsPromotionVisible</b> parameter and sets its default value to true.
+	<li><b>DERIVEDDisabled</b> job which inherits from <b>BASE</b> but also references  <b>IsPromotionVisible</b> parameter and sets its default value to false.
+	</ul>
+	In this configuration <b>DERIVEDEnabled</b> will show promotion <b>Promotion</b> but <b>DERIVEDDisabled</b> will not show it.
+</div>

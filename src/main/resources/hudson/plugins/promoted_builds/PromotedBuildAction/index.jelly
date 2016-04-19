@@ -15,78 +15,86 @@
 
         <!-- list promotions that are already attained -->
         <j:forEach var="p" items="${it.promotions}">
-          <h2>
-            <img src="${rootURL}${p.getIcon('32x32')}"/> ${p.name}
-          </h2>
+          <j:if test="${p.getProcess()!=null and p.getProcess().isVisible()}">
+            <h2>
+              <img src="${resURL}/plugin/promoted-builds/icons/32x32/${p.getProcess().getIcon()}.png"/>
+              <a href="../../promotion/process/${p.name}" class="model-link">${p.name}</a>
+            </h2>
 
-          <!-- history of this promotion -->
-          <l:pane title="${%Promotion History}" width="100">
-            <j:forEach var="attempt" items="${p.promotionBuilds}">
-              <tr><td>
-                <a href="${p.name}/promotionBuild/${attempt.number}/console">
-                  <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
-                   alt="${attempt.iconColor.description}"/> ${attempt.displayName} (${attempt.timestamp.time})</a> by ${attempt.userName}
-              </td></tr>
+            <!-- history of this promotion -->
+            <l:pane title="${%Promotion History}" width="100">
+              <j:forEach var="attempt" items="${p.promotionBuilds}">
+                <tr>
+                  <td>
+                    <a href="${p.name}/promotionBuild/${attempt.number}/console">
+                      <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
+                       alt="${attempt.iconColor.description}"/> ${attempt.displayName} (${attempt.timestamp.time})
+                    </a> by ${attempt.userName}
+                  </td>
+                </tr>
+              </j:forEach>
+            </l:pane>
+
+            <!-- how did this build qualify for promotion? -->
+            <h4>
+              ${%Qualification}
+              <span style="padding-left:2em"> </span>
+              (promoted ${p.timestampString} ago &#x2014; ${p.getDelayString(it.owner)} after build)
+            </h4>
+            <j:forEach var="b" items="${p.badges}">
+              <st:include it="${b}" page="index.jelly" />
             </j:forEach>
-          </l:pane>
 
-          <!-- how did this build qualify for promotion? -->
-          <h4>
-            ${%Qualification}
-            <span style="padding-left:2em"> </span>
-            (promoted ${p.timestampString} ago &#x2014; ${p.getDelayString(it.owner)} after build)
-          </h4>
-          <j:forEach var="b" items="${p.badges}">
-            <st:include it="${b}" page="index.jelly" />
-          </j:forEach>
-
-          <!-- promotion activity -->
-          <h4>Status</h4>
-          <div>
-            <!-- JENKINS-20492: show re-execute event when manually approved -->
-                <j:choose>
-                  <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
-                    <form style="float:right" method="post" action="${p.name}/build">
-                      <f:submit value="${%Re-execute promotion}"/>
-                    </form>
-                  </j:when>
-                </j:choose>
-            <j:choose>
-              <j:when test="${p.isPromotionSuccessful()}">
-                <img src="${imagesURL}/16x16/blue.png" alt="Unstable" width="16" height="16" />
-                ${%Successfully promoted} (<a href="${p.name}/lastSuccessful">${%log}</a>)
-              </j:when>
-              <j:when test="${!p.isPromotionAttempted()}">
-                ${%Pending promotion}
-                <j:choose>
-                  <j:when test="${p.isInQueue()}">
-                    (${%promotion queued})
-                  </j:when>
-                  <j:otherwise>
-                    <span class="error">(${%promotion not queued. Please re-execute promotion})</span>
-                  </j:otherwise>
-                </j:choose>
-              </j:when>
-              <j:otherwise>
-                <j:choose>
-                  <j:when test="${p.lastFailed == null}">
-                    ${%Promotion in progress} (<a href="${p.name}/lastSuccessful">${%log}</a>)
-                  </j:when>
-                  <j:otherwise>
-                    <img src="${imagesURL}/16x16/red.png" alt="Unstable" width="16" height="16" />
-                    ${%Promotion failed} (<a href="${p.name}/lastFailed">${%log}</a>)
-                  </j:otherwise>
-                </j:choose>
-              </j:otherwise>
-            </j:choose>
-          </div>
+            <!-- promotion activity -->
+            <h4>Status</h4>
+            <div>
+              <!-- JENKINS-20492: show re-execute event when manually approved -->
+              <j:choose>
+                <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
+                  <form style="float:right" method="post" action="${p.name}/build">
+                    <f:submit value="${%Re-execute promotion}"/>
+                  </form>
+                </j:when>
+              </j:choose>
+              <j:choose>
+                <j:when test="${p.isPromotionSuccessful()}">
+                  <img src="${imagesURL}/16x16/blue.png" alt="Unstable" width="16" height="16" />
+                  ${%Successfully promoted} (<a href="${p.name}/lastSuccessful">${%log}</a>)
+                </j:when>
+                <j:when test="${!p.isPromotionAttempted()}">
+                  ${%Pending promotion}
+                  <j:choose>
+                    <j:when test="${p.isInQueue()}">
+                      (${%promotion queued})
+                    </j:when>
+                    <j:otherwise>
+                      <span class="error">(${%promotion not queued. Please re-execute promotion})</span>
+                    </j:otherwise>
+                  </j:choose>
+                </j:when>
+                <j:otherwise>
+                  <j:choose>
+                    <j:when test="${p.lastFailed == null}">
+                      ${%Promotion in progress} (<a href="${p.name}/lastSuccessful">${%log}</a>)
+                    </j:when>
+                    <j:otherwise>
+                      <img src="${imagesURL}/16x16/red.png" alt="Unstable" width="16" height="16" />
+                      ${%Promotion failed} (<a href="${p.name}/lastFailed">${%log}</a>)
+                    </j:otherwise>
+                  </j:choose>
+                </j:otherwise>
+              </j:choose>
+            </div>
+            <div style="clear:both" />
+          </j:if>
         </j:forEach>
-
         <!-- list promotions that are not yet attained -->
         <j:forEach var="p" items="${it.pendingPromotions}">
-          <h2>
-            <img src="${imagesURL}/32x32/star.png"/> ${p.name}
-          </h2>
+          <j:if test="${p.isVisible()}">
+            <h2>
+              <img src="${resURL}/plugin/promoted-builds/icons/32x32/${p.getIcon()}.png"/>
+              <a href="../../promotion/process/${p.name}" class="model-link">${p.name}</a>
+            </h2>
             <j:choose>
               <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
                 <form style="float:right" method="post" action="forcePromotion?name=${p.name}">
@@ -94,31 +102,33 @@
                 </form>
               </j:when>
             </j:choose>
-          <div>
-            ${%This promotion has not happened.}
-          </div>
+            <div>
+              ${%This promotion has not happened.}
+            </div>
 
-          <!-- how did this build qualify for promotion? -->
-          <h4>
-            ${%Met Qualification(s)}
-            <span style="padding-left:2em"> </span>
-          </h4>
-          <j:forEach var="b" items="${p.getMetQualifications(it.owner)}">
-            <st:include it="${b}" page="index.jelly" />
-          </j:forEach>
+            <!-- how did this build qualify for promotion? -->
+            <h4>
+              ${%Met Qualification(s)}
+              <span style="padding-left:2em"> </span>
+            </h4>
+            <j:forEach var="b" items="${p.getMetQualifications(it.owner)}">
+              <st:include it="${b}" page="index.jelly" />
+            </j:forEach>
 
-          <!-- Remaining qualifications -->
-          <h4>
-            ${%Unmet Qualification(s)}
-            <span style="padding-left:2em"> </span>
-          </h4>
-          <j:forEach var="c" items="${p.getUnmetConditions(it.owner)}">
-            <j:set var="pba" value="${it}"/>
-            <st:include it="${c}" page="index.jelly" />
-          </j:forEach>
+            <!-- Remaining qualifications -->
+            <h4>
+              ${%Unmet Qualification(s)}
+              <span style="padding-left:2em"> </span>
+            </h4>
+            <j:forEach var="c" items="${p.getUnmetConditions(it.owner)}">
+              <j:set var="pba" value="${it}"/>
+              <st:include it="${c}" page="index.jelly" />
+            </j:forEach>
+          </j:if>
         </j:forEach>
+      </div>
 
-    </div>
     </l:main-panel>
   </l:layout>
 </j:jelly>
+

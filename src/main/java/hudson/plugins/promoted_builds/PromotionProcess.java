@@ -3,6 +3,7 @@ package hudson.plugins.promoted_builds;
 import antlr.ANTLRException;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.BulkChange;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractBuild;
@@ -22,11 +23,14 @@ import hudson.model.ItemGroup;
 import hudson.model.JDK;
 import hudson.model.Job;
 import hudson.model.Label;
+import hudson.model.ParameterDefinition;
 import hudson.model.ParametersAction;
+import hudson.model.ParametersDefinitionProperty;
 import hudson.model.PermalinkProjectAction.Permalink;
 import hudson.model.Queue.Item;
 import hudson.model.Run;
 import hudson.model.Saveable;
+import hudson.model.StringParameterValue;
 import hudson.model.labels.LabelAtom;
 import hudson.model.labels.LabelExpression;
 import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
@@ -76,12 +80,16 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * and ${rootURL}/plugin/promoted-builds/icons/32x32/, e.g. <code>"star-gold"</code>.
      */
     public String icon;
-    
+
     /**
      * The label that promotion process can be run on.
      */
     public String assignedLabel;
-    
+    /**
+     * Tells if this promotion should be hidden.
+     */
+    public String isVisible;
+
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
 
     /*package*/ PromotionProcess(JobPropertyImpl property, String name) {
@@ -135,6 +143,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         } else {
             assignedLabel = null;
         }
+        isVisible = c.getString("isVisible");
         save();
     }
 
@@ -145,9 +154,9 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     @Override
     public AbstractProject getRootProject() {
-    	return getParent().getOwner().getRootProject();
+        return getParent().getOwner().getRootProject();
     }
-    
+
     @Override
     public JobPropertyImpl getParent() {
         return (JobPropertyImpl)super.getParent();
@@ -190,7 +199,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
         return null;
     }
-    
+
     public DescribableList<Publisher, Descriptor<Publisher>> getPublishersList() {
         // TODO: extract from the buildsSteps field? Or should I separate builders and publishers?
         return new DescribableList<Publisher,Descriptor<Publisher>>(this);
@@ -219,7 +228,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             return LabelAtom.escape(assignedLabel);
         }
     }
-   
+
     @Override public Label getAssignedLabel() {
         // Really would like to run on the exact node that the promoted build ran on,
         // not just the same label.. but at least this works if job is tied to one node:
@@ -245,7 +254,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             return ((FreeStyleProject) p).getCustomWorkspace();
         return null;
     }
-    
+
     /**
      * Get the icon name, without the extension. It will always return a non null
      * and non empty string, as <code>"star-gold"</code> is used for compatibility
@@ -254,9 +263,52 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @return the icon name
      */
     public String getIcon() {
-    	return getIcon(icon);
+        return getIcon(icon);
     }
 
+    public String getIsVisible(){
+    	return isVisible;
+    }
+    
+    public boolean isVisible(){
+    	if (isVisible == null) return true;
+    	
+    	AbstractProject<?, ?> job = getOwner();
+    	
+    	if (job == null) return true;
+    	
+    	String expandedIsVisible = isVisible;
+    	EnvVars environment = getDefaultParameterValuesAsEnvVars(job);
+    	if (environment != null){
+    		expandedIsVisible = environment.expand(expandedIsVisible);
+    	}
+   	
+    	if (expandedIsVisible == null){
+    		return true;
+    	}
+    	if (expandedIsVisible.toLowerCase().equals("false")){
+    		return false;
+    	}
+    	return true;
+    }
+    private static EnvVars getDefaultParameterValuesAsEnvVars(AbstractProject owner) {
+    	EnvVars envVars = null;
+		ParametersDefinitionProperty parametersDefinitionProperty = (ParametersDefinitionProperty)owner.getProperty(ParametersDefinitionProperty.class);
+		if (parametersDefinitionProperty!=null){
+			envVars = new EnvVars();
+			for (ParameterDefinition parameterDefinition: parametersDefinitionProperty.getParameterDefinitions()){
+				ParameterValue defaultParameterValue = parameterDefinition.getDefaultParameterValue();
+				if (defaultParameterValue!=null){
+					if (defaultParameterValue instanceof StringParameterValue){
+						envVars.put(parameterDefinition.getName(), ((StringParameterValue)defaultParameterValue).value);
+					}
+				}
+			}
+			EnvVars.resolve(envVars);
+		}
+		
+		return envVars;
+    }
     /**
      * Handle compatibility with pre-1.8 configs.
      * 
@@ -267,9 +319,9 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     @Nonnull
     private static String getIcon(@CheckForNull String sIcon) {
-    	if ((sIcon == null) || sIcon.equals(""))
+        if ((sIcon == null) || sIcon.equals(""))
             return "star-gold";
-    	else
+        else
             return sIcon;
     }
 
@@ -468,15 +520,14 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     @CheckForNull
     public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build, 
             Cause cause, @CheckForNull List<ParameterValue> params) {
-
         List<Action> actions = new ArrayList<Action>();
-       	Promotion.buildParametersAction(actions, build, params);
+        Promotion.buildParametersAction(actions, build, params);
         actions.add(new PromotionTargetAction(build));
 
         // remember what build we are promoting
         return super.scheduleBuild2(0, cause, actions.toArray(new Action[actions.size()]));
     }
-    
+
 
     @Override
     public void doBuild(StaplerRequest req, StaplerResponse rsp, @QueryParameter TimeDuration delay) throws IOException, ServletException {
@@ -494,10 +545,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return false;
     }
 
-//
-// these are dummy implementations to implement abstract methods.
-// need to think about what the implications are.
-//
+    //
+    // these are dummy implementations to implement abstract methods.
+    // need to think about what the implications are.
+    //
     @Override
     public boolean isFingerprintConfigured() {
         return false;
@@ -678,8 +729,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     private static final Logger LOGGER = Logger.getLogger(PromotionProcess.class.getName());
 
-	public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build, ManualApproval approval) throws IOException {
-		return considerPromotion2(build, approval.badge.getParameterValues());
-	}
+    public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build, ManualApproval approval) throws IOException {
+        return considerPromotion2(build, approval.badge.getParameterValues());
+    }
 
 }
