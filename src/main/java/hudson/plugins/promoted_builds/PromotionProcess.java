@@ -442,7 +442,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return super.scheduleBuild();
     }
 
-    public boolean scheduleBuild(AbstractBuild<?,?> build) {
+    public boolean scheduleBuild(@Nonnull AbstractBuild<?,?> build) {
         return scheduleBuild(build,new UserCause());
     }
 
@@ -454,7 +454,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      Use {@link #scheduleBuild2(AbstractBuild, Cause)}
      */
     @Deprecated
-    public boolean scheduleBuild(AbstractBuild<?,?> build, Cause cause) {
+    public boolean scheduleBuild(@Nonnull AbstractBuild<?,?> build, @Nonnull Cause cause) {
         return scheduleBuild2(build,cause)!=null;
     }
 
@@ -466,7 +466,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @return Future result or {@code null} if the promotion cannot be scheduled
      */
     @CheckForNull
-    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause, List<ParameterValue> params) {
+    public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build, 
+            Cause cause, @CheckForNull List<ParameterValue> params) {
 
         List<Action> actions = new ArrayList<Action>();
        	Promotion.buildParametersAction(actions, build, params);
@@ -482,11 +483,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         throw HttpResponses.error(404, "Promotion processes may not be built directly");
     }
 
-    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
+    public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build, @Nonnull Cause cause) {
         return scheduleBuild2(build, cause, null);
     }
 
-    public boolean isInQueue(AbstractBuild<?,?> build) {
+    public boolean isInQueue(@Nonnull AbstractBuild<?,?> build) {
         for (Item item : JenkinsHelper.getInstance().getQueue().getItems(this))
             if (item.getAction(PromotionTargetAction.class).resolve(this)==build)
                 return true;

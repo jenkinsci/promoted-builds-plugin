@@ -47,6 +47,7 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
@@ -253,11 +254,26 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
       return Collections.emptyList();
     }
     
+    /**
+     * Gets parameter definitions from the {@link ManualCondition}.
+     * @return List of parameter definitions to be presented.
+     *         May be empty if there is no {@link ManualCondition}.
+     */
+    @Nonnull
     public List<ParameterDefinition> getParameterDefinitionsWithValue(){
     	List<ParameterDefinition> definitions=new ArrayList<ParameterDefinition>();
     	ManualCondition manualCondition=(ManualCondition) getProject().getPromotionCondition(ManualCondition.class.getName());
-    	for (ParameterValue pvalue:getParameterValues()){
+    	if (manualCondition == null) {
+            return definitions;
+        }
+        
+        for (ParameterValue pvalue:getParameterValues()){
     		ParameterDefinition pdef=manualCondition.getParameterDefinition(pvalue.getName());
+                if (pdef == null) {
+                    // We cannot do anything with such missing definitions.
+                    // May happen only in the case of the wrong form submission
+                    continue;
+                }
     		definitions.add(pdef.copyWithDefaultValue(pvalue));
     	}
     	return definitions;
@@ -446,7 +462,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      * @param build
      * @param promotionParams
      */
-	public static void buildParametersAction(List<Action> actions, AbstractBuild<?, ?> build, List<ParameterValue> promotionParams) {
+	public static void buildParametersAction(@Nonnull List<Action> actions, 
+                @Nonnull AbstractBuild<?, ?> build,
+                @CheckForNull List<ParameterValue> promotionParams) {
         if (promotionParams == null) {
             promotionParams = new ArrayList<ParameterValue>();
         }

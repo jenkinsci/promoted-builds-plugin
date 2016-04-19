@@ -1,5 +1,6 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
@@ -88,7 +89,10 @@ public final class Status {
     @CheckForNull
     public PromotedBuildAction getParent() {
     	if (parent==null){
-    		parent=getTarget().getAction(PromotedBuildAction.class);
+            final AbstractBuild<?, ?> target = getTarget();
+            if (target != null) {
+                parent = target.getAction(PromotedBuildAction.class);
+            }
     	}
         return parent;
     }
@@ -136,8 +140,10 @@ public final class Status {
      * Gets the build that was qualified for a promotion.
      * @return Build reference
      */
+    @CheckForNull
     public AbstractBuild<?,?> getTarget() {
-        return getParent().owner;
+        final PromotedBuildAction _parent = getParent();
+        return _parent != null ? _parent.owner : null;
     }
 
     /**
@@ -222,7 +228,8 @@ public final class Status {
      */
     public boolean isInQueue() {
         PromotionProcess p = getProcess();
-        return p!=null && p.isInQueue(getTarget());
+        AbstractBuild<?, ?> target = getTarget();
+        return p != null && target != null && p.isInQueue(target);
     }
 
     /**
@@ -261,6 +268,9 @@ public final class Status {
     @CheckForNull
     public Promotion getLastSuccessful() {
         PromotionProcess p = getProcess();
+        if (p == null) {
+            return null;
+        }
         for( Integer n : Iterators.reverse(promotionAttempts) ) {
             Promotion b = p.getBuildByNumber(n);
             if(b!=null && b.getResult()== Result.SUCCESS)
@@ -276,6 +286,9 @@ public final class Status {
     @CheckForNull
     public Promotion getLastFailed() {
         PromotionProcess p = getProcess();
+        if (p == null) {
+            return null;
+        }
         for( Integer n : Iterators.reverse(promotionAttempts) ) {
             Promotion b = p.getBuildByNumber(n);
             if(b!=null && b.getResult()!=Result.SUCCESS)
@@ -291,6 +304,9 @@ public final class Status {
     @CheckForNull
     public Promotion getLast() {
         PromotionProcess p = getProcess();
+        if (p == null) {
+            return null;
+        }
         for( Integer n : Iterators.reverse(promotionAttempts) ) {
             Promotion b = p.getBuildByNumber(n);
             if(b!=null)
@@ -334,12 +350,16 @@ public final class Status {
     @CheckForNull
     public Promotion getPromotionBuild(int number) {
         PromotionProcess p = getProcess();
-        return p.getBuildByNumber(number);
+        return p != null ? p.getBuildByNumber(number) : null;
     }
 
     public boolean isManuallyApproved(){
-    	ManualCondition manualCondition=(ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
-    	return manualCondition!=null;
+        final PromotionProcess process = getProcess();
+    	if (process == null) {
+            return false; // Should not be processed
+        }
+        ManualCondition manualCondition=(ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());
+    	return manualCondition != null;
     }
     /**
      * Schedules a new build.
@@ -350,9 +370,18 @@ public final class Status {
      */
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
         
-        ManualCondition manualCondition = (ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
+        final PromotionProcess process = getProcess();
+        if (process == null) {
+            throw new AbortException("Cannot retrieve the promotion process");
+        }
         
-        if(!getTarget().hasPermission(Promotion.PROMOTE)) {
+        AbstractBuild<?, ?> target = getTarget();
+        if (target ==null) {
+            throw new AbortException("Cannot get the target build to be promoted");
+        }
+        
+        ManualCondition manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());     
+        if(!target.hasPermission(Promotion.PROMOTE)) {
             if (manualCondition == null || (!manualCondition.getUsersAsSet().isEmpty() && !manualCondition.isInUsersList()
                     && !manualCondition.isInGroupList()))
                 return;
@@ -384,9 +413,9 @@ public final class Status {
         if (paramValues==null){
         	paramValues = new ArrayList<ParameterValue>();
         }
-        Future<Promotion> f = getProcess().scheduleBuild2(getTarget(), new UserCause(), paramValues);
+        Future<Promotion> f = process.scheduleBuild2(target, new UserCause(), paramValues);
         if (f==null)
-            LOGGER.warning("Failing to schedule the promotion of "+getTarget());
+            LOGGER.warning("Failing to schedule the promotion of "+target);
         // TODO: we need better visual feed back so that the user knows that the build happened.
         rsp.forwardToPreviousPage(req);
     }
