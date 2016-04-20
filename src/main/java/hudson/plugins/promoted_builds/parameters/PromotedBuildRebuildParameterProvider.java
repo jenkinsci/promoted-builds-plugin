@@ -36,9 +36,9 @@ public class PromotedBuildRebuildParameterProvider extends RebuildParameterProvi
 
     /**
      * Provide a view for specified {@link PromotedBuildParameterValue}.
-     * <p/>
+     * <p>
      * Return null if cannot handle specified {@link PromotedBuildParameterValue}.
-     *
+     * </p>
      * @param value a value to be shown in a rebuild page.
      * @return page for the parameter value. null for parameter values cannot be handled.
      */

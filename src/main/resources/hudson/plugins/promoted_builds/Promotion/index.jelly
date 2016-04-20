@@ -1,6 +1,7 @@
 <!--
   Displays the console output
 -->
+<?jelly escape-by-default='true'?>
 <st:compress xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
   <l:layout title="${it.parent.displayName} #${it.number} Console" norefresh="true">
     <l:header />

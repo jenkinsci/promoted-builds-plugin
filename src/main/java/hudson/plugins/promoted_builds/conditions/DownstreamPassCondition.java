@@ -116,11 +116,12 @@ public class DownstreamPassCondition extends PromotionCondition {
     }
 
     /**
-     *  @deprecated use {@link #getJobList(hudson.model.ItemGroup, hudson.model.AbstractProject, hudson.EnvVars)} 
+     * @deprecated use {@link #getJobList(hudson.model.ItemGroup, hudson.EnvVars)} 
      * List of downstream jobs that we need to monitor.
      *
      * @return never null.
      */
+    @Deprecated
     public List<AbstractProject<?,?>> getJobList(ItemGroup context){
     	return getJobList(context, null);
     }
@@ -326,7 +327,7 @@ public class DownstreamPassCondition extends PromotionCondition {
         }
 
         /**
-         * Called whenever some {@link JobPropertyImpl} changes to update {@link #DOWNSTREAM_JOBS}.
+         * Called whenever some {@link JobPropertyImpl} changes to update downstream jobs.
          * @deprecated Caches are not being used anymore
          */
         @Deprecated

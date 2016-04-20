@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core">
   <dt>$${PROMOTION_ENV,var="VARIABLENAME"}</dt>
   <dd>

@@ -67,6 +67,7 @@ import org.kohsuke.stapler.export.Exported;
  * Starting from TODO, the field also supports folders and the relative addressing (JENKINS-25011). 
  * See {@link ItemPathResolver#getByPath(java.lang.String, hudson.model.Item, java.lang.Class)} 
  * for the documentation.
+ * </p>
  * @author Pete Hayes
  */
 public class PromotedBuildParameterDefinition extends SimpleParameterDefinition {
@@ -139,7 +140,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
      * @deprecated This method retrieves the base item for relative addressing from 
      * the {@link StaplerRequest}. The relative addressing may be malfunctional if
      * you use this method outside {@link StaplerRequest}s. 
-     * Use {@link #getBuilds(hudson.model.Item)} instead
+     * Use {@link #getRuns(hudson.model.Item)} instead
      */
     @Nonnull
     @Deprecated

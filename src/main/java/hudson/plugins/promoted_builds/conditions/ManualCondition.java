@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import javax.servlet.ServletException;
@@ -80,6 +81,7 @@ public class ManualCondition extends PromotionCondition {
     /**
      * Gets the {@link ParameterDefinition} of the given name, if any.
      */
+    @CheckForNull
     public ParameterDefinition getParameterDefinition(String name) {
         if (parameterDefinitions == null) {
             return null;
@@ -164,6 +166,8 @@ public class ManualCondition extends PromotionCondition {
         }
         return false;
     }
+    
+    @CheckForNull
     public Future<Promotion> approve(AbstractBuild<?,?> build, PromotionProcess promotionProcess, List<ParameterValue> paramValues) throws IOException{
         if (canApprove(promotionProcess, build)) {            
             // add approval to build

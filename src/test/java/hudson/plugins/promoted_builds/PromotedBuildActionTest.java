@@ -1,6 +1,7 @@
 package hudson.plugins.promoted_builds;
 
 import com.gargoylesoftware.htmlunit.html.HtmlImage;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import hudson.model.Cause.UserCause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -30,7 +31,13 @@ public class PromotedBuildActionTest extends HudsonTestCase {
         assertTrue(base.getActiveItems().isEmpty());
 
         // make sure that the page renders OK without any error
-        for (HtmlImage img : createWebClient().getPage(p).<HtmlImage>selectNodes("//IMG")) {
+        HtmlPage page = createWebClient().getPage(p);
+        List<?> candidates = page.getByXPath("//IMG");
+        for (Object candidate : candidates) {
+            if (!(candidate instanceof HtmlImage)) {
+                continue;
+            } 
+            HtmlImage img = (HtmlImage)candidate;
             try {
                 img.getHeight();
             } catch (IOException e) {

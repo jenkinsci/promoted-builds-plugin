@@ -59,6 +59,8 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 /**
  * A dummy {@link AbstractProject} to carry out promotion operations.
@@ -101,6 +103,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     /**
      * Creates unconnected {@link PromotionProcess} instance from the JSON configuration.
      * This is mostly only useful for capturing its configuration in XML format.
+     * @param req Request
+     * @param o JSON object with source data
+     * @throws FormException form submission issue, includes form validation
+     * @throws IOException {@link PromotionProcess} creation issue
+     * @return Parsed promotion process
      */
     public static PromotionProcess fromJson(StaplerRequest req, JSONObject o) throws FormException, IOException {
         String name = o.getString("name");
@@ -158,6 +165,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     /**
      * Gets the owner {@link AbstractProject} that configured {@link JobPropertyImpl} as
      * a job property.
+     * @return Current owner project
      */
     public AbstractProject<?,?> getOwner() {
         return getParent().getOwner();
@@ -178,7 +186,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     /**
      * Get the promotion condition by referencing it fully qualified class name
+     * @param promotionClassName Class name of {@link Promotion}
+     * @return Promotion condition if exists
      */
+    @CheckForNull
     public PromotionCondition getPromotionCondition(String promotionClassName) {
         for (PromotionCondition condition : conditions) {
             if (condition.getClass().getName().equals(promotionClassName)) {
@@ -204,6 +215,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     /**
      * Gets the textual representation of the assigned label as it was entered by the user.
+     * @return Assigned label string
      */
     @Override
     public String getAssignedLabelString() {
@@ -235,6 +247,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * Support for FreeStyleProject only.
      * @return customWorkspace
      */
+    @CheckForNull
     public String getCustomWorkspace() {
         AbstractProject<?, ?> p = getOwner();
         if (p instanceof FreeStyleProject)
@@ -304,7 +317,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      we return the gold icon for compatibility with previous releases
      * @return the icon file name for this promotion
      */
-    private static String getIcon(String sIcon) {
+    @Nonnull
+    private static String getIcon(@CheckForNull String sIcon) {
         if ((sIcon == null) || sIcon.equals(""))
             return "star-gold";
         else
@@ -313,7 +327,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     /**
      * Get the badges of conditions that were passed for this promotion for the build
+     * @param build The build to be checked
+     * @return List of generated promotion badges
      */
+    @Nonnull
     public List<PromotionBadge> getMetQualifications(AbstractBuild<?,?> build) {
         List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
         for (PromotionCondition cond : conditions) {
@@ -327,7 +344,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     /**
      * Get the conditions that have not been met for this promotion for the build
+     * @param build Build to be checked
+     * @return List of unmet promotion conditions
      */
+    @Nonnull
     public List<PromotionCondition> getUnmetConditions(AbstractBuild<?,?> build) {
         List<PromotionCondition> unmetConditions = new ArrayList<PromotionCondition>();
 
@@ -341,11 +361,13 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     /**
      * Checks if all the conditions to promote a build is met.
-     *
+     * 
+     * @param build Build to be checked 
      * @return
-     *      null if promotion conditions are not met.
+     *      {@code null} if promotion conditions are not met.
      *      otherwise returns a list of badges that record how the promotion happened.
      */
+    @CheckForNull
     public Status isMet(AbstractBuild<?,?> build) {
         List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
         for (PromotionCondition cond : conditions) {
@@ -361,6 +383,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @deprecated
      *      Use {@link #considerPromotion2(AbstractBuild)}
      */
+    @Deprecated
     public boolean considerPromotion(AbstractBuild<?,?> build) throws IOException {
         return considerPromotion2(build)!=null;
     }
@@ -368,10 +391,12 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     /**
      * Checks if the build is promotable, and if so, promote it.
      *
+     * @param build Build to be promoted
      * @return
-     *      null if the build was not promoted, otherwise Future that kicks in when the build is completed.
+     *      {@code null} if the build was not promoted, otherwise Future that kicks in when the build is completed.
      * @throws IOException 
      */
+    @CheckForNull
     public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build) throws IOException {
 		LOGGER.fine("Considering the promotion of "+build+" via "+getName()+" without parmeters");
 		// If the build has manual approvals, use the parameters from it
@@ -388,6 +413,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 		return considerPromotion2(build, params);
 	}
 	
+    @CheckForNull
     public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build, List<ParameterValue> params) throws IOException {
         if (!isActive())
             return null;    // not active
@@ -425,14 +451,26 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     /**
      * Promote the given build by using the given qualification.
      *
-     * @param cause
-     *      Why the build is promoted?
-     * @return
-     *      Future to track the completion of the promotion.
+     * @param build Build to promote
+     * @param cause Why the build is promoted?
+     * @param qualification Initial promotion status
+     * @return Future to track the completion of the promotion.
+     * @throws IOException Promotion failure
      */
     public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
     	return promote2(build, cause, qualification, null);
     }
+    
+    /**
+     * Promote the given build by using the given qualification.
+     *
+     * @param build Build to promote
+     * @param cause Why the build is promoted?
+     * @param qualification Initial promotion status
+     * @param params Promotion parameters
+     * @return Future to track the completion of the promotion.
+     * @throws IOException Promotion failure
+     */
     public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification, List<ParameterValue> params) throws IOException {
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
         // build is qualified for a promotion.
@@ -451,23 +489,37 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @deprecated
      *      You need to be using {@link #scheduleBuild(AbstractBuild)}
      */
+    @Deprecated
     public boolean scheduleBuild() {
         return super.scheduleBuild();
     }
 
-    public boolean scheduleBuild(AbstractBuild<?,?> build) {
+    public boolean scheduleBuild(@Nonnull AbstractBuild<?,?> build) {
         return scheduleBuild(build,new UserCause());
     }
 
     /**
+     * @param build Target build
+     * @param cause Promotion cause
+     * @return {@code true} if scheduling is successful
      * @deprecated
      *      Use {@link #scheduleBuild2(AbstractBuild, Cause)}
      */
-    public boolean scheduleBuild(AbstractBuild<?,?> build, Cause cause) {
+    @Deprecated
+    public boolean scheduleBuild(@Nonnull AbstractBuild<?,?> build, @Nonnull Cause cause) {
         return scheduleBuild2(build,cause)!=null;
     }
 
-    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause, List<ParameterValue> params) {
+    /**
+     * Schedules the promotion.
+     * @param build Target build
+     * @param cause Promotion cause
+     * @param params Parameters to be passed
+     * @return Future result or {@code null} if the promotion cannot be scheduled
+     */
+    @CheckForNull
+    public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build, 
+            Cause cause, @CheckForNull List<ParameterValue> params) {
         List<Action> actions = new ArrayList<Action>();
         Promotion.buildParametersAction(actions, build, params);
         actions.add(new PromotionTargetAction(build));
@@ -482,11 +534,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         throw HttpResponses.error(404, "Promotion processes may not be built directly");
     }
 
-    public Future<Promotion> scheduleBuild2(AbstractBuild<?,?> build, Cause cause) {
+    public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build, @Nonnull Cause cause) {
         return scheduleBuild2(build, cause, null);
     }
 
-    public boolean isInQueue(AbstractBuild<?,?> build) {
+    public boolean isInQueue(@Nonnull AbstractBuild<?,?> build) {
         for (Item item : JenkinsHelper.getInstance().getQueue().getItems(this))
             if (item.getAction(PromotionTargetAction.class).resolve(this)==build)
                 return true;
@@ -497,10 +549,12 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     // these are dummy implementations to implement abstract methods.
     // need to think about what the implications are.
     //
+    @Override
     public boolean isFingerprintConfigured() {
         return false;
     }
 
+    @Override
     protected void buildDependencyGraph(DependencyGraph graph) {
         throw new UnsupportedOperationException();
     }

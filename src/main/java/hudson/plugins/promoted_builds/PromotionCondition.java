@@ -10,6 +10,7 @@ import hudson.plugins.promoted_builds.util.JenkinsHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import jenkins.model.Jenkins;
 
 /**
@@ -29,6 +30,7 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
      *      Null if otherwise, meaning it shouldn't be promoted.
      * @deprecated
      */
+    @CheckForNull
     public PromotionBadge isMet(AbstractBuild<?,?> build) {
         return null;
     }

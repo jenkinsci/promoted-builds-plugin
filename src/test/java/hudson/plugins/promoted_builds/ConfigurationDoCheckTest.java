@@ -27,7 +27,7 @@ public class ConfigurationDoCheckTest extends HudsonTestCase {
         proc.icon = "star-blue";
 
         WebClient client = new WebClient();
-        client.setThrowExceptionOnFailingStatusCode(false);
+        client.getOptions().setThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = submit(client.getPage(p, "configure").getFormByName("config"));
         assertTrue(page.asText().contains("No name is specified"));
 
@@ -48,7 +48,7 @@ public class ConfigurationDoCheckTest extends HudsonTestCase {
         proc.icon = "star-blue";
 
         WebClient client = new WebClient();
-        client.setThrowExceptionOnFailingStatusCode(false);
+        client.getOptions().setThrowExceptionOnFailingStatusCode(false);
         HtmlPage page = submit(client.getPage(p, "configure").getFormByName("config"));
         assertTrue(page.asText().contains("unsafe character"));
 

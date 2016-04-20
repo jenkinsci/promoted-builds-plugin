@@ -19,7 +19,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * {@link PromotionCondition} that promotes a build as soon as it's done if a
  * given parameter has the specified value.
  *
- * @author Grant Limberg <glimberg@gmail.com>
+ * @author Grant Limberg (glimberg at gmail.com)
  */
 public class ParameterizedSelfPromotionCondition extends SelfPromotionCondition {
     private final String parameterName;

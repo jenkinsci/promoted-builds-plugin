@@ -1,5 +1,6 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
@@ -26,6 +27,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -81,18 +84,25 @@ public final class Status {
 
     /**
      * Gets the parent {@link Status} that owns this object.
+     * @return Promoted build action if it exists in {@link #getTarget()} result.
      */
+    @CheckForNull
     public PromotedBuildAction getParent() {
     	if (parent==null){
-    		parent=getTarget().getAction(PromotedBuildAction.class);
+            final AbstractBuild<?, ?> target = getTarget();
+            if (target != null) {
+                parent = target.getAction(PromotedBuildAction.class);
+            }
     	}
         return parent;
     }
 
     /**
      * Gets the {@link PromotionProcess} that this object deals with.
+     * @return Gets the promotion process for the status.
      */
     @Exported
+    @CheckForNull
     public PromotionProcess getProcess() {
         assert parent != null : name;
         AbstractProject<?,?> project = parent.getProject();
@@ -104,7 +114,10 @@ public final class Status {
 
     /**
      * Gets the icon that should represent this promotion (that is potentially attempted but failed.)
+     * @param size size of the icon, will be used in the icon path
+     * @return Path to the icon in resources
      */
+    @Nonnull
     public String getIcon(String size) {
         String baseName;
 
@@ -122,11 +135,15 @@ public final class Status {
         return Jenkins.RESOURCE_PATH+"/plugin/promoted-builds/icons/"+size+"/"+ baseName +".png";
     }
 
+    //TODO: what is the Null status?
     /**
      * Gets the build that was qualified for a promotion.
+     * @return Build reference
      */
+    @CheckForNull
     public AbstractBuild<?,?> getTarget() {
-        return getParent().owner;
+        final PromotedBuildAction _parent = getParent();
+        return _parent != null ? _parent.owner : null;
     }
 
     /**
@@ -155,7 +172,9 @@ public final class Status {
     }
 
     /**
-     * Gets the string that says how long did it toook for this build to be promoted.
+     * Gets the string that says how long did it took for this build to be promoted.
+     * @param owner Build
+     * @return Time span string formatted by {@link Util#getTimeSpanString(long)}
      */
     public String getDelayString(AbstractBuild<?,?> owner) {
         long duration = timestamp.getTimeInMillis() - owner.getTimestamp().getTimeInMillis() - owner.getDuration();
@@ -169,10 +188,12 @@ public final class Status {
     /**
      * Returns the {@link Promotion} object that represents the successful promotion.
      *
+     * @param jp Job property
      * @return
-     *      null if the promotion has never been successful, or if it was but
+     *      {@code null} if the promotion has never been successful, or if it was but
      *      the record is already lost.
      */
+    @CheckForNull
     public Promotion getSuccessfulPromotion(JobPropertyImpl jp) {
         if(promotion>=0) {
             PromotionProcess p = jp.getItem(name);
@@ -184,30 +205,36 @@ public final class Status {
 
     /**
      * Returns true if the promotion was successfully completed.
+     * @return {@code true} if the there were successful promotions. 
      */
     public boolean isPromotionSuccessful() {
         return promotion>=0;
     }
 
     /**
-     * Returns true if at least one {@link Promotion} activity is attempted.
-     * False if none is executed yet (this includes the case where it's in the queue.)
+     * Checks promotion attempts. 
+     * @return 
+     *  {@code true} if at least one {@link Promotion} activity is attempted.
+     *  {@code false} if none is executed yet (this includes the case where it's in the queue.
      */
     public boolean isPromotionAttempted() {
         return !promotionAttempts.isEmpty();
     }
 
     /**
-     * Returns true if the promotion for this is pending in the queue,
+     * Check if the build is in queue.
+     * @return {@code true} if the promotion for this is pending in the queue,
      * waiting to be executed.
      */
     public boolean isInQueue() {
         PromotionProcess p = getProcess();
-        return p!=null && p.isInQueue(getTarget());
+        AbstractBuild<?, ?> target = getTarget();
+        return p != null && target != null && p.isInQueue(target);
     }
 
     /**
      * Gets the badges indicating how did a build qualify for a promotion.
+     * @return List of promotion badges
      */
     @Exported
     public List<PromotionBadge> getBadges() {
@@ -216,6 +243,7 @@ public final class Status {
 
     /**
      * Called when a new promotion attempts for this build starts.
+     * @param p Promotion
      */
     /*package*/ void addPromotionAttempt(Promotion p) {
         promotionAttempts.add(p.getNumber());
@@ -223,6 +251,7 @@ public final class Status {
 
     /**
      * Called when a promotion succeeds.
+     * @param p Promotion
      */
     /*package*/ void onSuccessfulPromotion(Promotion p) {
         promotion = p.getNumber();
@@ -234,9 +263,14 @@ public final class Status {
 
     /**
      * Gets the last successful {@link Promotion}.
+     * @return Last successful promotion or {@code null} if there is no successful ones.
      */
+    @CheckForNull
     public Promotion getLastSuccessful() {
         PromotionProcess p = getProcess();
+        if (p == null) {
+            return null;
+        }
         for( Integer n : Iterators.reverse(promotionAttempts) ) {
             Promotion b = p.getBuildByNumber(n);
             if(b!=null && b.getResult()== Result.SUCCESS)
@@ -246,10 +280,15 @@ public final class Status {
     }
 
     /**
-     * Gets the last successful {@link Promotion}.
+     * Gets the last failed {@link Promotion}.
+     * @return Last failed promotion or {@code null} if there is no failed ones.
      */
+    @CheckForNull
     public Promotion getLastFailed() {
         PromotionProcess p = getProcess();
+        if (p == null) {
+            return null;
+        }
         for( Integer n : Iterators.reverse(promotionAttempts) ) {
             Promotion b = p.getBuildByNumber(n);
             if(b!=null && b.getResult()!=Result.SUCCESS)
@@ -258,8 +297,16 @@ public final class Status {
         return null;
     }
 
+    /**
+     * Gets the last {@link Promotion}.
+     * @return Last promotion or {@code null} if there is no promotions.
+     */
+    @CheckForNull
     public Promotion getLast() {
         PromotionProcess p = getProcess();
+        if (p == null) {
+            return null;
+        }
         for( Integer n : Iterators.reverse(promotionAttempts) ) {
             Promotion b = p.getBuildByNumber(n);
             if(b!=null)
@@ -277,6 +324,7 @@ public final class Status {
 
     /**
      * Gets all the promotion builds.
+     * @return List of promotions
      */
     @Exported
     public List<Promotion> getPromotionBuilds() {
@@ -299,23 +347,41 @@ public final class Status {
      * @param number build number
      * @return promotion build
      */
+    @CheckForNull
     public Promotion getPromotionBuild(int number) {
         PromotionProcess p = getProcess();
-        return p.getBuildByNumber(number);
+        return p != null ? p.getBuildByNumber(number) : null;
     }
 
     public boolean isManuallyApproved(){
-    	ManualCondition manualCondition=(ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
-    	return manualCondition!=null;
+        final PromotionProcess process = getProcess();
+    	if (process == null) {
+            return false; // Should not be processed
+        }
+        ManualCondition manualCondition=(ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());
+    	return manualCondition != null;
     }
     /**
      * Schedules a new build.
+     * @param req Request
+     * @param rsp Response
+     * @throws IOException Functional error
+     * @throws ServletException Request handling error
      */
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
         
-        ManualCondition manualCondition = (ManualCondition) getProcess().getPromotionCondition(ManualCondition.class.getName());
+        final PromotionProcess process = getProcess();
+        if (process == null) {
+            throw new AbortException("Cannot retrieve the promotion process");
+        }
         
-        if(!getTarget().hasPermission(Promotion.PROMOTE)) {
+        AbstractBuild<?, ?> target = getTarget();
+        if (target ==null) {
+            throw new AbortException("Cannot get the target build to be promoted");
+        }
+        
+        ManualCondition manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());     
+        if(!target.hasPermission(Promotion.PROMOTE)) {
             if (manualCondition == null || (!manualCondition.getUsersAsSet().isEmpty() && !manualCondition.isInUsersList()
                     && !manualCondition.isInGroupList()))
                 return;
@@ -347,9 +413,9 @@ public final class Status {
         if (paramValues==null){
         	paramValues = new ArrayList<ParameterValue>();
         }
-        Future<Promotion> f = getProcess().scheduleBuild2(getTarget(), new UserCause(), paramValues);
+        Future<Promotion> f = process.scheduleBuild2(target, new UserCause(), paramValues);
         if (f==null)
-            LOGGER.warning("Failing to schedule the promotion of "+getTarget());
+            LOGGER.warning("Failing to schedule the promotion of "+target);
         // TODO: we need better visual feed back so that the user knows that the build happened.
         rsp.forwardToPreviousPage(req);
     }

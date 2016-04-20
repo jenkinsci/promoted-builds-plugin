@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.CheckForNull;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
@@ -47,6 +48,12 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
         return property.getActiveItems();
     }
     
+    /**
+     * Get the promotion process by name.
+     * @param name Name of the process
+     * @return Discovered process or {@code null} if it cannot be found
+     */
+    @CheckForNull
     public PromotionProcess getProcess(String name) {
     	for (PromotionProcess pp : getProcesses() ){
     		if(pp.getName().equals(name))
@@ -104,8 +111,8 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
     /**
      * returns the summary of the latest promotions for a promotion process.
      * 
-     * @param promotionProcessName
-     * @return
+     * @param promotionProcess Name of the promotion process
+     * @return List of latest promotions
      */
     public List<Promotion> getPromotionsSummary(PromotionProcess promotionProcess){
     	List<Promotion> promotionList = this.getPromotions(promotionProcess);

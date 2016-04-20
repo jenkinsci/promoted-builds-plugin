@@ -37,6 +37,7 @@ import hudson.model.JobPropertyDescriptor;
 import hudson.model.listeners.ItemListener;
 import hudson.remoting.Callable;
 import hudson.util.IOUtils;
+import javax.annotation.CheckForNull;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -47,7 +48,7 @@ import net.sf.json.JSONObject;
  * <p>
  * TODO: a possible performance problem as every time the owner job is reconfigured,
  * all the promotion processes get reloaded from the disk.
- *
+ * </p>
  * @author Kohsuke Kawaguchi
  */
 public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> implements ItemGroup<PromotionProcess> {
@@ -68,6 +69,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     private final Set<String> activeProcessNames = new HashSet<String>();
     /**
      * Programmatic construction.
+     * @param owner owner job
      */
     public JobPropertyImpl(AbstractProject<?,?> owner) throws Descriptor.FormException, IOException {
         this.owner = owner;
@@ -75,6 +77,8 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     }
     /**
      * Programmatic construction.
+     * @param other Property to be copied
+     * @param owner owner job
      */
     public JobPropertyImpl(JobPropertyImpl other, AbstractProject<?,?> owner) throws Descriptor.FormException, IOException {
         this.owner = owner;
@@ -94,8 +98,20 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         // a hack to get the owning AbstractProject.
         // this is needed here so that we can load items
         List<Ancestor> ancs = req.getAncestors();
-        owner = (AbstractProject)ancs.get(ancs.size()-1).getObject();
-
+        final Object ancestor = ancs.get(ancs.size()-1).getObject();
+        if (ancestor instanceof AbstractProject) {
+            owner = (AbstractProject)ancestor;
+        } else if (ancestor == null) {
+            throw new Descriptor.FormException("Cannot retrieve the ancestor item in the request",
+            "owner");
+        } else {
+            throw new Descriptor.FormException("Cannot create Promoted Builds Job Property for " + ancestor.getClass()
+            + ". Currently the plugin supports instances of AbstractProject only."
+            + ". Other job types are not supported, submit a bug to the plugin, which provides the job type"
+            + ". If you use Multi-Branch Project plugin, see https://issues.jenkins-ci.org/browse/JENKINS-32237",
+            "owner");
+        }
+            
         // newer version of Hudson put "promotions". This code makes it work with or without them.
         if(json.has("promotions"))
             json = json.getJSONObject("promotions");
@@ -159,6 +175,9 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
     /**
      * Adds a new promotion process of the given name.
+     * @param name Name of the process to be created
+     * @return Created process
+     * @throws IOException Execution error
      */
     public synchronized PromotionProcess addProcess(String name) throws IOException {
         PromotionProcess p = new PromotionProcess(this, name);
@@ -212,6 +231,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
     /**
      * Builds {@link #activeProcesses}.
+     * @throws IOException Execution error
      */
     private void buildActiveProcess() throws IOException {
         activeProcesses = new ArrayList<PromotionProcess>();
@@ -302,14 +322,18 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
 
     /**
      * Gets {@link AbstractProject} that contains us.
+     * @return Owner project
      */
     public synchronized AbstractProject<?,?> getOwner() {
         return owner;
     }
 
     /**
-     * Finds a config by name.
+     * Finds a {@link PromotionProcess} by name.
+     * @param name Name of the process
+     * @return {@link PromotionProcess} if it can be found.
      */
+    @CheckForNull
     public synchronized PromotionProcess getItem(String name) {
         if (processes == null) {
             return null;

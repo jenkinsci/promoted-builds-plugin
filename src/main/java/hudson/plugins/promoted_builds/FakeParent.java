@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
+//TODO: needs polishing
 /**
  * We use this {@link ItemGroup} to create a dangling {@link PromotionProcess}.
  *

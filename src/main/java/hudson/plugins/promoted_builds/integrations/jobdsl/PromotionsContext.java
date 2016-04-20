@@ -24,29 +24,32 @@ public class PromotionsContext implements Context {
         this.dslEnvironment = dslEnvironment;
     }
 
+    //TODO: What does this Javadoc mean? Just marked as pre
     /**
+     * See the examples below.
+     * 
      * PromotionNodes:
-     * 1. <string>dev</string>
-     * 2. <string>test</string>
+     * <pre>
+     * 1. &lt;string&gt;dev&lt;/string&gt;
+     * 2. &lt;string&gt;test&lt;/string&gt;
      * 
      * AND
      * 
-     * Sub PromotionNode for every promotion
-     * 1. <project>
-     * <name>dev</name>
+     * Sub PromotionNode for every promotion:
+     * 1. &lt;project&gt;
+     * &lt;name&gt;dev&lt;/name&gt;
      * .
      * .
      * .
-     * </project>
-     * 2. <project>
-     * <name>test</name>
+     * &lt;/project&gt;
+     * 2. &lt;project&gt;
+     * &lt;name&gt;test&lt;/name&gt;
      * .
      * .
      * .
-     * </project>
-     * 
-     * @param promotionClosure
-     * @return
+     * &lt;/project&gt;
+     * </pre>
+     * @param promotionClosure Input closure
      */
     public void promotion(Closure<?> promotionClosure) {
         PromotionContext promotionContext = new PromotionContext(dslEnvironment);
