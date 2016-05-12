@@ -309,7 +309,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             if (workspace == null) {
                 throw new IOException("Cannot retrieve workspace for " + item + " on the node " + n);
             }
-            return wsl.acquire(workspace, true);
+            return wsl.allocate(workspace, promotionRun);
         }
 
         protected Result doRun(BuildListener listener) throws Exception {
