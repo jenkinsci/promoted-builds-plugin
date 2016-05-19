@@ -32,7 +32,7 @@ import javaposse.jobdsl.plugin.DslExtensionMethod;
  * 
  * @author Dennis Schulte
  */
-@Extension
+@Extension(optional=true)
 public class PromotionsExtensionPoint extends ContextExtensionPoint {
 
     private static final Logger LOGGER = Logger.getLogger(PromotionsExtensionPoint.class.getName());
