@@ -492,7 +492,6 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             unfilteredParameters = params;
         }
 
-        @Exported(visibility=2)
         @Override
         public List<ParameterValue> getParameters() {
             return Collections.unmodifiableList(filter(unfilteredParameters));
@@ -513,7 +512,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
             List<ParameterValue> params = new ArrayList<ParameterValue>();
 
-            //Add the target build parameters first, if the same parameter is not being provided bu the promotion build
+            //Add the target build parameters first, if the same parameter is not being provided by the promotion build
             List<ParametersAction> parameters = buildToBePromoted.getActions(ParametersAction.class);
             for (ParametersAction paramAction : parameters) {
                 for (ParameterValue pvalue : paramAction.getParameters()) {
