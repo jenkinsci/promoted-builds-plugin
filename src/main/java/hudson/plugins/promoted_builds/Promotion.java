@@ -484,18 +484,18 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     @Restricted(NoExternalUse.class)
     public static class PromotionParametersAction extends ParametersAction {
         
-        private List<ParameterValue> parameters;
+        private List<ParameterValue> unfilteredParameters;
         
         private PromotionParametersAction(List<ParameterValue> params) {
             // Pass the parameters upstairs
             super(params);   
-            parameters = params;
+            unfilteredParameters = params;
         }
 
         @Exported(visibility=2)
         @Override
         public List<ParameterValue> getParameters() {
-            return Collections.unmodifiableList(filter(parameters));
+            return Collections.unmodifiableList(filter(unfilteredParameters));
         }
         
         private List<ParameterValue> filter(List<ParameterValue> params) {
