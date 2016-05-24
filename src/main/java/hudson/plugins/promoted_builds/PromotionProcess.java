@@ -521,7 +521,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build, 
             Cause cause, @CheckForNull List<ParameterValue> params) {
         List<Action> actions = new ArrayList<Action>();
-        Promotion.buildParametersAction(actions, build, params);
+        actions.add(Promotion.PromotionParametersAction.buildFor(build, params));
         actions.add(new PromotionTargetAction(build));
 
         // remember what build we are promoting
