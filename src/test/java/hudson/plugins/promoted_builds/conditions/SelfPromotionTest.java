@@ -135,6 +135,7 @@ public class SelfPromotionTest extends HudsonTestCase {
     }
 
     @Bug(22679)
+    // @Bug(34826) // Can be reproduced in Jenkins 2.3 +
     public void testPromotionEnvironmentShouldIncludeTargetParameters() throws Exception {
         String paramName = "param";
 

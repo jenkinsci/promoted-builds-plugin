@@ -28,6 +28,9 @@ import org.jvnet.hudson.test.HudsonTestCase;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import hudson.model.StringParameterValue;
+import hudson.model.TaskListener;
+import org.jvnet.hudson.test.Issue;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -78,7 +81,41 @@ public class ManualConditionTest extends HudsonTestCase {
         assertFalse(statuses.getPromotions().isEmpty());
     }
     
-
+    @Issue("SECURITY-170")
+    /**
+     * Verify that the plugin is tolerant against SECURITY-170 in Manual conditions
+     */
+    public void testManualPromotionProcessWithInvalidParam() throws Exception {
+        FreeStyleProject p = createFreeStyleProject();
+        ExtensionList<Descriptor> list = hudson.getExtensionList(Descriptor.class);
+        list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
+        JobPropertyImpl base =  new JobPropertyImpl(p);
+        p.addProperty(base);
+        PromotionProcess foo = base.addProcess("foo");
+        
+        ManualCondition condition=new ManualCondition();
+        condition.getParameterDefinitions().add(new StringParameterDefinition("FOO", "BAR", "Test parameter"));
+        foo.conditions.add(condition);
+        
+        FreeStyleBuild b1 = assertBuildStatusSuccess(p.scheduleBuild2(0));
+        
+        // Promote a build. Also add one invalid parameter 
+        List<ParameterValue> paramValues = condition.createDefaultValues();
+        paramValues.add(new StringParameterValue("INVALID_PARAM", "hacked!"));
+        assertBuildStatusSuccess(condition.approve(b1, foo, paramValues));
+        ManualApproval manualApproval = b1.getAction(ManualApproval.class);
+        assertNotNull(manualApproval);
+        List<ParameterValue> parameterValues = manualApproval.badge.getParameterValues();
+        
+        // Verify that the build succeeds && has no INVALID_PARAM
+        PromotedBuildAction statuses=b1.getAction(PromotedBuildAction.class);
+        assertNotNull(statuses);
+        assertNotNull(statuses.getPromotions());
+        assertFalse(statuses.getPromotions().isEmpty());
+        Promotion pb = base.getItem("foo").getBuildByNumber(1);
+        assertNotNull("INVALID_PARAM should not be injected into the environment", 
+                pb.getEnvironment(TaskListener.NULL).get("INVALID_PARAM", null));
+    }
 	
     public void testManualPromotionProcessViaWebClient() throws Exception {
         FreeStyleProject p = createFreeStyleProject();

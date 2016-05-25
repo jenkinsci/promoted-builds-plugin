@@ -49,6 +49,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 /**
  * Records a promotion process.
@@ -461,32 +463,70 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      * @param actions
      * @param build
      * @param promotionParams
+     * @deprecated Use {@link PromotionParametersAction} with constructor instead.
      */
-	public static void buildParametersAction(@Nonnull List<Action> actions, 
-                @Nonnull AbstractBuild<?, ?> build,
-                @CheckForNull List<ParameterValue> promotionParams) {
-        if (promotionParams == null) {
-            promotionParams = new ArrayList<ParameterValue>();
-        }
-
-		List<ParameterValue> params=new ArrayList<ParameterValue>();
-		
-		//Add the target build parameters first, if the same parameter is not being provided bu the promotion build
-        List<ParametersAction> parameters = build.getActions(ParametersAction.class);
-        for(ParametersAction paramAction:parameters){
-        	for (ParameterValue pvalue:paramAction.getParameters()){
-        		if (!promotionParams.contains(pvalue)){
-        			params.add(pvalue);
-        		}
-        	}
-        }
-        
-        //Add all the promotion build parameters
-        params.addAll(promotionParams);
-        
+    @Deprecated
+    public static void buildParametersAction(@Nonnull List<Action> actions,
+            @Nonnull AbstractBuild<?, ?> build,
+            @CheckForNull List<ParameterValue> promotionParams) {
         // Create list of actions to pass to scheduled build
-        actions.add(new ParametersAction(params));
-	}
+        actions.add(PromotionParametersAction.buildFor(build, promotionParams));
+    }
 
     private static final Logger LOGGER = Logger.getLogger(Promotion.class.getName());
+    
+    /**
+     * Action, which stores promotion parameters.
+     * This class allows defining custom parameters filtering logic, which is
+     * important for versions after the SECURITY-170 fix.
+     * @since TODO
+     */
+    @Restricted(NoExternalUse.class)
+    public static class PromotionParametersAction extends ParametersAction {
+        
+        private List<ParameterValue> unfilteredParameters;
+        
+        private PromotionParametersAction(List<ParameterValue> params) {
+            // Pass the parameters upstairs
+            super(params);   
+            unfilteredParameters = params;
+        }
+
+        @Override
+        public List<ParameterValue> getParameters() {
+            return Collections.unmodifiableList(filter(unfilteredParameters));
+        }
+        
+        private List<ParameterValue> filter(List<ParameterValue> params) {
+            // buildToBePromoted::getParameters() invokes the secured method, hence all
+            // parameters from the promoted build are safe.
+            return params;
+        }
+        
+        public static PromotionParametersAction buildFor(
+                @Nonnull AbstractBuild<?, ?> buildToBePromoted,
+                @CheckForNull List<ParameterValue> promotionParams) {
+            if (promotionParams == null) {
+                promotionParams = new ArrayList<ParameterValue>();
+            }
+
+            List<ParameterValue> params = new ArrayList<ParameterValue>();
+
+            //Add the target build parameters first, if the same parameter is not being provided by the promotion build
+            List<ParametersAction> parameters = buildToBePromoted.getActions(ParametersAction.class);
+            for (ParametersAction paramAction : parameters) {
+                for (ParameterValue pvalue : paramAction.getParameters()) {
+                    if (!promotionParams.contains(pvalue)) {
+                        params.add(pvalue);
+                    }
+                }
+            }
+
+            //Add all the promotion build parameters
+            params.addAll(promotionParams);
+
+            // Create list of actions to pass to scheduled build
+            return new PromotionParametersAction(params);
+        }
+    }
 }
