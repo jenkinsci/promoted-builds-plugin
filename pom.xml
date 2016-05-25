@@ -8,7 +8,7 @@
   </parent>
 
   <artifactId>promoted-builds</artifactId>
-  <version>2.27</version>
+  <version>2.28-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>Jenkins promoted builds plugin</name>
@@ -38,7 +38,7 @@
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    <tag>promoted-builds-2.27</tag>
+    <tag>HEAD</tag>
   </scm>
   <licenses>
     <license>
