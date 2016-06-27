@@ -17,6 +17,7 @@ import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,14 +26,15 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-
 import javax.servlet.ServletException;
 
 import net.sf.json.JSONArray;
@@ -53,6 +55,31 @@ import org.kohsuke.stapler.export.Exported;
 public class ManualCondition extends PromotionCondition {
     private String users;
     private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
+    
+    //Code to fetch Approve Promotion Button label from properties file
+    private static String executePromotionButtonLabel; 
+    private static final String PROPERTIES_FILE_NAME = "promoted-builds-plugin.properties";
+    static {
+    	try {
+    		String jenkinsHome = System.getProperty("JENKINS_HOME");
+    		String jenkinsPathToPluginProperties = jenkinsHome + "/plugins/promoted-builds/app-resources/";
+	    	Properties properties = new Properties();
+	    	properties.load(new FileInputStream(jenkinsPathToPluginProperties + PROPERTIES_FILE_NAME));
+	    	setExecutePromotionButtonLabel(properties.getProperty("APPROVE_BUTTON_LABEL"));
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		setExecutePromotionButtonLabel("Approve");
+    	}
+    }
+    
+    private static void setExecutePromotionButtonLabel(String executePromotionButtonLabel) {
+    	ManualCondition.executePromotionButtonLabel = executePromotionButtonLabel;
+    }
+    
+    public static String getExecutePromotionButtonLabel() {
+    	return executePromotionButtonLabel;
+    }
+    //Code to fetch Approve Promotion Button label from properties file -- Ends here
     
     /**
      * 

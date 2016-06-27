@@ -16,7 +16,7 @@
           </f:section>
         </j:if>
         <f:block>
-          <f:submit value="${%Approve}" />
+          <f:submit value="${it.getExecutePromotionButtonLabel()}" />
         </f:block>
       </j:if>
     </f:form>
