@@ -16,7 +16,7 @@
           </f:section>
         </j:if>
         <f:block>
-          <f:submit value="${#ApprovePromotion}" />
+          <f:submit value="${%Approve}" />
         </f:block>
       </j:if>
     </f:form>
