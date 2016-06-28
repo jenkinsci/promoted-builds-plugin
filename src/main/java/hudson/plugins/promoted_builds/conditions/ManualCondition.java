@@ -60,7 +60,7 @@ public class ManualCondition extends PromotionCondition {
     
     
     //Code to fetch Approve Promotion Button label from properties file
-    private String executeButtonLabel;
+    /*private String executeButtonLabel;
     private final String PROPERTIES_FILE_NAME = "promoted-builds-plugin.properties";
     public String getExecuteButtonLabel() {
     	
@@ -82,7 +82,7 @@ public class ManualCondition extends PromotionCondition {
     		executeButtonLabel = "Approve";
     	} 
     	return executeButtonLabel;
-    }
+    }*/
     //Code to fetch Approve Promotion Button label from properties file -- Ends here
     
     /**
@@ -342,7 +342,7 @@ public class ManualCondition extends PromotionCondition {
         public ManualCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             ManualCondition instance = new ManualCondition();
             instance.users = formData.getString("users");
-            instance.executeButtonLabel = instance.getExecuteButtonLabel();
+            //instance.executeButtonLabel = instance.getExecuteButtonLabel();
             instance.parameterDefinitions = Descriptor.newInstancesFromHeteroList(req, formData, "parameters", ParameterDefinition.all());
             return instance;
         }
