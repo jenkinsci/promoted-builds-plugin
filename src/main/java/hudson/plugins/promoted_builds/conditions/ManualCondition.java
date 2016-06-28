@@ -19,6 +19,7 @@ import hudson.plugins.promoted_builds.PromotionProcess;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -54,30 +55,33 @@ import org.kohsuke.stapler.export.Exported;
  */
 public class ManualCondition extends PromotionCondition {
     private String users;
+        
     private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
     
+    
     //Code to fetch Approve Promotion Button label from properties file
-    private static String executePromotionButtonLabel; 
-    private static final String PROPERTIES_FILE_NAME = "promoted-builds-plugin.properties";
-    static {
+    private String executeButtonLabel;
+    private final String PROPERTIES_FILE_NAME = "promoted-builds-plugin.properties";
+    public String getExecuteButtonLabel() {
+    	
+		String jenkinsHome = System.getProperty("JENKINS_HOME");
+		String jenkinsPathToPluginProperties = jenkinsHome + "/plugins/promoted-builds/app-resources/";
+    	Properties properties = new Properties();
+    	
     	try {
-    		String jenkinsHome = System.getProperty("JENKINS_HOME");
-    		String jenkinsPathToPluginProperties = jenkinsHome + "/plugins/promoted-builds/app-resources/";
-	    	Properties properties = new Properties();
-	    	properties.load(new FileInputStream(jenkinsPathToPluginProperties + PROPERTIES_FILE_NAME));
-	    	setExecutePromotionButtonLabel(properties.getProperty("APPROVE_BUTTON_LABEL"));
+    		
+	    	InputStream in = new FileInputStream(jenkinsPathToPluginProperties + PROPERTIES_FILE_NAME);
+	    	try {
+	    		properties.load(in);
+	        } finally {
+	            in.close();
+	        }    	
+	    	executeButtonLabel = properties.getProperty("APPROVE_BUTTON_LABEL");
     	} catch (Exception e) {
     		e.printStackTrace();
-    		setExecutePromotionButtonLabel("Approve");
-    	}
-    }
-    
-    private static void setExecutePromotionButtonLabel(String executePromotionButtonLabel) {
-    	ManualCondition.executePromotionButtonLabel = executePromotionButtonLabel;
-    }
-    
-    public static String getExecutePromotionButtonLabel() {
-    	return executePromotionButtonLabel;
+    		executeButtonLabel = "Approve";
+    	} 
+    	return executeButtonLabel;
     }
     //Code to fetch Approve Promotion Button label from properties file -- Ends here
     
@@ -141,7 +145,7 @@ public class ManualCondition extends PromotionCondition {
         List<ManualApproval> approvals = build.getActions(ManualApproval.class);
 
         for (ManualApproval approval : approvals) {
-            if (approval.name.equals(promotionProcess.getName()))
+        	if (approval.name.equals(promotionProcess.getName()))
                 return approval.badge;
         }
 
@@ -338,6 +342,7 @@ public class ManualCondition extends PromotionCondition {
         public ManualCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             ManualCondition instance = new ManualCondition();
             instance.users = formData.getString("users");
+            instance.executeButtonLabel = instance.getExecuteButtonLabel();
             instance.parameterDefinitions = Descriptor.newInstancesFromHeteroList(req, formData, "parameters", ParameterDefinition.all());
             return instance;
         }

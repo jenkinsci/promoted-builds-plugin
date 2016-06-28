@@ -16,7 +16,7 @@
           </f:section>
         </j:if>
         <f:block>
-          <f:submit value="${it.getExecutePromotionButtonLabel()}" />
+          <f:submit value="${it.executeButtonLabel}" />
         </f:block>
       </j:if>
     </f:form>
