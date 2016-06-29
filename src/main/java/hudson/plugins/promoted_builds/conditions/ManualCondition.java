@@ -61,26 +61,21 @@ public class ManualCondition extends PromotionCondition {
     
     //Code to fetch Approve Promotion Button label from properties file
     private String executeButtonLabel;
-    private final String PROPERTIES_FILE_NAME = "promoted-builds-plugin.properties";
+    
     public String getExecuteButtonLabel() {
-    	
-		String jenkinsHome = System.getProperty("JENKINS_HOME");
-		String jenkinsPathToPluginProperties = jenkinsHome + "/plugins/promoted-builds/app-resources/";
-    	Properties properties = new Properties();
-    	
     	try {
+    		//to use Custom label, add deamon property 'PROMOTION_BUILD_APPROVE_BUTTON_CUSTOM_LABEL' to "/etc/init.d/jenkins" file in value to JAVA_CMD
+    		//sample: JAVA_CMD="$JENKINS_JAVA_CMD $JENKINS_JAVA_OPTIONS -DJENKINS_HOME=$JENKINS_HOME -DPROMOTION_BUILD_APPROVE_BUTTON_CUSTOM_LABEL=Execute -jar $JENKINS_WAR"
+    		executeButtonLabel = System.getProperty("PROMOTION_BUILD_APPROVE_BUTTON_CUSTOM_LABEL");
+    		if(executeButtonLabel == null) {
+    			executeButtonLabel = "Approve";	//if property is not set in "/etc/init.d/jenkins" default value is "Approve"
+    		}
     		
-	    	InputStream in = new FileInputStream(jenkinsPathToPluginProperties + PROPERTIES_FILE_NAME);
-	    	try {
-	    		properties.load(in);
-	        } finally {
-	            in.close();
-	        }    	
-	    	executeButtonLabel = properties.getProperty("APPROVE_BUTTON_LABEL");
     	} catch (Exception e) {
     		e.printStackTrace();
     		executeButtonLabel = "Approve";
     	} 
+
     	return executeButtonLabel;
     }
     //Code to fetch Approve Promotion Button label from properties file -- Ends here
