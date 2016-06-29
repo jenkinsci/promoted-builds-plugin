@@ -67,7 +67,7 @@ public class ManualCondition extends PromotionCondition {
     
     public String getExecuteButtonLabel() {
     	String label = System.getProperty("MANUAL_CONDITION_APPROVE_BUTTON_CUSTOM_LABEL");
-    	if(label == null) {
+    	if(null == label) {
     		label = "Approve";
     	}
     	return label;
