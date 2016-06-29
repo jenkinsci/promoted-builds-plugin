@@ -58,27 +58,21 @@ public class ManualCondition extends PromotionCondition {
         
     private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
     
+    //TODO ======================
+    //to use Custom label for approve button, add deamon property 'MANUAL_CONDITION_APPROVE_BUTTON_CUSTOM_LABEL' to "/etc/init.d/jenkins" file in value to JAVA_CMD
+	//sample: JAVA_CMD="$JENKINS_JAVA_CMD $JENKINS_JAVA_OPTIONS -DJENKINS_HOME=$JENKINS_HOME -DMANUAL_CONDITION_APPROVE_BUTTON_CUSTOM_LABEL=CUSTOM_VALUE -jar $JENKINS_WAR"
     
-    //Code to fetch Approve Promotion Button label from properties file
+    @Nonnull
     private String executeButtonLabel;
     
     public String getExecuteButtonLabel() {
-    	try {
-    		//to use Custom label, add deamon property 'PROMOTION_BUILD_APPROVE_BUTTON_CUSTOM_LABEL' to "/etc/init.d/jenkins" file in value to JAVA_CMD
-    		//sample: JAVA_CMD="$JENKINS_JAVA_CMD $JENKINS_JAVA_OPTIONS -DJENKINS_HOME=$JENKINS_HOME -DPROMOTION_BUILD_APPROVE_BUTTON_CUSTOM_LABEL=Execute -jar $JENKINS_WAR"
-    		executeButtonLabel = System.getProperty("PROMOTION_BUILD_APPROVE_BUTTON_CUSTOM_LABEL");
-    		if(executeButtonLabel == null) {
-    			executeButtonLabel = "Approve";	//if property is not set in "/etc/init.d/jenkins" default value is "Approve"
-    		}
-    		
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    		executeButtonLabel = "Approve";
-    	} 
-
-    	return executeButtonLabel;
+    	String label = System.getProperty("MANUAL_CONDITION_APPROVE_BUTTON_CUSTOM_LABEL");
+    	if(label == null) {
+    		label = "Approve";
+    	}
+    	return label;
     }
-    //Code to fetch Approve Promotion Button label from properties file -- Ends here
+    //===========================
     
     /**
      * 
