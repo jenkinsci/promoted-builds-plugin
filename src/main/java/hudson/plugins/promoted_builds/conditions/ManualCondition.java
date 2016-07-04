@@ -59,18 +59,14 @@ public class ManualCondition extends PromotionCondition {
     private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
     
     //TODO ======================
-    //to use Custom label for approve button, add deamon property 'MANUAL_CONDITION_APPROVE_BUTTON_CUSTOM_LABEL' to "/etc/init.d/jenkins" file in value to JAVA_CMD
-	//sample: JAVA_CMD="$JENKINS_JAVA_CMD $JENKINS_JAVA_OPTIONS -DJENKINS_HOME=$JENKINS_HOME -DMANUAL_CONDITION_APPROVE_BUTTON_CUSTOM_LABEL=CUSTOM_VALUE -jar $JENKINS_WAR"
-    
-    @Nonnull
-    private String executeButtonLabel;
-    
+    //to use Custom label for approve button, add deamon property 'ManualCondition.approveButtonLabel' to "/etc/init.d/jenkins" file in value to JAVA_CMD
+	//sample: JAVA_CMD="$JENKINS_JAVA_CMD $JENKINS_JAVA_OPTIONS -DJENKINS_HOME=$JENKINS_HOME -DManualCondition.approveButtonLabel=CUSTOM_VALUE -jar $JENKINS_WAR"
     public String getExecuteButtonLabel() {
-    	String label = System.getProperty("MANUAL_CONDITION_APPROVE_BUTTON_CUSTOM_LABEL");
-    	if(null == label) {
-    		label = "Approve";
+        String label = System.getProperty(this.getClass().getSimpleName()+".approveButtonLabel");
+        if(null == label) {
+    	    label = "Approve";
     	}
-    	return label;
+        return label;
     }
     //===========================
     
@@ -331,7 +327,6 @@ public class ManualCondition extends PromotionCondition {
         public ManualCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             ManualCondition instance = new ManualCondition();
             instance.users = formData.getString("users");
-            instance.executeButtonLabel = instance.getExecuteButtonLabel();
             instance.parameterDefinitions = Descriptor.newInstancesFromHeteroList(req, formData, "parameters", ParameterDefinition.all());
             return instance;
         }
