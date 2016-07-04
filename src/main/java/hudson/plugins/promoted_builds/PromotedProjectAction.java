@@ -64,7 +64,7 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
 
     public AbstractBuild<?,?> getLatest(PromotionProcess p) {
     	List<Promotion> list = getPromotions( p );
-        return list.size() > 0 ? list.get(0) : null;
+        return list.size() > 0 ? list.get(list.size() - 1) : null;
     }
 
     @Restricted(NoExternalUse.class)
@@ -83,7 +83,7 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
     @Restricted(NoExternalUse.class)
     public Status getStatus(PromotionProcess process) {
         List<Promotion> list = getPromotions( process );
-        Promotion latest = list.size() > 0 ? list.get(0) : null;
+        Promotion latest = list.size() > 0 ? list.get(list.size() - 1) : null;
         Status status = latest != null ? latest.getStatus() : null;
         return status;
     }
@@ -93,7 +93,7 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
      */
     public AbstractBuild<?,?> getLatest(String name) {
     	List<Promotion> list = getPromotions( getProcess(name) );
-        return list.size() > 0 ? list.get(0) : null;
+        return list.size() > 0 ? list.get(list.size() - 1) : null;
     }
 
 
@@ -117,7 +117,7 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
     public List<Promotion> getPromotionsSummary(PromotionProcess promotionProcess){
     	List<Promotion> promotionList = this.getPromotions(promotionProcess);
     	if(promotionList.size() > SUMMARY_SIZE ){
-    		return promotionList.subList(0, SUMMARY_SIZE);
+	    return promotionList.subList(promotionList.size() - SUMMARY_SIZE, promotionList.size());
     	}else{
     		return promotionList;
     	}
