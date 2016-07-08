@@ -179,6 +179,7 @@ public class SelfPromotionInheritanceTest  {
         inheritanceProjectPair.getBase().addProperty(promotion);
 
         inheritanceProjectPair.getBase().addProperty(new ParametersDefinitionProperty(new StringParameterDefinition(paramName, "")));
+        inheritanceProjectPair.getDerived().addProperty(new ParametersDefinitionProperty(new StringParameterDefinition(paramName, "")));
         PromotionProcess promo1 = promotion.addProcess("promo1");
         promo1.conditions.add(new SelfPromotionCondition(false));
 
