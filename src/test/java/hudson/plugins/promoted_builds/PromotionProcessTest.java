@@ -7,6 +7,7 @@ import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Result;
 import hudson.model.StringParameterDefinition;
 import hudson.model.FreeStyleBuild;
+import hudson.model.listeners.ItemListener;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildTrigger;
@@ -53,9 +54,8 @@ public class PromotionProcessTest extends HudsonTestCase {
             "expr $BUILD_NUMBER % 2 - 1\n"  // expr exits with non-zero status if result is zero
         ));
         down.getPublishersList().replaceBy(recorders);
-        // TODO this and some tests in KeepBuildForeverActionTest will not work in 1.575+ because these ArtifactArchiver/Fingerprinter constructors are deprecated.
-        // Would only work if using @LocalData to prepare test configuration; or if we insert at this point a call to ArtifactArchiver.Migrator:
-        // for (ItemListener l : ItemListener.all()) {l.onLoaded();}
+        //Make this test work with Jenkins 1.575+
+        for (ItemListener l : ItemListener.all()) {l.onLoaded();}
 
         // not yet promoted while the downstream is failing
         FreeStyleBuild up1 = assertBuildStatusSuccess(up.scheduleBuild2(0).get());
