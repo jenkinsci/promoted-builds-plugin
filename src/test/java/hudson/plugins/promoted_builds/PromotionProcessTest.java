@@ -54,8 +54,11 @@ public class PromotionProcessTest extends HudsonTestCase {
             "expr $BUILD_NUMBER % 2 - 1\n"  // expr exits with non-zero status if result is zero
         ));
         down.getPublishersList().replaceBy(recorders);
-        //Make this test work with Jenkins 1.575+
-        for (ItemListener l : ItemListener.all()) {l.onLoaded();}
+
+        // Make this test work with Jenkins 1.575+
+        for (ItemListener l : ItemListener.all()) {
+            l.onLoaded();
+        }
 
         // not yet promoted while the downstream is failing
         FreeStyleBuild up1 = assertBuildStatusSuccess(up.scheduleBuild2(0).get());

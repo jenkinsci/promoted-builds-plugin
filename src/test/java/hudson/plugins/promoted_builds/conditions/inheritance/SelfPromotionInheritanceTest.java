@@ -184,8 +184,10 @@ public class SelfPromotionInheritanceTest  {
         PromotionProcess promo1 = promotion.addProcess("promo1");
         promo1.conditions.add(new SelfPromotionCondition(false));
 
-        //Make this test work with Jenkins 1.575+
-        for (ItemListener l : ItemListener.all()) {l.onLoaded();}
+        // Make this test work with Jenkins 1.575+
+        for (ItemListener l : ItemListener.all()) {
+            l.onLoaded();
+        }
 
         String paramValue = "someString";
         j.assertBuildStatusSuccess(inheritanceProjectPair.getDerived().scheduleBuild2(0, new Cause.UserCause(),
