@@ -7,7 +7,6 @@ import hudson.model.Result;
 import hudson.model.StringParameterDefinition;
 import hudson.model.StringParameterValue;
 import hudson.model.TaskListener;
-import hudson.model.listeners.ItemListener;
 import hudson.plugins.project_inheritance.projects.InheritanceBuild;
 import hudson.plugins.project_inheritance.projects.InheritanceProject.IMode;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
@@ -19,6 +18,7 @@ import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.plugins.promoted_builds.inheritance.helpers.InheritanceProjectRule;
 import hudson.plugins.promoted_builds.inheritance.helpers.InheritanceProjectsPair;
 
+import static hudson.plugins.promoted_builds.util.ItemListenerHelper.fireItemListeners;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -184,10 +184,8 @@ public class SelfPromotionInheritanceTest  {
         PromotionProcess promo1 = promotion.addProcess("promo1");
         promo1.conditions.add(new SelfPromotionCondition(false));
 
-        // Make this test work with Jenkins 1.575+
-        for (ItemListener l : ItemListener.all()) {
-            l.onLoaded();
-        }
+        // Fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        fireItemListeners();
 
         String paramValue = "someString";
         j.assertBuildStatusSuccess(inheritanceProjectPair.getDerived().scheduleBuild2(0, new Cause.UserCause(),

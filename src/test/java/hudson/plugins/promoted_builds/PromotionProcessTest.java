@@ -7,7 +7,6 @@ import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Result;
 import hudson.model.StringParameterDefinition;
 import hudson.model.FreeStyleBuild;
-import hudson.model.listeners.ItemListener;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildTrigger;
@@ -23,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import static hudson.plugins.promoted_builds.util.ItemListenerHelper.fireItemListeners;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -55,10 +56,8 @@ public class PromotionProcessTest extends HudsonTestCase {
         ));
         down.getPublishersList().replaceBy(recorders);
 
-        // Make this test work with Jenkins 1.575+
-        for (ItemListener l : ItemListener.all()) {
-            l.onLoaded();
-        }
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        fireItemListeners();
 
         // not yet promoted while the downstream is failing
         FreeStyleBuild up1 = assertBuildStatusSuccess(up.scheduleBuild2(0).get());
