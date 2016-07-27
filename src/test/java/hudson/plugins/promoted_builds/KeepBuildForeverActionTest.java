@@ -34,7 +34,7 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         PromotionProcess promotionJob = createDownstreamSuccessPromotion(upJob, downJob);
         promotionJob.getBuildSteps().add(new KeepBuildForeverAction());
 
-        // Fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
         fireItemListeners();
 
         FreeStyleBuild upBuild = assertBuildStatusSuccess(upJob.scheduleBuild2(0).get());
@@ -55,7 +55,7 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         promotionJob.getBuildSteps().add(new FixedResultBuilder(Result.FAILURE));
         promotionJob.getBuildSteps().add(new KeepBuildForeverAction());
 
-        // Fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
         fireItemListeners();
 
         FreeStyleBuild upBuild = assertBuildStatusSuccess(upJob.scheduleBuild2(0).get());
@@ -75,7 +75,7 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         PromotionProcess promotionJob = createDownstreamSuccessPromotion(upJob, downJob);
         promotionJob.getBuildSteps().add(new KeepBuildForeverAction());
 
-        // Fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
         fireItemListeners();
 
         FreeStyleBuild upBuild = assertBuildStatus(Result.FAILURE, upJob.scheduleBuild2(0).get());
@@ -91,7 +91,7 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         job.getBuildersList().add(successfulBuilder());
         job.getPublishersList().add(new KeepBuildForeverAction());
 
-        // Fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
         fireItemListeners();
 
         FreeStyleBuild build = assertBuildStatus(Result.FAILURE, job.scheduleBuild2(0).get());
