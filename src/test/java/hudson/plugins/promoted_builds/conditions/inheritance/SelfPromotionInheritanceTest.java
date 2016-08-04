@@ -18,6 +18,7 @@ import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.plugins.promoted_builds.inheritance.helpers.InheritanceProjectRule;
 import hudson.plugins.promoted_builds.inheritance.helpers.InheritanceProjectsPair;
 
+import static hudson.plugins.promoted_builds.util.ItemListenerHelper.fireItemListeners;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -178,9 +179,14 @@ public class SelfPromotionInheritanceTest  {
         JobPropertyImpl promotion = new JobPropertyImpl(inheritanceProjectPair.getBase());
         inheritanceProjectPair.getBase().addProperty(promotion);
 
+        // TODO review this property asignment after https://issues.jenkins-ci.org/browse/JENKINS-34831 is fixed
         inheritanceProjectPair.getBase().addProperty(new ParametersDefinitionProperty(new StringParameterDefinition(paramName, "")));
+        inheritanceProjectPair.getDerived().addProperty(new ParametersDefinitionProperty(new StringParameterDefinition(paramName, "")));
         PromotionProcess promo1 = promotion.addProcess("promo1");
         promo1.conditions.add(new SelfPromotionCondition(false));
+
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        fireItemListeners();
 
         String paramValue = "someString";
         j.assertBuildStatusSuccess(inheritanceProjectPair.getDerived().scheduleBuild2(0, new Cause.UserCause(),

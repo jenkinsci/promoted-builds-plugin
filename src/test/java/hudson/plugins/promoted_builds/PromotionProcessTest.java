@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static hudson.plugins.promoted_builds.util.ItemListenerHelper.fireItemListeners;
+
 /**
  * @author Kohsuke Kawaguchi
  */
@@ -53,9 +55,9 @@ public class PromotionProcessTest extends HudsonTestCase {
             "expr $BUILD_NUMBER % 2 - 1\n"  // expr exits with non-zero status if result is zero
         ));
         down.getPublishersList().replaceBy(recorders);
-        // TODO this and some tests in KeepBuildForeverActionTest will not work in 1.575+ because these ArtifactArchiver/Fingerprinter constructors are deprecated.
-        // Would only work if using @LocalData to prepare test configuration; or if we insert at this point a call to ArtifactArchiver.Migrator:
-        // for (ItemListener l : ItemListener.all()) {l.onLoaded();}
+
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        fireItemListeners();
 
         // not yet promoted while the downstream is failing
         FreeStyleBuild up1 = assertBuildStatusSuccess(up.scheduleBuild2(0).get());

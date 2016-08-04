@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import static hudson.plugins.promoted_builds.util.ItemListenerHelper.fireItemListeners;
+
 public class KeepBuildForeverActionTest extends HudsonTestCase {
     
     public void testCanMarkBuildKeepForever() throws Exception {
@@ -31,6 +33,9 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
 
         PromotionProcess promotionJob = createDownstreamSuccessPromotion(upJob, downJob);
         promotionJob.getBuildSteps().add(new KeepBuildForeverAction());
+
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        fireItemListeners();
 
         FreeStyleBuild upBuild = assertBuildStatusSuccess(upJob.scheduleBuild2(0).get());
         assertFalse(upBuild.isKeepLog());
@@ -50,6 +55,9 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         promotionJob.getBuildSteps().add(new FixedResultBuilder(Result.FAILURE));
         promotionJob.getBuildSteps().add(new KeepBuildForeverAction());
 
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        fireItemListeners();
+
         FreeStyleBuild upBuild = assertBuildStatusSuccess(upJob.scheduleBuild2(0).get());
         assertFalse(upBuild.isKeepLog());
         
@@ -67,6 +75,9 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         PromotionProcess promotionJob = createDownstreamSuccessPromotion(upJob, downJob);
         promotionJob.getBuildSteps().add(new KeepBuildForeverAction());
 
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        fireItemListeners();
+
         FreeStyleBuild upBuild = assertBuildStatus(Result.FAILURE, upJob.scheduleBuild2(0).get());
         assertFalse(upBuild.isKeepLog());
         
@@ -79,6 +90,9 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         FreeStyleProject job = createProject("job");
         job.getBuildersList().add(successfulBuilder());
         job.getPublishersList().add(new KeepBuildForeverAction());
+
+        // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
+        fireItemListeners();
 
         FreeStyleBuild build = assertBuildStatus(Result.FAILURE, job.scheduleBuild2(0).get());
         assertFalse(build.isKeepLog());
