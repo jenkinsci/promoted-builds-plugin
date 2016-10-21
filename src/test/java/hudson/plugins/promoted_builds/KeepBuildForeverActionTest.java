@@ -141,7 +141,7 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
     }
     
     private List<Recorder> createFingerprinters() {
-        return Arrays.asList(
+        return Arrays.<Recorder>asList(
             new ArtifactArchiver("*", null, false),
             new Fingerprinter("", true)
         );

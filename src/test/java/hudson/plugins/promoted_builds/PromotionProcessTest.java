@@ -33,7 +33,7 @@ public class PromotionProcessTest extends HudsonTestCase {
         FreeStyleProject up = createFreeStyleProject("up");
         FreeStyleProject down = createFreeStyleProject();
 
-        List<Recorder> recorders = Arrays.asList(
+        List<Recorder> recorders = Arrays.<Recorder>asList(
                 new ArtifactArchiver("a.jar", null, false),
                 new Fingerprinter("", true));
 

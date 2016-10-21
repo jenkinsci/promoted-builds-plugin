@@ -12,7 +12,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jenkins.security.Roles;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.remoting.RoleChecker;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.Ancestor;
@@ -304,6 +306,11 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         try {
             IOUtils.copy(xml, configXml);
             PromotionProcess result = Items.whileUpdatingByXml(new Callable<PromotionProcess,IOException>() {
+                @Override
+                public void checkRoles(RoleChecker checker) throws SecurityException {
+                    checker.check(this, Roles.MASTER);
+                }
+
                 @Override public PromotionProcess call() throws IOException {
                     setOwner(owner);
                     return getItem(name);
