@@ -70,7 +70,17 @@ public class JobDslPromotionProcessConverter extends ReflectionConverter {
             }
             if (promotionProcess.getConditions() != null) {
                 writer.startNode("conditions");
-                context.convertAnother(promotionProcess.getConditions());
+                for (Node node : promotionProcess.getConditions()) {
+                    writer.startNode(node.name().toString());
+                    if (node.value() instanceof Collection) {
+                        for (Object subNode : (Collection) node.value()) {
+                            convertNode((Node) subNode, writer);
+                        }
+                    } else {
+                        writer.setValue(node.value().toString());
+                    }
+                    writer.endNode();
+                }
                 writer.endNode();
             }
             if (promotionProcess.getBuildSteps() != null) {

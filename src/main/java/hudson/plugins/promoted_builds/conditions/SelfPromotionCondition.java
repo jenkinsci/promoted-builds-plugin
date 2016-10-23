@@ -34,6 +34,7 @@ import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -100,6 +101,7 @@ public class SelfPromotionCondition extends PromotionCondition {
     }
 
     @Extension
+    @Symbol("selfPromotion")
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;

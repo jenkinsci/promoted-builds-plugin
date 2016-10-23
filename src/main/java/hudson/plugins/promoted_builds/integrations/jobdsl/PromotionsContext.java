@@ -1,26 +1,27 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import javaposse.jobdsl.dsl.AbstractContext;
+import javaposse.jobdsl.dsl.DslContext;
+import javaposse.jobdsl.dsl.Item;
+import javaposse.jobdsl.dsl.JobManagement;
 import com.google.common.base.Preconditions;
+import javaposse.jobdsl.plugin.DslEnvironment;
+
+import java.util.*;
 
 import groovy.lang.Closure;
-import javaposse.jobdsl.dsl.Context;
-import javaposse.jobdsl.plugin.DslEnvironment;
 
 import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 
-public class PromotionsContext implements Context {
-    private final DslEnvironment dslEnvironment;
+public class PromotionsContext extends AbstractContext {
+    protected final Item item;
+    protected final DslEnvironment dslEnvironment;
 
-    Set<String> names = new HashSet<String>();
-    
-    Map<String,PromotionContext> promotionContexts = new HashMap<String,PromotionContext>();
+    protected List<PromotionContext> promotionContexts = new ArrayList<PromotionContext>();
 
-    public PromotionsContext(DslEnvironment dslEnvironment) {
+    public PromotionsContext(JobManagement jobManagement, Item item, DslEnvironment dslEnvironment) {
+        super(jobManagement);
+        this.item = item;
         this.dslEnvironment = dslEnvironment;
     }
 
@@ -51,14 +52,16 @@ public class PromotionsContext implements Context {
      * </pre>
      * @param promotionClosure Input closure
      */
-    public void promotion(Closure<?> promotionClosure) {
-        PromotionContext promotionContext = new PromotionContext(dslEnvironment);
+    public void promotion(@DslContext(PromotionContext.class) Closure<?> promotionClosure) {
+        promotion(null, promotionClosure);
+    }
+
+    public void promotion(String name, @DslContext(PromotionContext.class) Closure promotionClosure) {
+        PromotionContext promotionContext = new PromotionContext(jobManagement, item, dslEnvironment);
+        promotionContext.setName(name);
         executeInContext(promotionClosure, promotionContext);
         Preconditions.checkNotNull(promotionContext.getName(), "promotion name cannot be null");
         Preconditions.checkArgument(promotionContext.getName().length() > 0);
-        names.add(promotionContext.getName());
-        promotionContexts.put(promotionContext.getName(),promotionContext);
-        
+        promotionContexts.add(promotionContext);
     }
-
 }

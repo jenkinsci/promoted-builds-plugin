@@ -5,14 +5,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.common.base.Function;
 import com.thoughtworks.xstream.XStream;
 
+import groovy.lang.Closure;
 import hudson.Extension;
 import hudson.model.AbstractItem;
 import hudson.model.Item;
@@ -21,10 +21,17 @@ import hudson.model.Descriptor.FormException;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.util.IOUtils;
 import hudson.util.XStream2;
+import javaposse.jobdsl.dsl.Context;
+import javaposse.jobdsl.dsl.DslContext;
+import javaposse.jobdsl.dsl.JobManagement;
 import javaposse.jobdsl.dsl.helpers.properties.PropertiesContext;
 import javaposse.jobdsl.plugin.ContextExtensionPoint;
 import javaposse.jobdsl.plugin.DslEnvironment;
 import javaposse.jobdsl.plugin.DslExtensionMethod;
+
+import javax.annotation.Nullable;
+
+import static com.google.common.collect.Lists.transform;
 
 /**
  * The Job DSL Extension Point for the Promotions. 
@@ -37,26 +44,36 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
 
     private static final Logger LOGGER = Logger.getLogger(PromotionsExtensionPoint.class.getName());
 
-    private static final XStream XSTREAM = new XStream2();
+    private static final String PROMOTION_PROCESSES = "promotionProcesses";
+    /* package */ static final XStream XSTREAM = new XStream2();
+
+    /**
+     * Workaround to {@link DslEnvironment#createContext(Class)} not being able to propagate
+     * the DslEnvironment and not exposing the {@link JobManagement} instance for inner contexts
+     */
+    public static class FakeContext implements Context {
+        private final JobManagement jobManagement;
+        private final javaposse.jobdsl.dsl.Item item;
+
+        public FakeContext(JobManagement jobManagement, javaposse.jobdsl.dsl.Item item) {
+            this.jobManagement = jobManagement;
+            this.item = item;
+        }
+    }
 
     @DslExtensionMethod(context = PropertiesContext.class)
     public Object promotions(Runnable closure, DslEnvironment dslEnvironment) throws FormException, IOException {
-        PromotionsContext context = new PromotionsContext(dslEnvironment);
+        FakeContext fakeContext = dslEnvironment.createContext(FakeContext.class);
+        PromotionsContext context = new PromotionsContext(fakeContext.jobManagement, fakeContext.item, dslEnvironment);
         executeInContext(closure, context);
-        dslEnvironment.put("processNames", context.names);
-        JobPropertyImpl jobProperty = new JobPropertyImpl(context.names);
-        Map<String,JobDslPromotionProcess> promotionProcesses = new HashMap<String,JobDslPromotionProcess>();
-        for (String processName : context.names) {
-            PromotionContext promotionContext = context.promotionContexts.get(processName);
-            JobDslPromotionProcess jobDslPromotionProcess = new JobDslPromotionProcess();
-            jobDslPromotionProcess.setName(processName);
-            jobDslPromotionProcess.setIcon(promotionContext.getIcon());
-            jobDslPromotionProcess.setAssignedLabel(promotionContext.getRestrict());
-            jobDslPromotionProcess.setBuildSteps(promotionContext.getActions());
-            jobDslPromotionProcess.setConditions(promotionContext.getConditions());
-            promotionProcesses.put(processName,jobDslPromotionProcess);
-        }
-        dslEnvironment.put("promotionProcesses", promotionProcesses);
+        final Set<String> promotionNames = new HashSet<String>(transform(context.promotionContexts, new Function<PromotionContext, String>() {
+            @Override
+            public String apply(@Nullable PromotionContext input) {
+                return input.getName();
+            }
+        }));
+        JobPropertyImpl jobProperty = new JobPropertyImpl(promotionNames);
+        dslEnvironment.put(PROMOTION_PROCESSES, context.promotionContexts);
         return jobProperty;
     }
 
@@ -68,14 +85,11 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
     @SuppressWarnings("unchecked")
     public void notifyItemCreated(Item item, DslEnvironment dslEnvironment, boolean update) {
         LOGGER.log(Level.INFO, String.format("Creating promotions for %s", item.getName()));
-        Map<String,JobDslPromotionProcess>  promotionProcesses = (Map<String,JobDslPromotionProcess>) dslEnvironment.get("promotionProcesses");
-        Set<String> names = (Set<String>) dslEnvironment.get("processNames");
-        if (names != null && names.size() > 0) {
-            for (String name : names) {
-                JobDslPromotionProcess promotionProcess = promotionProcesses.get(name);
-                XSTREAM.registerConverter(new JobDslPromotionProcessConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
-                XSTREAM.registerConverter(new ManualConditionConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
-                String xml = XSTREAM.toXML(promotionProcess);
+        Collection<PromotionContext>  promotionProcesses = (Collection<PromotionContext>) dslEnvironment.get(PROMOTION_PROCESSES);
+        if (promotionProcesses != null && promotionProcesses.size() > 0) {
+            for (PromotionContext promotionProcess : promotionProcesses) {
+                final String name = promotionProcess.getName();
+                String xml = promotionProcess.getXml();
                 File dir = new File(item.getRootDir(), "promotions/" + name);
                 File configXml = Items.getConfigFile(dir).getFile();
                 boolean created = configXml.getParentFile().mkdirs();

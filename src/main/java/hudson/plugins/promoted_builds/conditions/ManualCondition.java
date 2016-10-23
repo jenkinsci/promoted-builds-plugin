@@ -39,6 +39,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.acegisecurity.GrantedAuthority;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -298,6 +299,7 @@ public class ManualCondition extends PromotionCondition {
     }
 
     @Extension
+    @Symbol("manual")
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;

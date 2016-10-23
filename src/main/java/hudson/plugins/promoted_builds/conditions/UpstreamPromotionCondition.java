@@ -10,6 +10,7 @@ import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.plugins.promoted_builds.Status;
 import net.sf.json.JSONObject;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.util.ArrayList;
@@ -86,6 +87,7 @@ public class UpstreamPromotionCondition extends PromotionCondition {
     }
 
     @Extension
+    @Symbol("upstreamPromotion")
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;

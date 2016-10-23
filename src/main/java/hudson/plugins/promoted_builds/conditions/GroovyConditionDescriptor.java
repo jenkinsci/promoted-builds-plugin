@@ -6,6 +6,7 @@ import hudson.PluginWrapper;
 import hudson.model.AbstractProject;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,6 +15,7 @@ import java.util.logging.Logger;
  * Declared outside GroovyCondition as it depends on the optional 'script-security' dependency
  */
 @Extension(optional = true)
+@Symbol("groovy")
 public final class GroovyConditionDescriptor extends PromotionConditionDescriptor {
 
     private static final Logger LOGGER = Logger.getLogger(GroovyConditionDescriptor.class.getName());

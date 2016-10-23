@@ -61,7 +61,19 @@ public class PromotionsDslContextExtensionTest extends HudsonTestCase {
         TopLevelItem item = jenkins.getItem("copy-artifacts-test");
         File config = new File(item.getRootDir(), "promotions/Development/config.xml");
         String content = Files.toString(config, Charset.forName("UTF-8"));
-        assert content.contains("<selector class=\"hudson.plugins.copyartifact.SpecificBuildSelector\">");
+        assert content.contains("<selector class='hudson.plugins.copyartifact.SpecificBuildSelector'>");
     }
 
+    @Test
+    public void testAutomaticallyGeneratedDsl() throws Exception {
+        // Given
+        String dsl = FileUtils.readFileToString(new File("src/test/resources/automatically-generated-dsl.groovy"));
+        FreeStyleProject seedJob = createFreeStyleProject();
+        seedJob.getBuildersList().add(
+            new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
+        // When
+        QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
+        // Then
+        assertBuildStatusSuccess(scheduleBuild2);
+    }
 }

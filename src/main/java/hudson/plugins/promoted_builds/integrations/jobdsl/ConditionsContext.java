@@ -1,59 +1,72 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
 import groovy.lang.Closure;
+import groovy.lang.MetaClass;
 import groovy.util.Node;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import javaposse.jobdsl.dsl.Context;
+import javaposse.jobdsl.dsl.AbstractExtensibleContext;
+import javaposse.jobdsl.dsl.ContextType;
+import javaposse.jobdsl.dsl.Item;
+import javaposse.jobdsl.dsl.JobManagement;
 import javaposse.jobdsl.dsl.helpers.BuildParametersContext;
-
 import javaposse.jobdsl.plugin.DslEnvironment;
+import org.codehaus.groovy.runtime.InvokerHelper;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 
-public class ConditionsContext implements Context {
-	private final DslEnvironment dslEnvironment;
+@ContextType("hudson.plugins.promoted_builds.PromotionCondition")
+public class ConditionsContext extends AbstractExtensibleContext {
+	// never persist the MetaClass
+	private transient MetaClass metaClass;
+
+	protected final DslEnvironment dslEnvironment;
+
+	final List<Node> conditionNodes = new ArrayList<Node>();
 
 	// Self Promotion Condition
-	private boolean isSelfPromotion = false;
-	
-	private boolean evenIfUnstable = false;
-	
-	// Parametzerized Self Promotion Condition
-	private boolean isParameterizedSelfPromotion = false;
-	
-	private boolean evenIfUnstableParameterized = false;
-	
-	private String parameterName = null;
-	
-	private String parameterValue = null;
-	
-	// Manual Promotion Condition
-	private boolean isManual = false;
-	
-	private String users = null;
-	
-	final Map<String, Node> params = new HashMap<String, Node>();
-	
-	// Release Build Condition
-	private boolean isReleaseBuild = false;
-	
-	// Downstream Build Condition
-	private boolean isDownstreamPass = false;
-	
-	private boolean evenIfUnstableDownstream = false;
-	
-	private String jobs = null;
-	
-	// Upstream Build Condition
-	private boolean isUpstreamPromotion = false;
-	
-	private String promotionNames = null;
+	private boolean isSelfPromotion;
 
-	public ConditionsContext(DslEnvironment dslEnvironment) {
+	private boolean evenIfUnstable;
+
+	// Parametzerized Self Promotion Condition
+	private boolean isParameterizedSelfPromotion;
+
+	private boolean evenIfUnstableParameterized;
+
+	private String parameterName;
+
+	private String parameterValue;
+
+	// Manual Promotion Condition
+	private boolean isManual;
+
+	private String users;
+
+	final Map<String, Node> params = new HashMap<String, Node>();
+
+	// Release Build Condition
+	private boolean isReleaseBuild;
+
+	// Downstream Build Condition
+	private boolean isDownstreamPass;
+
+	private boolean evenIfUnstableDownstream;
+
+	private String jobs;
+
+	// Upstream Build Condition
+	private boolean isUpstreamPromotion;
+
+	private String promotionNames;
+
+	public ConditionsContext(JobManagement jobManagement, Item item, DslEnvironment dslEnvironment) {
+		super(jobManagement, item);
 		this.dslEnvironment = dslEnvironment;
+		this.metaClass = InvokerHelper.getMetaClass(this.getClass());
 	}
 
 	public void selfPromotion(Boolean evenIfUnstable) {
@@ -167,4 +180,36 @@ public class ConditionsContext implements Context {
 		return promotionNames;
 	}
 
+	@Override
+	protected void addExtensionNode(Node node) {
+		conditionNodes.add(node);
+	}
+
+	@Override
+	public Object getProperty(String property) {
+		return getMetaClass().getProperty(this, property);
+	}
+
+	@Override
+	public void setProperty(String property, Object newValue) {
+		getMetaClass().setProperty(this, property, newValue);
+	}
+
+	@Override
+	public Object invokeMethod(String name, Object args) {
+		return getMetaClass().invokeMethod(this, name, args);
+	}
+
+	@Override
+	public MetaClass getMetaClass() {
+		if (metaClass == null) {
+			metaClass = InvokerHelper.getMetaClass(getClass());
+		}
+		return metaClass;
+	}
+
+	@Override
+	public void setMetaClass(MetaClass metaClass) {
+		this.metaClass = metaClass;
+	}
 }

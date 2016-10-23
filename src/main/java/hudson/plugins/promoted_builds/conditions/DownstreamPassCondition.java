@@ -29,6 +29,7 @@ import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -200,6 +201,7 @@ public class DownstreamPassCondition extends PromotionCondition {
     }
 
     @Extension
+    @Symbol("downstreamPass")
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;

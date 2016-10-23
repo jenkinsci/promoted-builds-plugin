@@ -14,6 +14,7 @@ import hudson.plugins.promoted_builds.PromotionCondition;
  * @author Dennis Schulte
  */
 @XStreamAlias("hudson.plugins.promoted_builds.PromotionProcess")
+@Deprecated
 public final class JobDslPromotionProcess {
 
     private String name;
@@ -32,7 +33,7 @@ public final class JobDslPromotionProcess {
     /**
      * {@link PromotionCondition}s. All have to be met for a build to be promoted.
      */
-    private List<PromotionCondition> conditions = new ArrayList<PromotionCondition>();
+    private List<Node> conditions = new ArrayList<Node>();
 
     private List<Node> buildSteps = new ArrayList<Node>();
 
@@ -60,11 +61,11 @@ public final class JobDslPromotionProcess {
         this.assignedLabel = assignedLabel;
     }
 
-    public List<PromotionCondition> getConditions() {
+    public List<Node> getConditions() {
         return conditions;
     }
 
-    public void setConditions(List<PromotionCondition> conditions) {
+    public void setConditions(List<Node> conditions) {
         this.conditions = conditions;
     }
 
