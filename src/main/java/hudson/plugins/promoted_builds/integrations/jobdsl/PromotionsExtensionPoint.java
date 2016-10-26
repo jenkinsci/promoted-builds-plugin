@@ -69,6 +69,10 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
         final Set<String> promotionNames = new HashSet<String>(transform(context.promotionContexts, new Function<PromotionContext, String>() {
             @Override
             public String apply(@Nullable PromotionContext input) {
+                if (input == null) {
+                    // throw NPE as documented by Function#apply(Object)
+                    throw new NullPointerException("PromotionsContext.promotionContexts is not expected to contain null elements");
+                }
                 return input.getName();
             }
         }));

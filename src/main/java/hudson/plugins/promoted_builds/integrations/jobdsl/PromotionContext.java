@@ -1,5 +1,6 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Closure;
 import groovy.lang.MetaClass;
 import groovy.util.Node;
@@ -101,10 +102,11 @@ class PromotionContext extends Item {
 
     public void icon(final String icon) {
         configure(new MethodClosure(new Object() {
-            public void conf(Node promotion) {
+            @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically called by MethodClosure")
+            public void call(Node promotion) {
                 ((Node) ((NodeList) promotion.get("icon")).get(0)).setValue(icon);
             }
-        }, "conf"));
+        }, "call"));
     }
 
     /**
@@ -119,11 +121,12 @@ class PromotionContext extends Item {
 
     public void label(final String labelExpression) {
         configure(new MethodClosure(new Object() {
-            public void conf(Node promotion) {
+            @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically called by MethodClosure")
+            public void call(Node promotion) {
                 Node node = (Node) new NodeBuilder().invokeMethod("assignedLabel", labelExpression);
                 promotion.append(node);
             }
-        }, "conf"));
+        }, "call"));
     }
 
     public PromotionContext(JobManagement jobManagement, Item item, DslEnvironment dslEnvironment) {
@@ -147,12 +150,13 @@ class PromotionContext extends Item {
         executeInContext(actionsClosure, stepContext);
         actions.addAll(stepContext.getStepNodes());
         configure(new MethodClosure(new Object(){
-            public void doWork(Node promotion) {
+            @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically called by MethodClosure")
+            public void call(Node promotion) {
                 for (Node stepNode: stepContext.getStepNodes()) {
                     ((Node) ((NodeList) promotion.get("buildSteps")).get(0)).append(stepNode);
                 }
             }
-        }, "doWork"));
+        }, "call"));
     }
 
     @Override
