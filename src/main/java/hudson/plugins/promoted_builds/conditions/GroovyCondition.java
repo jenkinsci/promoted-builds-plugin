@@ -14,6 +14,7 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
 import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedClasspathException;
 import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedUsageException;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
 import java.util.Collections;
@@ -30,13 +31,16 @@ public class GroovyCondition extends PromotionCondition {
     private static final Logger LOGGER = Logger.getLogger(GroovyCondition.class.getName());
 
     @CheckForNull
-    private final String unmetQualificationLabel;
+    private String unmetQualificationLabel;
     @CheckForNull
-    private final String metQualificationLabel;
+    private String metQualificationLabel;
     private final SecureGroovyScript script;
 
     @DataBoundConstructor
-    public GroovyCondition(final SecureGroovyScript script, final String unmetQualificationLabel, final String metQualificationLabel) {
+    public GroovyCondition(final SecureGroovyScript script) {
+        this(script, null, null);
+    }
+    public GroovyCondition(final SecureGroovyScript script, @CheckForNull final String unmetQualificationLabel, @CheckForNull final String metQualificationLabel) {
         this.unmetQualificationLabel = Util.fixEmptyAndTrim(unmetQualificationLabel);
         this.metQualificationLabel = Util.fixEmptyAndTrim(metQualificationLabel);
         this.script = script.configuringWithNonKeyItem();
@@ -52,9 +56,19 @@ public class GroovyCondition extends PromotionCondition {
         return unmetQualificationLabel;
     }
 
+    @DataBoundSetter
+    public void setUnmetQualificationLabel(String unmetQualificationLabel) {
+        this.unmetQualificationLabel = unmetQualificationLabel;
+    }
+
     // exposed for config.jelly
     public String getMetQualificationLabel() {
         return metQualificationLabel;
+    }
+
+    @DataBoundSetter
+    public void setMetQualificationLabel(String metQualificationLabel) {
+        this.metQualificationLabel = metQualificationLabel;
     }
 
     // exposed for promotion status page

@@ -7,7 +7,7 @@
   <f:block>
     <div style="padding-left: 0.5em">
       <label class="attach-previous">${%Approval Parameters}</label>
-      <f:hetero-list name="parameters" hasHeader="true"
+      <f:hetero-list name="parameterDefinitions" hasHeader="true"
 		     descriptors="${h.getParameterDescriptors()}" items="${instance.parameterDefinitions}"
 		     addCaption="${%Add Parameter}" />
     </div>

@@ -11,6 +11,7 @@ import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.plugins.promoted_builds.Status;
 import net.sf.json.JSONObject;
 import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.util.ArrayList;
@@ -33,8 +34,9 @@ public class UpstreamPromotionCondition extends PromotionCondition {
      */
     private final String requiredPromotionNames;
 
-    public UpstreamPromotionCondition(String requiredPromotionNames) {
-        this.requiredPromotionNames = requiredPromotionNames;
+    @DataBoundConstructor
+    public UpstreamPromotionCondition(String promotions) {
+        this.requiredPromotionNames = promotions;
     }
 
     public String getRequiredPromotionNames() {
@@ -87,7 +89,7 @@ public class UpstreamPromotionCondition extends PromotionCondition {
     }
 
     @Extension
-    @Symbol("upstreamPromotion")
+    @Symbol("upstream")
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
@@ -95,11 +97,6 @@ public class UpstreamPromotionCondition extends PromotionCondition {
 
         public String getDisplayName() {
             return Messages.UpstreamPromotionCondition_DisplayName();
-        }
-
-        public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return new UpstreamPromotionCondition(
-                    formData.getString("promotions"));
         }
     }
 }

@@ -40,9 +40,7 @@ import net.sf.json.JSONObject;
 
 import org.acegisecurity.GrantedAuthority;
 import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.export.Exported;
 
 /**
@@ -60,6 +58,7 @@ public class ManualCondition extends PromotionCondition {
      */
     public final static String MISSING_USER_ID_DISPLAY_STRING = "N/A";
 
+    @DataBoundConstructor
     public ManualCondition() {
     }
 
@@ -71,12 +70,18 @@ public class ManualCondition extends PromotionCondition {
         return users;
     }
 
+    @DataBoundSetter
     public void setUsers(String users) {
         this.users = users;
     }
     
     public List<ParameterDefinition> getParameterDefinitions() {
         return parameterDefinitions;
+    }
+
+    @DataBoundSetter
+    public void setParameterDefinitions(List<ParameterDefinition> parameterDefinitions) {
+        this.parameterDefinitions = parameterDefinitions;
     }
 
     /**
@@ -307,14 +312,6 @@ public class ManualCondition extends PromotionCondition {
 
         public String getDisplayName() {
             return Messages.ManualCondition_DisplayName();
-        }
-
-        @Override
-        public ManualCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            ManualCondition instance = new ManualCondition();
-            instance.users = formData.getString("users");
-            instance.parameterDefinitions = Descriptor.newInstancesFromHeteroList(req, formData, "parameters", ParameterDefinition.all());
-            return instance;
         }
     }
 }

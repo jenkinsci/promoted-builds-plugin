@@ -1,16 +1,23 @@
 freeStyleJob('Definition with automatically generated DSL') {
     properties {
         promotions {
-            promotion {
-                name = 'Foo Promotion'
+            promotion('Foo promotion') {
                 conditions {
                     groovy {
                         script {
-                            script 'false'
-                            sandbox false
+                            script('false')
+                            sandbox(false)
                         }
-                        unmetQualificationLabel ''
-                        metQualificationLabel ''
+                    }
+                    manual {
+                        users('authenticated')
+                        parameterDefinitions {
+                            stringParameterDefinition {
+                                name('FOO')
+                                defaultValue('BAR')
+                                description('description')
+                            }
+                        }
                     }
                 }
                 actions {

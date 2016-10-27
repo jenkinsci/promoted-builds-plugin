@@ -31,6 +31,7 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -65,6 +66,7 @@ public class DownstreamPassCondition extends PromotionCondition {
         this(jobs, false);
     }
 
+    @DataBoundConstructor
     public DownstreamPassCondition(String jobs, boolean evenIfUnstable) {
         this.jobs = jobs;
         this.evenIfUnstable = evenIfUnstable;
@@ -209,11 +211,6 @@ public class DownstreamPassCondition extends PromotionCondition {
 
         public String getDisplayName() {
             return Messages.DownstreamPassCondition_DisplayName();
-        }
-
-        public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return new DownstreamPassCondition(
-                    formData.getString("jobs"), formData.getBoolean("evenIfUnstable"));
         }
 
         public AutoCompletionCandidates doAutoCompleteJobs(@QueryParameter String value, @AncestorInPath AbstractProject project) {

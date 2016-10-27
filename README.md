@@ -124,7 +124,58 @@ These were retrieved from github [here][2].
 *   `PROMOTED_USER_NAME` - the user who triggered the promotion
 *   `PROMOTED_JOB_FULL_NAME` - the full name of the promoted job
 
-## Job DSL support
+## Job DSL with Automatically Generated DSL support
+
+```groovy
+freeStyleJob(String jobName) {
+  properties {
+    promotions {
+      promotion(String promotionName) {
+        icon(String icon)
+        label(String labelExpression)
+        conditions {
+          selfPromotion {
+            evenIfUnstable(boolean flag) // required
+          }
+          parameterizedSelfPromotion {
+            evenIfUnstable(boolean flag) // required
+            parameterName(String name) // required
+            parameterValue(String value) // required
+          }
+          release {} // FIXME check compatibility with plugin
+          downstream {
+            jobs(String jobNames) // required
+            evenIfUnstable(boolean flag) // required
+          }
+          upstream {
+            promotions(String promotionNames) // required
+          }
+          manual {
+            users(String users)
+            parameterDefinitions {
+              // See [BuildParametersContext](https://jenkinsci.github.io/job-dsl-plugin/#path/job-parameters)
+            }
+          }
+          groovy {
+            script {
+              script(String groovyScriptContent) // required
+            }
+            metQualificationLabel(String label)
+            unmetQualificationLabel(String label)
+          }
+          // + any other detected PromotionCondition in your Jenkins installation
+        }
+        actions {
+          // See [StepContext](https://jenkinsci.github.io/job-dsl-plugin/#path/job-steps)
+        }
+        configure {
+          // [Advanced XML manipulation](https://github.com/jenkinsci/job-dsl-plugin/wiki/The-Configure-Block)
+        }
+      }
+    }
+  }
+}
+```
 
 ```groovy  
 freeStyleJob(String jobname) {
@@ -161,8 +212,7 @@ See [StepContext](https://jenkinsci.github.io/job-dsl-plugin/#path/job-steps) in
 freeStyleJob('test-job') {
   properties{
     promotions {
-      promotion {
-        name('Development')
+      promotion('Development') {
         conditions {
           manual('testuser')
         }
