@@ -45,6 +45,7 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
     private static final Logger LOGGER = Logger.getLogger(PromotionsExtensionPoint.class.getName());
 
     private static final String PROMOTION_PROCESSES = "promotionProcesses";
+
     /* package */ static final XStream XSTREAM = new XStream2();
 
     /**

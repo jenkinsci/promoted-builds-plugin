@@ -17,7 +17,10 @@ import com.thoughtworks.xstream.mapper.Mapper;
  * XStream Converter for the ManualCondition for the Job DSL Plugin
  * 
  * @author Dennis Schulte
+ * @deprecated Should be avoided in favor of Automatically Generated DSL. Relying on name collision does not scale
+ *  well.
  */
+@Deprecated
 public class ManualConditionConverter extends ReflectionConverter {
 
     public ManualConditionConverter(Mapper mapper, ReflectionProvider reflectionProvider) {
