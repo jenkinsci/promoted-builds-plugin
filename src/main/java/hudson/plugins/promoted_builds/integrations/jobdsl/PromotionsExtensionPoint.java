@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import com.google.common.base.Function;
 import com.thoughtworks.xstream.XStream;
 
-import groovy.lang.Closure;
 import hudson.Extension;
 import hudson.model.AbstractItem;
 import hudson.model.Item;
@@ -22,7 +21,6 @@ import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.util.IOUtils;
 import hudson.util.XStream2;
 import javaposse.jobdsl.dsl.Context;
-import javaposse.jobdsl.dsl.DslContext;
 import javaposse.jobdsl.dsl.JobManagement;
 import javaposse.jobdsl.dsl.helpers.properties.PropertiesContext;
 import javaposse.jobdsl.plugin.ContextExtensionPoint;
@@ -44,9 +42,22 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
 
     private static final Logger LOGGER = Logger.getLogger(PromotionsExtensionPoint.class.getName());
 
+    /** key to store List&lt;PromotionContext&gt; */
     private static final String PROMOTION_PROCESSES = "promotionProcesses";
 
     /* package */ static final XStream XSTREAM = new XStream2();
+
+    /** Note: this function does not handle null input */
+    private static final Function<PromotionContext, String> PROMOTION_CONTEXT_NAME_EXTRACTOR = new Function<PromotionContext, String>() {
+        @Override
+        public String apply(@Nullable PromotionContext input) {
+            if (input != null) {
+                return input.getName();
+            }
+            // throw NPE as documented by Function#apply(Object)
+            throw new NullPointerException("Unexpected null element");
+        }
+    };
 
     /**
      * Workaround to {@link DslEnvironment#createContext(Class)} not being able to propagate
@@ -66,19 +77,12 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
     public Object promotions(Runnable closure, DslEnvironment dslEnvironment) throws FormException, IOException {
         FakeContext fakeContext = dslEnvironment.createContext(FakeContext.class);
         PromotionsContext context = new PromotionsContext(fakeContext.jobManagement, fakeContext.item, dslEnvironment);
+
         executeInContext(closure, context);
-        final Set<String> promotionNames = new HashSet<String>(transform(context.promotionContexts, new Function<PromotionContext, String>() {
-            @Override
-            public String apply(@Nullable PromotionContext input) {
-                if (input != null) {
-                    return input.getName();
-                }
-                // throw NPE as documented by Function#apply(Object)
-                throw new NullPointerException("PromotionsContext.promotionContexts is not expected to contain null elements");
-            }
-        }));
-        JobPropertyImpl jobProperty = new JobPropertyImpl(promotionNames);
-        dslEnvironment.put(PROMOTION_PROCESSES, context.promotionContexts);
+
+        final List<PromotionContext> promotionContexts = context.promotionContexts;
+        JobPropertyImpl jobProperty = new JobPropertyImpl(getPromotionNames(promotionContexts));
+        dslEnvironment.put(PROMOTION_PROCESSES, promotionContexts);
         return jobProperty;
     }
 
@@ -90,7 +94,7 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
     @SuppressWarnings("unchecked")
     public void notifyItemCreated(Item item, DslEnvironment dslEnvironment, boolean update) {
         LOGGER.log(Level.INFO, String.format("Creating promotions for %s", item.getName()));
-        Collection<PromotionContext>  promotionProcesses = (Collection<PromotionContext>) dslEnvironment.get(PROMOTION_PROCESSES);
+        Collection<PromotionContext>  promotionProcesses = (List<PromotionContext>) dslEnvironment.get(PROMOTION_PROCESSES);
         if (promotionProcesses != null && promotionProcesses.size() > 0) {
             for (PromotionContext promotionProcess : promotionProcesses) {
                 final String name = promotionProcess.getName();
@@ -132,7 +136,7 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
     public void notifyItemUpdated(Item item, DslEnvironment dslEnvironment) {
         LOGGER.log(Level.INFO, String.format("Updating promotions for %s", item.getName()));
         @SuppressWarnings("unchecked")
-        Set<String> newPromotions = (Set<String>) dslEnvironment.get("processNames");
+        Set<String> newPromotions = getPromotionNames((List<PromotionContext>) dslEnvironment.get(PROMOTION_PROCESSES));
         File dir = new File(item.getRootDir(), "promotions/");
         boolean update = false;
         // Delete removed promotions
@@ -153,6 +157,10 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
 
         // Delegate to create-method
         this.notifyItemCreated(item, dslEnvironment, update);
+    }
+
+    private Set<String> getPromotionNames(final List<PromotionContext> contexts) {
+        return new HashSet<>(transform(contexts, PROMOTION_CONTEXT_NAME_EXTRACTOR));
     }
 
 }
