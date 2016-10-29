@@ -5,6 +5,7 @@ import groovy.lang.Closure;
 import javaposse.jobdsl.dsl.Item;
 import javaposse.jobdsl.dsl.JobManagement;
 import javaposse.jobdsl.dsl.MemoryJobManagement;
+import javaposse.jobdsl.dsl.helpers.BuildParametersContext;
 import javaposse.jobdsl.dsl.helpers.step.StepContext;
 import javaposse.jobdsl.dsl.jobs.FreeStyleJob;
 import javaposse.jobdsl.plugin.DslEnvironmentImpl;
@@ -12,6 +13,10 @@ import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
 import org.jvnet.hudson.test.For;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -23,11 +28,14 @@ public class PromotionContextTest {
 
     private JobManagement jobManagement;
     private Item item;
+    /** Tested class */
+    private PromotionContext promotionContext;
 
     @Before
     public void setUp() throws Exception {
         jobManagement = new MemoryJobManagement();
         item = new FreeStyleJob(jobManagement);
+        promotionContext = new PromotionContext(jobManagement, item, new DslEnvironmentImpl(jobManagement, item));
     }
 
     /**
@@ -37,8 +45,6 @@ public class PromotionContextTest {
      */
     @Test
     public void shouldGenerateValidXml() throws Exception {
-
-        final PromotionContext promotionContext = new PromotionContext(jobManagement, item, new DslEnvironmentImpl(jobManagement, item));
 
         final Object thisObject = new Object();
         final Object owner = new Object();
@@ -65,34 +71,45 @@ public class PromotionContextTest {
         assertThat(xml, xmlHelper.newStringXPathMatcher("name(/*)", "hudson.plugins.promoted__builds.PromotionProcess"));
         assertThat(xml, xmlHelper.newStringXPathMatcher("/*/assignedLabel[1]/text()", "!master && linux"));
         assertThat(xml, xmlHelper.newStringXPathMatcher("/*/icon/text()", "yellow-unicorn"));
+    }
 
-//        // Given
-//        JobDslPromotionProcess pp = new JobDslPromotionProcess();
-//        //Conditions
-//        List<Node> conditions = new ArrayList<Node>();
-//        conditions.add(XSTREAM.toXML(new SelfPromotionCondition(true)));
-//        //BuildSteps
-//        List<Node> buildSteps = new ArrayList<Node>();
-//        Node node = new Node(null, "hudson.tasks.Shell");
-//        Node subNode = new Node(node, "command");
-//        buildSteps.add(node);
-//        subNode.setValue("echo hello;");
-//        Node node2 = new Node(null, "hudson.plugins.parameterizedtrigger.TriggerBuilder");
-//        Node subNode2 = new Node(node2, "configs");
-//        Node subsubNode2 = new Node(subNode2, "hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig");
-//        Node subsubsubNode2a = new Node(subsubNode2, "projects");
-//        subsubsubNode2a.setValue("anoter-project");
-//        Node subsubsubNode2b = new Node(subsubNode2, "condition");
-//        subsubsubNode2b.setValue("ALWAYS");
-//        buildSteps.add(node2);
-//        pp.setBuildSteps(buildSteps);
-//        pp.setConditions(conditions);
-//        // When
-//        XSTREAM.registerConverter(new JobDslPromotionProcessConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
-//        String xml = XSTREAM.toXML(pp);
-//        // Then
-//        assertNotNull(xml);
-//        System.out.println(xml);
-//        assertTrue(StringUtils.contains(xml, "hudson.plugins.promoted__builds.PromotionProcess"));
+    /**
+     * @see ReleasePromotionCondition
+     */
+    @Test
+    @For(ReleasePromotionCondition.class)
+    public void testReleaseConditionNameClashTrick() {
+        promotionContext.conditions(new Closure(new Object()) {
+            public void doCall() throws Exception {
+                ((ConditionsContext) getDelegate()).releaseBuild();
+            }
+        });
+        assertThat(promotionContext.getXml(), xmlHelper.newStringXPathMatcher("count(/*/conditions[1]/hudson.plugins.release.promotion.ReleasePromotionCondition)", "1"));
+        assertThat(promotionContext.getXml(), xmlHelper.newStringXPathMatcher("count(/*/conditions[1]/hudson.plugins.promoted__builds.integrations.jobdsl.ReleasePromotionCondition)", "0"));
+    }
+
+    @Test
+    @For({ManualConditionConverter.class, JobDslManualCondition.class})
+    public void testManualConditionCustomSerializationTrick() {
+        final String expectedUsers = "expectedUsers";
+        final String expectedParameterName = "PARAMETER_NAME";
+        promotionContext.conditions(new Closure(new Object()) {
+            @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked")
+            public void doCall() throws Exception {
+                ((ConditionsContext) getDelegate()).manual(expectedUsers, new Closure(this) {
+                    @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked")
+                    public void doCall() throws Exception {
+                        ((ConditionsContext.ParametersContext) getDelegate()).parameters(new Closure(this) {
+                            @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked")
+                            public void doCall() throws Exception {
+                                ((BuildParametersContext) getDelegate()).stringParam(expectedParameterName);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        assertThat(promotionContext.getXml(), xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/users[1]/text()", expectedUsers));
+        assertThat(promotionContext.getXml(), xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/parameterDefinitions[1]/hudson.model.StringParameterDefinition[1]/name[1]/text()", expectedParameterName));
     }
 }

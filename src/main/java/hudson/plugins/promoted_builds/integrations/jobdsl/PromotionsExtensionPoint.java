@@ -46,9 +46,10 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
     private static final String PROMOTION_PROCESSES = "promotionProcesses";
 
     /** TODO Should be removed once fully migrated to Automatically Generated DSL */
-    /* package */ static final XStream XSTREAM = new XStream2();
+    /* package */ static final XStream XSTREAM;
 
-    {
+    static {
+        XSTREAM = new XStream2();
         XSTREAM.registerConverter(new ManualConditionConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
     }
 
