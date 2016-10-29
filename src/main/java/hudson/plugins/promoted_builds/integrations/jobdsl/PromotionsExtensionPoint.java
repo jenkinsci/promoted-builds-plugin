@@ -45,7 +45,12 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
     /** key to store List&lt;PromotionContext&gt; */
     private static final String PROMOTION_PROCESSES = "promotionProcesses";
 
+    /** TODO Should be removed once fully migrated to Automatically Generated DSL */
     /* package */ static final XStream XSTREAM = new XStream2();
+
+    {
+        XSTREAM.registerConverter(new ManualConditionConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
+    }
 
     /** Note: this function does not handle null input */
     private static final Function<PromotionContext, String> PROMOTION_CONTEXT_NAME_EXTRACTOR = new Function<PromotionContext, String>() {
