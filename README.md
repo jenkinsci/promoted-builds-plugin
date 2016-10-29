@@ -219,6 +219,11 @@ freeStyleJob('test-job') {
         actions {
           shell('echo hello;')
         }
+        configure { node ->
+          node / buildSteps / 'foo.bar.CustomAction' {
+            customAttribute 'customValue'
+          }
+        }
       }
     }
   }
