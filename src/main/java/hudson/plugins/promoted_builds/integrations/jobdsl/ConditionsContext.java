@@ -51,8 +51,8 @@ public class ConditionsContext extends AbstractExtensibleContext {
 
 	final List<Node> conditionNodes = new ArrayList<>();
 
-	public ConditionsContext(JobManagement jobManagement, Item item, DslEnvironment dslEnvironment) {
-		super(jobManagement, item);
+	public ConditionsContext(JobManagement jobManagement, DslEnvironment dslEnvironment) {
+		super(jobManagement, null);
 		this.dslEnvironment = dslEnvironment;
 		this.metaClass = InvokerHelper.getMetaClass(this.getClass());
 	}

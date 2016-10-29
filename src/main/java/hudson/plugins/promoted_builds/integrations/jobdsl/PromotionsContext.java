@@ -14,14 +14,12 @@ import groovy.lang.Closure;
 import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 
 public class PromotionsContext extends AbstractContext {
-    protected final Item item;
     protected final DslEnvironment dslEnvironment;
 
     protected List<PromotionContext> promotionContexts = new ArrayList<PromotionContext>();
 
-    public PromotionsContext(JobManagement jobManagement, Item item, DslEnvironment dslEnvironment) {
+    public PromotionsContext(JobManagement jobManagement, DslEnvironment dslEnvironment) {
         super(jobManagement);
-        this.item = item;
         this.dslEnvironment = dslEnvironment;
     }
 
@@ -30,7 +28,7 @@ public class PromotionsContext extends AbstractContext {
     }
 
     public void promotion(String name, @DslContext(PromotionContext.class) Closure promotionClosure) {
-        PromotionContext promotionContext = new PromotionContext(jobManagement, item, dslEnvironment);
+        PromotionContext promotionContext = new PromotionContext(jobManagement, dslEnvironment);
         promotionContext.setName(name);
         executeInContext(promotionClosure, promotionContext);
         Preconditions.checkNotNull(promotionContext.getName(), "promotion name cannot be null");

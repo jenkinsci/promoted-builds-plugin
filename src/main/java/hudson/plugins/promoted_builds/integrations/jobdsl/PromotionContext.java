@@ -29,8 +29,6 @@ class PromotionContext extends Item {
     // never persist the MetaClass
     private transient MetaClass metaClass;
 
-    /** the owning project */
-    protected final Item parentItem;
     protected final DslEnvironment dslEnvironment;
 
     private List<Node> actions = new ArrayList<Node>();
@@ -76,10 +74,9 @@ class PromotionContext extends Item {
         }, "call"));
     }
 
-    public PromotionContext(JobManagement jobManagement, Item item, DslEnvironment dslEnvironment) {
+    public PromotionContext(JobManagement jobManagement, DslEnvironment dslEnvironment) {
         super(jobManagement);
         this.metaClass = InvokerHelper.getMetaClass(this.getClass());
-        this.parentItem = item;
         this.dslEnvironment = dslEnvironment;
     }
 
@@ -88,7 +85,7 @@ class PromotionContext extends Item {
      */
     public void conditions(@DslContext(ConditionsContext.class) Closure<?> conditionClosure) {
         // delegate to ConditionsContext
-        final ConditionsContext conditionContext = new ConditionsContext(jobManagement, parentItem, dslEnvironment);
+        final ConditionsContext conditionContext = new ConditionsContext(jobManagement, dslEnvironment);
         executeInContext(conditionClosure, conditionContext);
         configure(new MethodClosure(new Object() {
             @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically called by MethodClosure")

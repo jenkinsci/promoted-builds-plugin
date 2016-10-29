@@ -70,18 +70,16 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
      */
     public static class FakeContext implements Context {
         private final JobManagement jobManagement;
-        private final javaposse.jobdsl.dsl.Item item;
 
-        public FakeContext(JobManagement jobManagement, javaposse.jobdsl.dsl.Item item) {
+        public FakeContext(JobManagement jobManagement) {
             this.jobManagement = jobManagement;
-            this.item = item;
         }
     }
 
     @DslExtensionMethod(context = PropertiesContext.class)
     public Object promotions(Runnable closure, DslEnvironment dslEnvironment) throws FormException, IOException {
         FakeContext fakeContext = dslEnvironment.createContext(FakeContext.class);
-        PromotionsContext context = new PromotionsContext(fakeContext.jobManagement, fakeContext.item, dslEnvironment);
+        PromotionsContext context = new PromotionsContext(fakeContext.jobManagement, dslEnvironment);
 
         executeInContext(closure, context);
 
