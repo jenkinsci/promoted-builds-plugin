@@ -3,7 +3,7 @@ freeStyleJob('configure-block-test') {
         promotions {
             promotion('PromotionName') {
                 configure { node ->
-                    node / buildSteps / 'foo.bar.CustomAction' {
+                    node / buildSteps / 'foo.bar.CustomAction'(foo: 'bar') {
                         customAttribute 'customValue'
                     }
                 }

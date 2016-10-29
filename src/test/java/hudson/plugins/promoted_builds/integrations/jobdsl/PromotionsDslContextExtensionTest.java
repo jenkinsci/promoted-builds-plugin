@@ -7,34 +7,99 @@ import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.TopLevelItem;
 import hudson.model.queue.QueueTaskFuture;
-
-import java.io.File;
-import java.nio.charset.Charset;
-
-import javaposse.jobdsl.plugin.RemovedJobAction;
 import javaposse.jobdsl.plugin.ExecuteDslScripts;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
+import javaposse.jobdsl.plugin.RemovedJobAction;
 import org.apache.commons.io.FileUtils;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.For;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
 
-import static org.junit.Assert.assertEquals;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @For(PromotionsExtensionPoint.class)
 public class PromotionsDslContextExtensionTest {
 
+    private class XPathMatcher extends BaseMatcher<File> {
+        private final String xPathExpression;
+        private final String expectedValue;
+
+        /**
+         * @param xPathExpression Never null. Will be evaluated as {@link XPathConstants#STRING}
+         * @param expectedValue Never null. Will be compared ({@link #equals(Object)}) to the result of the XPath expression evaluation
+         */
+        public XPathMatcher(String xPathExpression, String expectedValue) {
+            this.xPathExpression = xPathExpression;
+            this.expectedValue = expectedValue;
+        }
+
+        @Override
+        public boolean matches(Object item) {
+            try {
+                final File file = (File) item;
+
+                final DocumentBuilder documentBuilder = documentBuilderFactory.get().newDocumentBuilder();
+
+                final XPath xPath = xPathFactory.get().newXPath();
+                final XPathExpression xPathExpression = xPath.compile(this.xPathExpression);
+
+                final Document document = documentBuilder.parse(file);
+                final Object evaluate = xPathExpression.evaluate(document, XPathConstants.STRING);
+
+                return expectedValue.equals(evaluate);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("Result of ").appendValue(xPathExpression).appendText(" XPath evaluation equals to ").appendValue(expectedValue);
+        }
+
+        @Override
+        public void describeMismatch(Object item, Description description) {
+            try {
+                description.appendText("Parsed XML (").appendValue(item).appendText(") is ").appendValue(Files.toString((File) item, Charset.forName("UTF-8")));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
+
+    // DocumentBuilderFactory is not thread-safe
+    private ThreadLocal<DocumentBuilderFactory> documentBuilderFactory = new ThreadLocal<DocumentBuilderFactory>() {
+        @Override
+        protected DocumentBuilderFactory initialValue() {
+            return DocumentBuilderFactory.newInstance();
+        }
+    };
+
+    // XPathFactory is not thread-safe
+    private ThreadLocal<XPathFactory> xPathFactory = new ThreadLocal<XPathFactory>() {
+        @Override
+        protected XPathFactory initialValue() {
+            return XPathFactory.newInstance();
+        }
+    };
 
     @Test
     public void testShouldGenerateTheDefindedJob() throws Exception {
@@ -108,32 +173,12 @@ public class PromotionsDslContextExtensionTest {
         // Then
         j.assertBuildStatusSuccess(scheduleBuild2);
 
-        final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        final XPath xPath = XPathFactory.newInstance().newXPath();
-
         final Item createdJob = j.jenkins.getItemByFullName("configure-block-test");
         final File promotionConfig = new File(createdJob.getRootDir(), "promotions/PromotionName/config.xml");
-        final String xml = Files.toString(promotionConfig, Charset.forName("UTF-8"));
 
-        final Document document = documentBuilder.parse(promotionConfig);
-
-        final String expression = "/*/buildSteps[1]/foo.bar.CustomAction[1]/customAttribute[1]/text()";
-        final Object evaluate = xPath.compile(expression).evaluate(document, XPathConstants.STRING);
-
-        assertEquals("Should contain customization but is \n" + xml, "customValue", evaluate);
-
-        // does not run because of version inconsistencies in classpath: java.lang.NoSuchMethodError: org.hamcrest.Matcher.describeMismatch(Ljava/lang/Object;Lorg/hamcrest/Description;)V
-//        Assert.assertThat(document, new BaseMatcher<Document>() {
-//            @Override
-//            public boolean matches(Object item) {
-//                return false;
-//            }
-//
-//            @Override
-//            public void describeTo(Description description) {
-//                description.appendText("Contain the expected XML customization");
-//            }
-//        });
+        assertTrue("Configuration file must exist", promotionConfig.exists());
+        assertThat(promotionConfig, new XPathMatcher("/*/buildSteps[1]/foo.bar.CustomAction[1]/customAttribute[1]/text()", "customValue"));
+        assertThat(promotionConfig, new XPathMatcher("/*/buildSteps[1]/foo.bar.CustomAction[1]/@foo", "bar"));
     }
+
 }
