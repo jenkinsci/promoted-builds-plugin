@@ -21,23 +21,32 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.For;
+import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.w3c.dom.*;
 
-public class PromotionsDslContextExtensionTest extends HudsonTestCase {
+import static org.junit.Assert.assertEquals;
+
+@For(PromotionsExtensionPoint.class)
+public class PromotionsDslContextExtensionTest {
+
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
 
     @Test
     public void testShouldGenerateTheDefindedJob() throws Exception {
         // Given
         String dsl = FileUtils.readFileToString(new File("src/test/resources/example-dsl.groovy"));
-        FreeStyleProject seedJob = createFreeStyleProject();
+        FreeStyleProject seedJob = j.createFreeStyleProject();
         seedJob.getBuildersList().add(
                 new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
         // When        
         QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
         // Then
-        assertBuildStatusSuccess(scheduleBuild2);
+        j.assertBuildStatusSuccess(scheduleBuild2);
     }
     
 
@@ -45,63 +54,65 @@ public class PromotionsDslContextExtensionTest extends HudsonTestCase {
     public void testShouldGenerateTheDefindedComplexJob() throws Exception {
         // Given
         String dsl = FileUtils.readFileToString(new File("src/test/resources/complex-example-dsl.groovy"));
-        FreeStyleProject seedJob = createFreeStyleProject();
+        FreeStyleProject seedJob = j.createFreeStyleProject();
         seedJob.getBuildersList().add(
                 new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
         // When        
         QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
         // Then
-        assertBuildStatusSuccess(scheduleBuild2);
+        j.assertBuildStatusSuccess(scheduleBuild2);
     }
 
     @Test
     public void testShouldGenerateTheCopyArtifactsJob() throws Exception {
         // Given
         String dsl = FileUtils.readFileToString(new File("src/test/resources/copyartifacts-example-dsl.groovy"));
-        FreeStyleProject seedJob = createFreeStyleProject();
+        FreeStyleProject seedJob = j.createFreeStyleProject();
         seedJob.getBuildersList().add(
                 new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
         // When
         QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
         // Then (unstable b/c we aren't including the CopyArtifacts dependency)
-        assertBuildStatus(Result.UNSTABLE, scheduleBuild2.get());
+        j.assertBuildStatus(Result.UNSTABLE, scheduleBuild2.get());
 
-        TopLevelItem item = jenkins.getItem("copy-artifacts-test");
+        TopLevelItem item = j.jenkins.getItem("copy-artifacts-test");
         File config = new File(item.getRootDir(), "promotions/Development/config.xml");
         String content = Files.toString(config, Charset.forName("UTF-8"));
         assert content.contains("<selector class='hudson.plugins.copyartifact.SpecificBuildSelector'>");
     }
 
     @Test
+    @Issue("JENKINS-39342")
     public void testAutomaticallyGeneratedDsl() throws Exception {
         // Given
         String dsl = FileUtils.readFileToString(new File("src/test/resources/automatically-generated-dsl.groovy"));
-        FreeStyleProject seedJob = createFreeStyleProject();
+        FreeStyleProject seedJob = j.createFreeStyleProject();
         seedJob.getBuildersList().add(
             new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
         // When
         QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
         // Then
-        assertBuildStatusSuccess(scheduleBuild2);
+        j.assertBuildStatusSuccess(scheduleBuild2);
     }
 
     @Test
+    @Issue("JENKINS-34982")
     public void testConfigureBlock() throws Exception {
         // Given
         String dsl = FileUtils.readFileToString(new File("src/test/resources/configure-block-dsl.groovy"));
-        FreeStyleProject seedJob = createFreeStyleProject();
+        FreeStyleProject seedJob = j.createFreeStyleProject();
         seedJob.getBuildersList().add(
             new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
         // When
         QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
         // Then
-        assertBuildStatusSuccess(scheduleBuild2);
+        j.assertBuildStatusSuccess(scheduleBuild2);
 
         final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         final XPath xPath = XPathFactory.newInstance().newXPath();
 
-        final Item createdJob = jenkins.getItemByFullName("configure-block-test");
+        final Item createdJob = j.jenkins.getItemByFullName("configure-block-test");
         final File promotionConfig = new File(createdJob.getRootDir(), "promotions/PromotionName/config.xml");
         final String xml = Files.toString(promotionConfig, Charset.forName("UTF-8"));
 
