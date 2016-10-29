@@ -25,33 +25,6 @@ public class PromotionsContext extends AbstractContext {
         this.dslEnvironment = dslEnvironment;
     }
 
-    //TODO: What does this Javadoc mean? Just marked as pre
-    /**
-     * See the examples below.
-     * 
-     * PromotionNodes:
-     * <pre>
-     * 1. &lt;string&gt;dev&lt;/string&gt;
-     * 2. &lt;string&gt;test&lt;/string&gt;
-     * 
-     * AND
-     * 
-     * Sub PromotionNode for every promotion:
-     * 1. &lt;project&gt;
-     * &lt;name&gt;dev&lt;/name&gt;
-     * .
-     * .
-     * .
-     * &lt;/project&gt;
-     * 2. &lt;project&gt;
-     * &lt;name&gt;test&lt;/name&gt;
-     * .
-     * .
-     * .
-     * &lt;/project&gt;
-     * </pre>
-     * @param promotionClosure Input closure
-     */
     public void promotion(@DslContext(PromotionContext.class) Closure<?> promotionClosure) {
         promotion(null, promotionClosure);
     }
