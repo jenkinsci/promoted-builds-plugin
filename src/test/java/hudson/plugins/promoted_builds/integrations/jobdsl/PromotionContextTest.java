@@ -38,7 +38,7 @@ public class PromotionContextTest {
     @Test
     public void shouldGenerateValidXml() throws Exception {
 
-        final PromotionContext promotionContext = new PromotionContext(jobManagement, item, new DslEnvironmentImpl(jobManagement, item));
+        final PromotionContext promotionContext = new PromotionContext(jobManagement, new DslEnvironmentImpl(jobManagement, item));
 
         final Object thisObject = new Object();
         final Object owner = new Object();
