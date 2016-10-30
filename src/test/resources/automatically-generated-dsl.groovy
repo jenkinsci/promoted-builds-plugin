@@ -1,16 +1,19 @@
-freeStyleJob('Definition with automatically generated DSL') {
+freeStyleJob('Job-from-automatically-generated-DSL') {
+    label('windows')
     properties {
         promotions {
-            promotion('Foo promotion') {
+            promotion('Development') {
+                icon("star-red")
+                label('slave1')
                 conditions {
                     groovy {
                         script {
-                            script('false')
+                            script('''return true == !false;''')
                             sandbox(false)
                         }
                     }
                     manual {
-                        users('authenticated')
+                        users('testuser')
                         parameterDefinitions {
                             stringParameterDefinition {
                                 name('FOO')
@@ -19,19 +22,84 @@ freeStyleJob('Definition with automatically generated DSL') {
                             }
                         }
                     }
+                    selfPromotion {
+                        evenIfUnstable(false) // required
+                    }
+                    parameterizedSelfPromotion {
+                        evenIfUnstable(false) // required
+                        parameterName('name') // required
+                        parameterValue('value') // required
+                    }
+                    downstreamPass {
+                        jobs('downstream') // required
+                        evenIfUnstable(false) // required
+                    }
+                    upstream {
+                        promotions('upstream') // required
+                    }
                 }
                 actions {
-                    downstreamParameterized {
-                        trigger("deploy-application") {
-                            block {
-                                buildStepFailure('FAILURE')
-                                failure('FAILURE')
-                                unstable('UNSTABLE')
+                    shell {
+                        command('echo foo')
+                    }
+                    triggerBuilder {
+                        configs {
+                            blockableBuildTriggerConfig {
+                                projects('projects')
+                                block {
+                                    buildStepFailureThreshold('FAILURE')
+                                    unstableThreshold('FAILURE')
+                                    failureThreshold('FAILURE')
+                                }
+                                configFactories {}
+                                configs {
+                                    predefinedBuildParameters {
+                                        properties('''\
+                                            ENVIRONMENT=dev-server
+                                            APPLICATION_NAME=${PROMOTED_JOB_FULL_NAME}
+                                            BUILD_ID=${PROMOTED_NUMBER}
+                                            '''.stripIndent())
+                                    }
+                                }
                             }
-                            parameters {
-                                predefinedProp("ENVIRONMENT","dev-server")
-                                predefinedProp("APPLICATION_NAME", "\${PROMOTED_JOB_FULL_NAME}")
-                                predefinedProp("BUILD_ID","\${PROMOTED_NUMBER}")
+                        }
+                    }
+                }
+            }
+            promotion('test') {
+                icon("star-yellow")
+                label('slave2')
+                conditions {
+                    manual {
+                        users('testuser')
+                    }
+                    upstream {
+                        promotions("Development")
+                    }
+                }
+                actions {
+                    shell {
+                        command('echo bar')
+                    }
+                    triggerBuilder {
+                        configs {
+                            blockableBuildTriggerConfig {
+                                projects('projects')
+                                block {
+                                    buildStepFailureThreshold('FAILURE')
+                                    unstableThreshold('FAILURE')
+                                    failureThreshold('FAILURE')
+                                }
+                                configFactories {}
+                                configs {
+                                    predefinedBuildParameters {
+                                        properties('''\
+                                            ENVIRONMENT=test-server
+                                            APPLICATION_NAME=${PROMOTED_JOB_FULL_NAME}
+                                            BUILD_ID=${PROMOTED_NUMBER}
+                                            '''.stripIndent())
+                                    }
+                                }
                             }
                         }
                     }
