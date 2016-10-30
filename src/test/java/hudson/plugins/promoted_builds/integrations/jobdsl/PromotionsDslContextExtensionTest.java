@@ -18,7 +18,8 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 @For(PromotionsExtensionPoint.class)
@@ -114,12 +115,14 @@ public class PromotionsDslContextExtensionTest {
         final String devPromotionConfig = generatedJob.getProperty(JobPropertyImpl.class).getItem(promotion1).getConfigFile().asString();
         final String testPromotionConfig = generatedJob.getProperty(JobPropertyImpl.class).getItem(promotion2).getConfigFile().asString();
 
-        assertThat(devPromotionConfig, xmlHelper.newStringXPathMatcher("count(/*/buildSteps/hudson.plugins.parameterizedtrigger.TriggerBuilder)", "1"));
-        assertThat(devPromotionConfig, xmlHelper.newStringXPathMatcher("count(/*/buildSteps/hudson.plugins.parameterizedtrigger.TriggerBuilder[1]/descendant::hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig)", "1"));
-        assertThat(devPromotionConfig, xmlHelper.newStringXPathMatcher("/*/assignedLabel[1]/text()", "slave1"));
+        assertThat(devPromotionConfig, allOf(
+            xmlHelper.newStringXPathMatcher("count(/*/buildSteps/hudson.plugins.parameterizedtrigger.TriggerBuilder)", "1"),
+            xmlHelper.newStringXPathMatcher("count(/*/buildSteps/hudson.plugins.parameterizedtrigger.TriggerBuilder[1]/descendant::hudson.plugins.parameterizedtrigger.BlockableBuildTriggerConfig)", "1"),
+            xmlHelper.newStringXPathMatcher("/*/assignedLabel[1]/text()", "slave1")
+        ));
         assertThat(testPromotionConfig, xmlHelper.newStringXPathMatcher("/*/assignedLabel[1]/text()", "slave2"));
 
-        assertEquals(generatedJob.getProperty(JobPropertyImpl.class).getItem(promotion1).getAssignedLabelString(), "slave1");
+        assertThat(generatedJob.getProperty(JobPropertyImpl.class).getItem(promotion1).getAssignedLabelString(), equalTo("slave1"));
     }
 
     @Test
@@ -138,8 +141,10 @@ public class PromotionsDslContextExtensionTest {
         final FreeStyleProject createdJob = j.jenkins.getItemByFullName("configure-block-test", FreeStyleProject.class);
         final String promotionConfig = createdJob.getProperty(JobPropertyImpl.class).getItem("PromotionName").getConfigFile().asString();
 
-        assertThat(promotionConfig, xmlHelper.newStringXPathMatcher("/*/buildSteps[1]/foo.bar.CustomAction[1]/customAttribute[1]/text()", "customValue"));
-        assertThat(promotionConfig, xmlHelper.newStringXPathMatcher("/*/buildSteps[1]/foo.bar.CustomAction[1]/@foo", "bar"));
+        assertThat(promotionConfig, allOf(
+            xmlHelper.newStringXPathMatcher("/*/buildSteps[1]/foo.bar.CustomAction[1]/customAttribute[1]/text()", "customValue"),
+            xmlHelper.newStringXPathMatcher("/*/buildSteps[1]/foo.bar.CustomAction[1]/@foo", "bar")
+        ));
     }
 
 }

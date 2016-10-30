@@ -9,16 +9,14 @@ import javaposse.jobdsl.dsl.helpers.BuildParametersContext;
 import javaposse.jobdsl.dsl.helpers.step.StepContext;
 import javaposse.jobdsl.dsl.jobs.FreeStyleJob;
 import javaposse.jobdsl.plugin.DslEnvironmentImpl;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
 import org.jvnet.hudson.test.For;
-import org.xml.sax.SAXException;
+import org.mockito.Mockito;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 @For(PromotionContext.class)
@@ -49,28 +47,41 @@ public class PromotionContextTest {
         final Object thisObject = new Object();
         final Object owner = new Object();
 
+        // For making sure the assertions put in inner classes get executed
+        final Runnable conditionsChecker = Mockito.mock(Runnable.class);
+        final Runnable actionsChecker = Mockito.mock(Runnable.class);
+
         promotionContext.label("!master && linux");
         promotionContext.icon("yellow-unicorn");
         promotionContext.conditions(new Closure(owner, thisObject) {
             @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked")
             public void doCall() {
-                assertThat("Wrong conditions() closure delegate", getDelegate(), new IsInstanceOf(ConditionsContext.class));
+                conditionsChecker.run();
+                assertThat("Wrong conditions() closure delegate", getDelegate(), instanceOf(ConditionsContext.class));
                 // When using {@link MemoryJobManagement}, extensions are not available so we cannot test automatically generated DSL usage
             }
         });
         promotionContext.actions(new Closure(owner, thisObject) {
             @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked")
             public void doCall() {
-                assertThat("Wrong actions() closure delegate", getDelegate(), new IsInstanceOf(StepContext.class));
+                actionsChecker.run();
+                assertThat("Wrong actions() closure delegate", getDelegate(), instanceOf(StepContext.class));
             }
         });
 
+        Mockito.verify(conditionsChecker).run();
+        Mockito.verify(actionsChecker).run();
+
         final String xml = promotionContext.getXml();
 
-        assertNotNull(xml);
-        assertThat(xml, xmlHelper.newStringXPathMatcher("name(/*)", "hudson.plugins.promoted__builds.PromotionProcess"));
-        assertThat(xml, xmlHelper.newStringXPathMatcher("/*/assignedLabel[1]/text()", "!master && linux"));
-        assertThat(xml, xmlHelper.newStringXPathMatcher("/*/icon/text()", "yellow-unicorn"));
+        assertThat(xml, allOf(
+            notNullValue(),
+            xmlHelper.newStringXPathMatcher("name(/*)", "hudson.plugins.promoted__builds.PromotionProcess"),
+            xmlHelper.newStringXPathMatcher("/*/assignedLabel[1]/text()", "!master && linux"),
+            xmlHelper.newStringXPathMatcher("/*/icon/text()", "yellow-unicorn")
+        ));
+
+        Mockito.validateMockitoUsage();
     }
 
     /**
@@ -84,8 +95,10 @@ public class PromotionContextTest {
                 ((ConditionsContext) getDelegate()).releaseBuild();
             }
         });
-        assertThat(promotionContext.getXml(), xmlHelper.newStringXPathMatcher("count(/*/conditions[1]/hudson.plugins.release.promotion.ReleasePromotionCondition)", "1"));
-        assertThat(promotionContext.getXml(), xmlHelper.newStringXPathMatcher("count(/*/conditions[1]/hudson.plugins.promoted__builds.integrations.jobdsl.ReleasePromotionCondition)", "0"));
+        assertThat(promotionContext.getXml(), allOf(
+            xmlHelper.newStringXPathMatcher("count(/*/conditions[1]/hudson.plugins.release.promotion.ReleasePromotionCondition)", "1"),
+            xmlHelper.newStringXPathMatcher("count(/*/conditions[1]/hudson.plugins.promoted__builds.integrations.jobdsl.ReleasePromotionCondition)", "0")
+        ));
     }
 
     @Test
@@ -109,7 +122,9 @@ public class PromotionContextTest {
                 });
             }
         });
-        assertThat(promotionContext.getXml(), xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/users[1]/text()", expectedUsers));
-        assertThat(promotionContext.getXml(), xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/parameterDefinitions[1]/hudson.model.StringParameterDefinition[1]/name[1]/text()", expectedParameterName));
+        assertThat(promotionContext.getXml(), allOf(
+            xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/users[1]/text()", expectedUsers),
+            xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/parameterDefinitions[1]/hudson.model.StringParameterDefinition[1]/name[1]/text()", expectedParameterName)
+        ));
     }
 }
