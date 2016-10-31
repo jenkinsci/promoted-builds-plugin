@@ -20,8 +20,6 @@ import hudson.model.Descriptor.FormException;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.util.IOUtils;
 import hudson.util.XStream2;
-import javaposse.jobdsl.dsl.Context;
-import javaposse.jobdsl.dsl.JobManagement;
 import javaposse.jobdsl.dsl.helpers.properties.PropertiesContext;
 import javaposse.jobdsl.plugin.ContextExtensionPoint;
 import javaposse.jobdsl.plugin.DslEnvironment;
@@ -65,22 +63,9 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
         }
     };
 
-    /**
-     * Workaround to {@link DslEnvironment#createContext(Class)} not being able to propagate
-     * the DslEnvironment and not exposing the {@link JobManagement} instance for inner contexts
-     */
-    public static class FakeContext implements Context {
-        private final JobManagement jobManagement;
-
-        public FakeContext(JobManagement jobManagement) {
-            this.jobManagement = jobManagement;
-        }
-    }
-
     @DslExtensionMethod(context = PropertiesContext.class)
     public Object promotions(Runnable closure, DslEnvironment dslEnvironment) throws FormException, IOException {
-        FakeContext fakeContext = dslEnvironment.createContext(FakeContext.class);
-        PromotionsContext context = new PromotionsContext(fakeContext.jobManagement, dslEnvironment);
+        PromotionsContext context = dslEnvironment.createContext(PromotionsContext.class);
 
         executeInContext(closure, context);
 

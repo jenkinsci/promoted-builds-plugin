@@ -28,7 +28,7 @@ public class PromotionsContext extends AbstractContext {
     }
 
     public void promotion(String name, @DslContext(PromotionContext.class) Closure promotionClosure) {
-        PromotionContext promotionContext = new PromotionContext(jobManagement, dslEnvironment);
+        PromotionContext promotionContext = dslEnvironment.createContext(PromotionContext.class);
         promotionContext.setName(name);
         executeInContext(promotionClosure, promotionContext);
         Preconditions.checkNotNull(promotionContext.getName(), "promotion name cannot be null");
