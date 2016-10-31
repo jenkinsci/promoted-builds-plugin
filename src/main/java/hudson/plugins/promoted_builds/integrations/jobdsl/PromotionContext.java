@@ -24,7 +24,7 @@ import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
  * some helper classes such as the {@link MethodClosure} adapter used for methods accepting Closure arguments. This may
  * result in some unusual OOP constructs.
  */
-class PromotionContext extends Item {
+public class PromotionContext extends Item {
 
     // never persist the MetaClass
     private transient MetaClass metaClass;
@@ -85,7 +85,7 @@ class PromotionContext extends Item {
      */
     public void conditions(@DslContext(ConditionsContext.class) Closure<?> conditionClosure) {
         // delegate to ConditionsContext
-        final ConditionsContext conditionContext = new ConditionsContext(jobManagement, dslEnvironment);
+        final ConditionsContext conditionContext = dslEnvironment.createContext(ConditionsContext.class);
         executeInContext(conditionClosure, conditionContext);
         configure(new MethodClosure(new Object() {
             @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically called by MethodClosure")
