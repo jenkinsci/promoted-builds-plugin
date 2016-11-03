@@ -1,15 +1,25 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
+import com.thoughtworks.xstream.XStreamException;
 import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
 import groovy.lang.MetaClass;
 import groovy.util.Node;
+import groovy.util.NodeBuilder;
+import groovy.util.NodeList;
 import groovy.util.XmlParser;
+import hudson.model.Items;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
+import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.plugins.promoted_builds.conditions.ParameterizedSelfPromotionCondition;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.plugins.promoted_builds.conditions.UpstreamPromotionCondition;
-import javaposse.jobdsl.dsl.*;
+import javaposse.jobdsl.dsl.AbstractExtensibleContext;
+import javaposse.jobdsl.dsl.Context;
+import javaposse.jobdsl.dsl.ContextType;
+import javaposse.jobdsl.dsl.DslContext;
+import javaposse.jobdsl.dsl.JobManagement;
 import javaposse.jobdsl.dsl.helpers.BuildParametersContext;
 import javaposse.jobdsl.plugin.DslEnvironment;
 import org.codehaus.groovy.runtime.InvokerHelper;
@@ -23,167 +33,189 @@ import java.util.Map;
 
 import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 
+/**
+ * Context for defining {@link PromotionCondition promotion conditions}.
+ */
 @ContextType("hudson.plugins.promoted_builds.PromotionCondition")
 public class ConditionsContext extends AbstractExtensibleContext {
 
 	/**
-	 * Used as a migration path toward Automatically Generated DSL usage
+	 * @see #manual(String, Closure)
 	 */
-	public class ParametersContext implements Context {
+	public class ManualPromotionContext implements Context {
 		Map<String, Node> buildParameterNodes;
 
-		public void parameters(@DslContext(BuildParametersContext.class) Closure<?> closure) {
+		public void parameters(@DslContext(BuildParametersContext.class) @DelegatesTo(BuildParametersContext.class) Closure<?> closure) {
 			final BuildParametersContext context = dslEnvironment.createContext(BuildParametersContext.class);
 			executeInContext(closure, context);
 			this.buildParameterNodes = context.getBuildParameterNodes();
 		}
 	}
 
-	private static final String DEPRECATION_MODEL_SERIALIZATION_WARNING = "Automatically Generated DSL should be used";
-
+	/**
+	 * Used to integrate this Java class with Groovy meta protocol
+	 *
+	 * @see groovy.lang.GroovyObjectSupport#metaClass
+	 */
 	// never persist the MetaClass
 	private transient MetaClass metaClass;
 
-	/** Used for migration purpose to retain compatibility with previous implementation. */
+	/**
+	 * Used to generate the required memory node structure from an XML representation.
+	 */
 	private transient XmlParser xmlParser;
 
 	protected final DslEnvironment dslEnvironment;
 
 	final List<Node> conditionNodes = new ArrayList<>();
 
+	/**
+	 * @param jobManagement Never {@code null}
+	 * @param dslEnvironment Never {@code null}
+	 */
 	public ConditionsContext(JobManagement jobManagement, DslEnvironment dslEnvironment) {
 		super(jobManagement, null);
 		this.dslEnvironment = dslEnvironment;
+		// see groovy.lang.GroovyObjectSupport
 		this.metaClass = InvokerHelper.getMetaClass(this.getClass());
 	}
 
 	/**
-	 * @param evenIfUnstable
-	 * @deprecated Use Automatically Generated DSL for syntax consistency
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
+	 * @param evenIfUnstable {@code true} if unstable builds also triggers promotion
+	 * @see SelfPromotionCondition
+	 * @throws ParserConfigurationException Issue with parser configuration
+	 * @throws SAXException Any SAX exception, possibly wrapping another exception.
+	 * @throws IOException An IO exception from the parser, possibly from a byte stream or character stream supplied by the application.
 	 */
-	@Deprecated
-	public void selfPromotion(Boolean evenIfUnstable) throws ParserConfigurationException, SAXException, IOException {
-		jobManagement.logDeprecationWarning(DEPRECATION_MODEL_SERIALIZATION_WARNING);
+	public void selfPromotion(boolean evenIfUnstable) throws ParserConfigurationException, SAXException, IOException {
 		addCondition(new SelfPromotionCondition(evenIfUnstable));
 	}
 
 	/**
-	 * @param evenIfUnstable
-	 * @param parameterName
-	 * @param parameterValue
-	 * @deprecated Use Automatically Generated DSL for syntax consistency
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
+	 * @param evenIfUnstable {@code true} if unstable builds also triggers promotion
+	 * @param parameterName Never {@code null}
+	 * @param parameterValue Never {@code null}
+	 * @see ParameterizedSelfPromotionCondition
+	 * @throws ParserConfigurationException Issue with parser configuration
+	 * @throws SAXException Any SAX exception, possibly wrapping another exception.
+	 * @throws IOException An IO exception from the parser, possibly from a byte stream or character stream supplied by the application.
 	 */
-	@Deprecated
-	public void parameterizedSelfPromotion(Boolean evenIfUnstable, String parameterName, String parameterValue) throws ParserConfigurationException, SAXException, IOException {
-		jobManagement.logDeprecationWarning(DEPRECATION_MODEL_SERIALIZATION_WARNING);
+	public void parameterizedSelfPromotion(boolean evenIfUnstable, String parameterName, String parameterValue) throws ParserConfigurationException, SAXException, IOException {
 		addCondition(new ParameterizedSelfPromotionCondition(evenIfUnstable, parameterName, parameterValue));
 	}
 
 	/**
-	 * @param users
-	 * @deprecated Use Automatically Generated DSL for syntax consistency
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
-	 * @see #manual(String, Closure)
+	 * @param users Comma-separated list of users/groups allowed to trigger the promotion
+	 * @see ManualCondition
+	 * @throws ParserConfigurationException Issue with parser configuration
+	 * @throws SAXException Any SAX exception, possibly wrapping another exception.
+	 * @throws IOException An IO exception from the parser, possibly from a byte stream or character stream supplied by the application.
 	 */
-	@Deprecated
 	public void manual(String users) throws ParserConfigurationException, SAXException, IOException {
-		jobManagement.logDeprecationWarning(DEPRECATION_MODEL_SERIALIZATION_WARNING);
-		doManual(users, null);
+		manual(users, null);
 	}
 
 	/**
-	 * @param users
-	 * @param parametersClosure
-	 * @deprecated Use Automatically Generated DSL for syntax consistency
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
+	 * @param users Comma-separated list of users/groups allowed to trigger the promotion
+	 * @param manualPromotionClosure Extra options, see {@link ManualPromotionContext}. Can be {@code null}.
+	 * @see ManualCondition
+	 * @throws ParserConfigurationException Issue with parser configuration
+	 * @throws SAXException Any SAX exception, possibly wrapping another exception.
+	 * @throws IOException An IO exception from the parser, possibly from a byte stream or character stream supplied by the application.
 	 */
-	@Deprecated
-	public void manual(String users, @DslContext(ParametersContext.class) Closure<?> parametersClosure) throws ParserConfigurationException, SAXException, IOException {
-		jobManagement.logDeprecationWarning(DEPRECATION_MODEL_SERIALIZATION_WARNING);
-		doManual(users, parametersClosure);
-	}
-
-	private void doManual(String users, @DslContext(ParametersContext.class) Closure<?> parametersClosure) throws ParserConfigurationException, SAXException, IOException {
-		JobDslManualCondition condition = new JobDslManualCondition();
+	public void manual(String users, @DslContext(ManualPromotionContext.class) @DelegatesTo(ManualPromotionContext.class) Closure<?> manualPromotionClosure) throws ParserConfigurationException, SAXException, IOException {
+		final ManualCondition condition = new ManualCondition();
 		condition.setUsers(users);
-		if (parametersClosure != null) {
-			final ParametersContext context = new ParametersContext();
-			executeInContext(parametersClosure, context);
-			condition.setParameterDefinitionNodes(context.buildParameterNodes.values());
+		final Node conditionNode = toNode(condition);
+		if (manualPromotionClosure != null) {
+			// parameters closure specified, need to execute it and integrate its result with our instance
+			final ManualPromotionContext context = new ManualPromotionContext();
+			executeInContext(manualPromotionClosure, context);
+			final Node parameterDefinitionsNode = (Node) ((NodeList) conditionNode.get("parameterDefinitions")).get(0);
+			for (final Node node: context.buildParameterNodes.values()) {
+				parameterDefinitionsNode.append(node);
+			}
+			addExtensionNode(conditionNode);
+		} else {
+			addCondition(condition);
 		}
-		addCondition(condition);
 	}
 
 	/**
-	 * @deprecated Use Automatically Generated DSL for syntax consistency
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
+	 * Add the <a href="https://wiki.jenkins-ci.org/display/JENKINS/Release+Plugin">release plugin</a> promotion
+	 * condition
+	 *
+	 * @throws ParserConfigurationException Issue with parser configuration
+	 * @throws SAXException Any SAX exception, possibly wrapping another exception.
+	 * @throws IOException An IO exception from the parser, possibly from a byte stream or character stream supplied by the application.
 	 */
-	@Deprecated
 	public void releaseBuild() throws ParserConfigurationException, SAXException, IOException {
-		jobManagement.logDeprecationWarning(DEPRECATION_MODEL_SERIALIZATION_WARNING);
-		addCondition(new ReleasePromotionCondition());
+		jobManagement.requirePlugin("release");
+		addExtensionNode((Node) new NodeBuilder().invokeMethod("hudson.plugins.release.promotion.ReleasePromotionCondition", null));
 	}
 
 	/**
-	 * @param parametersClosure
+	 * @param parametersClosure Ignored
 	 * @deprecated This method doesn't achieve anything (was wrongly exposed at a higher context). See
-	 * 	{@link ParametersContext#parameters(Closure)}.
+	 * 	{@link ManualPromotionContext#parameters(Closure)}.
 	 */
 	@Deprecated
 	public void parameters(Closure<?> parametersClosure) {
-		jobManagement.logDeprecationWarning("This method doesn't achieve anything");
+		// As of job-dsl:1.53, it will automatically add " is deprecated" to the end of the message so adding a "This
+		// method doesn't achieve anything" message would not make much sense -&gt; "This method doesn't achieve
+		// anything is deprecated"
+		jobManagement.logDeprecationWarning();
 	}
 
 	/**
-	 * @param evenIfUnstable
-	 * @param jobs
-	 * @deprecated Use Automatically Generated DSL for syntax consistency
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
+	 * @param evenIfUnstable {@code true} if unstable builds also triggers promotion
+	 * @param jobs Downstream jobs to monitor for success
+	 * @see DownstreamPassCondition
+	 * @throws ParserConfigurationException Issue with parser configuration
+	 * @throws SAXException Any SAX exception, possibly wrapping another exception.
+	 * @throws IOException An IO exception from the parser, possibly from a byte stream or character stream supplied by the application.
 	 */
-	@Deprecated
-	public void downstream(Boolean evenIfUnstable, String jobs) throws ParserConfigurationException, SAXException, IOException {
-		jobManagement.logDeprecationWarning(DEPRECATION_MODEL_SERIALIZATION_WARNING);
+	public void downstream(boolean evenIfUnstable, String jobs) throws ParserConfigurationException, SAXException, IOException {
 		addCondition(new DownstreamPassCondition(jobs, evenIfUnstable));
 	}
 
 	/**
-	 * @param promotionNames
-	 * @deprecated Use Automatically Generated DSL for syntax consistency
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
+	 * @param promotionNames Comma-separated list of promotions
+	 * @see UpstreamPromotionCondition
+	 * @throws ParserConfigurationException Issue with parser configuration
+	 * @throws SAXException Any SAX exception, possibly wrapping another exception.
+	 * @throws IOException An IO exception from the parser, possibly from a byte stream or character stream supplied by the application.
 	 */
-	@Deprecated
 	public void upstream(String promotionNames) throws ParserConfigurationException, SAXException, IOException {
-		jobManagement.logDeprecationWarning(DEPRECATION_MODEL_SERIALIZATION_WARNING);
 		addCondition(new UpstreamPromotionCondition(promotionNames));
 	}
 
 	/**
-	 * Helper method to migrate from domain object serialization to direct XML generation from Automatically Generated
-	 * DSL
-	 *
-	 * @param condition
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
+	 * Add a condition to be generated.
+	 * @param condition Condition to include in resulting promotion. Never {@code null}.
+	 * @throws ParserConfigurationException Issue with parser configuration
+	 * @throws SAXException Any SAX exception, possibly wrapping another exception.
+	 * @throws IOException An IO exception from the parser, possibly from a byte stream or character stream supplied by the application.
 	 */
 	protected void addCondition(PromotionCondition condition) throws ParserConfigurationException, SAXException, IOException {
+		final Node node = toNode(condition);
+		addExtensionNode(node);
+	}
+
+	/**
+	 * Convert an object into a {@link Node}.
+	 * @param object Never {@code null}
+	 * @return Converted object, mainly for use with {@link #addExtensionNode(Node)}. Never {@code null}
+	 * @throws ParserConfigurationException Issue with parser configuration
+	 * @throws SAXException Any SAX exception, possibly wrapping another exception.
+	 * @throws IOException An IO exception from the parser, possibly from a byte stream or character stream supplied by the application.
+	 * @throws XStreamException if the object cannot be serialized
+	 */
+	protected Node toNode(Object object) throws ParserConfigurationException, SAXException, IOException, XStreamException {
 		if (xmlParser == null) {
 			xmlParser = new XmlParser();
 		}
-		addExtensionNode(xmlParser.parseText(PromotionsExtensionPoint.XSTREAM.toXML(condition)));
+		return xmlParser.parseText(Items.XSTREAM2.toXML(object));
 	}
 
 	@Override
@@ -191,21 +223,33 @@ public class ConditionsContext extends AbstractExtensibleContext {
 		conditionNodes.add(node);
 	}
 
+	/*
+	 * @see groovy.lang.GroovyObjectSupport#getProperty(String)
+	 */
 	@Override
 	public Object getProperty(String property) {
 		return getMetaClass().getProperty(this, property);
 	}
 
+	/*
+	 * @see groovy.lang.GroovyObjectSupport#setProperty(String, Object)
+	 */
 	@Override
 	public void setProperty(String property, Object newValue) {
 		getMetaClass().setProperty(this, property, newValue);
 	}
 
+	/*
+	 * @see groovy.lang.GroovyObjectSupport#invokeMethod(String, Object)
+	 */
 	@Override
 	public Object invokeMethod(String name, Object args) {
 		return getMetaClass().invokeMethod(this, name, args);
 	}
 
+	/*
+	 * @see groovy.lang.GroovyObjectSupport#getMetaClass()
+	 */
 	@Override
 	public MetaClass getMetaClass() {
 		if (metaClass == null) {
@@ -214,6 +258,9 @@ public class ConditionsContext extends AbstractExtensibleContext {
 		return metaClass;
 	}
 
+	/*
+	 * @see groovy.lang.GroovyObjectSupport#setMetaClass(MetaClass)
+	 */
 	@Override
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;

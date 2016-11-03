@@ -36,7 +36,7 @@ public class PromotionContext extends Item {
     /**
      *
      * @param name
-     * @deprecated Use {@link #setName(String)} or {@link PromotionsContext#promotion(String, Closure)} for consistency
+     * @deprecated Use {@link PromotionsContext#promotion(String, Closure)} for consistency
      *  with Job DSL core API such as {@link javaposse.jobdsl.dsl.DslFactory#freeStyleJob(String, Closure)}.
      */
     @Deprecated

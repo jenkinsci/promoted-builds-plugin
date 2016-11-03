@@ -67,12 +67,6 @@ freeStyleJob('test-job-complex') {
                 }
             }
             promotion {
-                name('releaseBuild')
-                conditions {
-                    releaseBuild()
-                }
-            }
-            promotion {
                 name('downstream')
                 conditions {
                     downstream(false, 'jobName')

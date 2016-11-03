@@ -106,16 +106,19 @@ public class PromotionContextTest {
     public void testManualConditionCustomSerializationTrick() {
         final String expectedUsers = "expectedUsers";
         final String expectedParameterName = "PARAMETER_NAME";
+        final String expectedParameter2Name = "UNICORNS";
+        final String expectedParameter2Description = "ELEPHANTS";
         promotionContext.conditions(new Closure(new Object()) {
             @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked")
             public void doCall() throws Exception {
                 ((ConditionsContext) getDelegate()).manual(expectedUsers, new Closure(this) {
                     @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked")
                     public void doCall() throws Exception {
-                        ((ConditionsContext.ParametersContext) getDelegate()).parameters(new Closure(this) {
+                        ((ConditionsContext.ManualPromotionContext) getDelegate()).parameters(new Closure(this) {
                             @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked")
                             public void doCall() throws Exception {
                                 ((BuildParametersContext) getDelegate()).stringParam(expectedParameterName);
+                                ((BuildParametersContext) getDelegate()).booleanParam(expectedParameter2Name, true, expectedParameter2Description);
                             }
                         });
                     }
@@ -124,7 +127,10 @@ public class PromotionContextTest {
         });
         assertThat(promotionContext.getXml(), allOf(
             xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/users[1]/text()", expectedUsers),
-            xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/parameterDefinitions[1]/hudson.model.StringParameterDefinition[1]/name[1]/text()", expectedParameterName)
+            xmlHelper.newStringXPathMatcher("count(/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/parameterDefinitions[1]/*)", "2"),
+            xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/parameterDefinitions[1]/hudson.model.StringParameterDefinition[1]/name[1]/text()", expectedParameterName),
+            xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/parameterDefinitions[1]/hudson.model.BooleanParameterDefinition[1]/name[1]/text()", expectedParameter2Name),
+            xmlHelper.newStringXPathMatcher("/*/conditions[1]/hudson.plugins.promoted__builds.conditions.ManualCondition[1]/parameterDefinitions[1]/hudson.model.BooleanParameterDefinition[1]/description[1]/text()", expectedParameter2Description)
         ));
     }
 }

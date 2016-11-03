@@ -17,9 +17,12 @@ import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.describedAs;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 @For(PromotionsExtensionPoint.class)
@@ -94,6 +97,27 @@ public class PromotionsDslContextExtensionTest {
         final FreeStyleProject item = j.jenkins.getItemByFullName("copy-artifacts-test", FreeStyleProject.class);
         final String config = item.getProperty(JobPropertyImpl.class).getItem("Development").getConfigFile().asString();
         assertThat(config, xmlHelper.newStringXPathMatcher("count(//selector[@class = 'hudson.plugins.copyartifact.SpecificBuildSelector'])", "1"));
+    }
+
+    @Test
+    public void testReleaseCondition() throws Exception {
+        final FreeStyleProject seedJob = j.createFreeStyleProject();
+        final ExecuteDslScripts dslBuilder = new ExecuteDslScripts();
+        dslBuilder.setScriptText("freeStyleJob('foo') { properties { promotions { promotion('Deploy on release') { conditions { releaseBuild() } } } } }");
+        seedJob.getBuildersList().add(dslBuilder);
+
+        final QueueTaskFuture<FreeStyleBuild> schedule = seedJob.scheduleBuild2(0);
+
+        // release plugin is marked as required but is not in classpath, so expect JobDSL to mark build as UNSTABLE
+        j.assertBuildStatus(Result.UNSTABLE, schedule.get(1, TimeUnit.MINUTES));
+        final FreeStyleProject producedJob = j.jenkins.getItemByFullName("foo", FreeStyleProject.class);
+        assertThat(producedJob, describedAs("Produced project found", notNullValue()));
+        final JobPropertyImpl promotedBuildsProperty = producedJob.getProperty(JobPropertyImpl.class);
+        assertThat(promotedBuildsProperty, describedAs("promoted-builds property found", notNullValue()));
+        final PromotionProcess promotion = promotedBuildsProperty.getItem("Deploy on release");
+        assertThat(promotion, describedAs("PromotionProcess found", notNullValue()));
+        final String xml = promotion.getConfigFile().asString();
+        assertThat(xml, xmlHelper.newStringXPathMatcher("count(/*/conditions[1]/hudson.plugins.release.promotion.ReleasePromotionCondition)", "1"));
     }
 
     @Test
