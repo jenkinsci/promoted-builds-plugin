@@ -3,20 +3,18 @@ package hudson.plugins.promoted_builds.integrations.jobdsl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
-import groovy.lang.MetaClass;
 import groovy.util.Node;
 import groovy.util.NodeBuilder;
 import groovy.util.NodeList;
 import groovy.util.XmlNodePrinter;
 import groovy.util.XmlParser;
 import hudson.plugins.promoted_builds.PromotionProcess;
-import javaposse.jobdsl.dsl.AbstractContext;
+import javaposse.jobdsl.dsl.Context;
 import javaposse.jobdsl.dsl.ContextHelper;
 import javaposse.jobdsl.dsl.DslContext;
 import javaposse.jobdsl.dsl.JobManagement;
 import javaposse.jobdsl.dsl.helpers.step.StepContext;
 import javaposse.jobdsl.plugin.DslEnvironment;
-import org.codehaus.groovy.runtime.InvokerHelper;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,16 +31,19 @@ import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 /**
  * Context for defining a {@link hudson.plugins.promoted_builds.PromotionProcess}
  */
-public class PromotionContext extends AbstractContext {
+public class PromotionContext implements Context {
 
-    // never persist the MetaClass
-    private transient MetaClass metaClass;
-
+    protected final JobManagement jobManagement;
     protected final DslEnvironment dslEnvironment;
 
     protected String name;
 
     private final List<Closure> configureBlocks = new ArrayList<>();
+
+    public PromotionContext(final JobManagement jobManagement, final DslEnvironment dslEnvironment) {
+        this.jobManagement = jobManagement;
+        this.dslEnvironment = dslEnvironment;
+    }
 
     public String getName() {
         return name;
@@ -103,12 +104,6 @@ public class PromotionContext extends AbstractContext {
                 }
             }
         });
-    }
-
-    public PromotionContext(JobManagement jobManagement, DslEnvironment dslEnvironment) {
-        super(jobManagement);
-        this.metaClass = InvokerHelper.getMetaClass(this.getClass());
-        this.dslEnvironment = dslEnvironment;
     }
 
     /**
@@ -176,31 +171,4 @@ public class PromotionContext extends AbstractContext {
         }
     }
 
-    @Override
-    public Object getProperty(String property) {
-        return getMetaClass().getProperty(this, property);
-    }
-
-    @Override
-    public void setProperty(String property, Object newValue) {
-        getMetaClass().setProperty(this, property, newValue);
-    }
-
-    @Override
-    public Object invokeMethod(String name, Object args) {
-        return getMetaClass().invokeMethod(this, name, args);
-    }
-
-    @Override
-    public MetaClass getMetaClass() {
-        if (metaClass == null) {
-            metaClass = InvokerHelper.getMetaClass(getClass());
-        }
-        return metaClass;
-    }
-
-    @Override
-    public void setMetaClass(MetaClass metaClass) {
-        this.metaClass = metaClass;
-    }
 }
