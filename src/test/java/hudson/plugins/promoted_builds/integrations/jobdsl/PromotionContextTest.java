@@ -88,6 +88,10 @@ public class PromotionContextTest {
         Mockito.validateMockitoUsage();
     }
 
+    /**
+     * @throws Throwable
+     * @see ConditionsContext#releaseBuild()
+     */
     @Test
     public void testReleaseCondition() throws Throwable {
         promotionContext.conditions(new Closure(new Object()) {
@@ -101,8 +105,12 @@ public class PromotionContextTest {
         ));
     }
 
+    /**
+     * @throws Throwable
+     * @see ConditionsContext#manual(String, Closure)
+     */
     @Test
-    public void testManualConditionCustomSerializationTrick() throws Throwable {
+    public void testManualCondition() throws Throwable {
         final String expectedUsers = "expectedUsers";
         final String expectedParameterName = "PARAMETER_NAME";
         final String expectedParameter2Name = "UNICORNS";
