@@ -40,8 +40,6 @@ public class PromotionContext extends AbstractContext {
 
     protected final DslEnvironment dslEnvironment;
 
-    private List<Node> actions = new ArrayList<>();
-
     protected String name;
 
     private final List<Closure> configureBlocks = new ArrayList<>();
@@ -141,7 +139,6 @@ public class PromotionContext extends AbstractContext {
         // delegate to StepContext
         final StepContext stepContext = dslEnvironment.createContext(StepContext.class);
         executeInContext(actionsClosure, stepContext);
-        actions.addAll(stepContext.getStepNodes());
         configure(new Closure(this) {
             @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked when the closure gets called")
             protected void doCall(Node promotion) {
