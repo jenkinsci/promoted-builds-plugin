@@ -78,8 +78,13 @@ public class PromotionContext extends Item {
         configure(new Closure(this) {
             @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked when the closure gets called")
             protected void doCall(Node promotion) {
-                final Node node = (Node) new NodeBuilder().invokeMethod("assignedLabel", labelExpression);
-                promotion.append(node);
+                final NodeList assignedLabels = (NodeList) promotion.get("assignedLabel");
+                if (assignedLabels.size() == 0) {
+                    final Node node = (Node) new NodeBuilder().invokeMethod("assignedLabel", labelExpression);
+                    promotion.append(node);
+                } else {
+                    ((Node) assignedLabels.get(0)).setValue(labelExpression);
+                }
             }
         });
     }

@@ -51,7 +51,9 @@ public class PromotionContextTest {
         final Runnable conditionsChecker = Mockito.mock(Runnable.class);
         final Runnable actionsChecker = Mockito.mock(Runnable.class);
 
+        promotionContext.label("label to be replaced");
         promotionContext.label("!master && linux");
+        promotionContext.icon("icon to be replaced");
         promotionContext.icon("yellow-unicorn");
         promotionContext.conditions(new Closure(owner, thisObject) {
             @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked")
@@ -77,7 +79,9 @@ public class PromotionContextTest {
         assertThat(xml, allOf(
             notNullValue(),
             xmlHelper.newStringXPathMatcher("name(/*)", "hudson.plugins.promoted__builds.PromotionProcess"),
+            xmlHelper.newStringXPathMatcher("count(/*/assignedLabel)", "1"),
             xmlHelper.newStringXPathMatcher("/*/assignedLabel[1]/text()", "!master && linux"),
+            xmlHelper.newStringXPathMatcher("count(/*/icon)", "1"),
             xmlHelper.newStringXPathMatcher("/*/icon/text()", "yellow-unicorn")
         ));
 
