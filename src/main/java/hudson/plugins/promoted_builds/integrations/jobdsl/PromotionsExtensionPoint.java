@@ -41,8 +41,8 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
 
     private static final Logger LOGGER = Logger.getLogger(PromotionsExtensionPoint.class.getName());
 
-    /** key to store List&lt;PromotionContext&gt; */
-    private static final String PROMOTION_PROCESSES = "promotionProcesses";
+    /** key to store List&lt;PromotionContext&gt; in {@link DslEnvironment} */
+    private static final String PROMOTION_PROCESSES = PromotionsExtensionPoint.class.getName() + ".promotionProcesses";
 
     /** Note: this function does not handle null input */
     private static final Function<PromotionContext, String> PROMOTION_CONTEXT_NAME_EXTRACTOR = new Function<PromotionContext, String>() {
