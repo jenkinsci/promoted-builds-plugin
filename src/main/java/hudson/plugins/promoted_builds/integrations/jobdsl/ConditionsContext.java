@@ -3,7 +3,8 @@ package hudson.plugins.promoted_builds.integrations.jobdsl;
 import com.thoughtworks.xstream.XStreamException;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
-import groovy.lang.MetaClass;
+import groovy.lang.GroovyObjectSupport;
+import groovy.lang.MissingMethodException;
 import groovy.util.Node;
 import groovy.util.NodeBuilder;
 import groovy.util.NodeList;
@@ -15,14 +16,13 @@ import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.plugins.promoted_builds.conditions.ParameterizedSelfPromotionCondition;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.plugins.promoted_builds.conditions.UpstreamPromotionCondition;
-import javaposse.jobdsl.dsl.AbstractExtensibleContext;
 import javaposse.jobdsl.dsl.Context;
 import javaposse.jobdsl.dsl.ContextType;
 import javaposse.jobdsl.dsl.DslContext;
+import javaposse.jobdsl.dsl.ExtensibleContext;
 import javaposse.jobdsl.dsl.JobManagement;
 import javaposse.jobdsl.dsl.helpers.BuildParametersContext;
 import javaposse.jobdsl.plugin.DslEnvironment;
-import org.codehaus.groovy.runtime.InvokerHelper;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -37,7 +37,7 @@ import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
  * Context for defining {@link PromotionCondition promotion conditions}.
  */
 @ContextType("hudson.plugins.promoted_builds.PromotionCondition")
-public class ConditionsContext extends AbstractExtensibleContext {
+public class ConditionsContext extends GroovyObjectSupport implements ExtensibleContext {
 
     /**
      * @see #manual(String, Closure)
@@ -53,18 +53,11 @@ public class ConditionsContext extends AbstractExtensibleContext {
     }
 
     /**
-     * Used to integrate this Java class with Groovy meta protocol
-     *
-     * @see groovy.lang.GroovyObjectSupport#metaClass
-     */
-    // never persist the MetaClass
-    private transient MetaClass metaClass;
-
-    /**
      * Used to generate the required memory node structure from an XML representation.
      */
     private transient XmlParser xmlParser;
 
+    protected final JobManagement jobManagement;
     protected final DslEnvironment dslEnvironment;
 
     final List<Node> conditionNodes = new ArrayList<>();
@@ -74,10 +67,8 @@ public class ConditionsContext extends AbstractExtensibleContext {
      * @param dslEnvironment Never {@code null}
      */
     public ConditionsContext(JobManagement jobManagement, DslEnvironment dslEnvironment) {
-        super(jobManagement, null);
+        this.jobManagement = jobManagement;
         this.dslEnvironment = dslEnvironment;
-        // see groovy.lang.GroovyObjectSupport
-        this.metaClass = InvokerHelper.getMetaClass(this.getClass());
     }
 
     /**
@@ -218,51 +209,29 @@ public class ConditionsContext extends AbstractExtensibleContext {
         return xmlParser.parseText(Items.XSTREAM2.toXML(object));
     }
 
-    @Override
     protected void addExtensionNode(Node node) {
         conditionNodes.add(node);
     }
 
-    /*
-     * @see groovy.lang.GroovyObjectSupport#getProperty(String)
+    /**
+     * Leverage the Groovy Meta Object Protocol to implement dynamic DSL if deemed valid by Job DSL extension lookup
+     *
+     * @param name DSL method name to lookup
+     * @param args Arguments
+     * @return {@code null}
+     * @throws Throwable If unable to find a matching extension for the given name/arguments
      */
-    @Override
-    public Object getProperty(String property) {
-        return getMetaClass().getProperty(this, property);
-    }
-
-    /*
-     * @see groovy.lang.GroovyObjectSupport#setProperty(String, Object)
-     */
-    @Override
-    public void setProperty(String property, Object newValue) {
-        getMetaClass().setProperty(this, property, newValue);
-    }
-
-    /*
-     * @see groovy.lang.GroovyObjectSupport#invokeMethod(String, Object)
-     */
-    @Override
-    public Object invokeMethod(String name, Object args) {
-        return getMetaClass().invokeMethod(this, name, args);
-    }
-
-    /*
-     * @see groovy.lang.GroovyObjectSupport#getMetaClass()
-     */
-    @Override
-    public MetaClass getMetaClass() {
-        if (metaClass == null) {
-            metaClass = InvokerHelper.getMetaClass(getClass());
+    Object methodMissing(String name, Object args) throws Throwable {
+        Object[] argsArray = (Object[]) args;
+        final Class<? extends ExtensibleContext> contextType = getClass();
+        Node node = jobManagement.callExtension(name, null, contextType, argsArray);
+        if (node == null) {
+            throw new MissingMethodException(name, contextType, argsArray);
         }
-        return metaClass;
+        if (node != JobManagement.NO_VALUE) {
+            addExtensionNode(node);
+        }
+        return null;
     }
 
-    /*
-     * @see groovy.lang.GroovyObjectSupport#setMetaClass(MetaClass)
-     */
-    @Override
-    public void setMetaClass(MetaClass metaClass) {
-        this.metaClass = metaClass;
-    }
 }
