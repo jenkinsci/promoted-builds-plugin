@@ -14,9 +14,9 @@ import org.junit.Test;
 import org.jvnet.hudson.test.For;
 import org.mockito.Mockito;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 @For(PromotionContext.class)
@@ -88,12 +88,8 @@ public class PromotionContextTest {
         Mockito.validateMockitoUsage();
     }
 
-    /**
-     * @see ReleasePromotionCondition
-     */
     @Test
-    @For(ReleasePromotionCondition.class)
-    public void testReleaseConditionNameClashTrick() throws Throwable {
+    public void testReleaseCondition() throws Throwable {
         promotionContext.conditions(new Closure(new Object()) {
             public void doCall() throws Exception {
                 ((ConditionsContext) getDelegate()).releaseBuild();
@@ -106,7 +102,6 @@ public class PromotionContextTest {
     }
 
     @Test
-    @For({ManualConditionConverter.class, JobDslManualCondition.class})
     public void testManualConditionCustomSerializationTrick() throws Throwable {
         final String expectedUsers = "expectedUsers";
         final String expectedParameterName = "PARAMETER_NAME";

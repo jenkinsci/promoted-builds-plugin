@@ -19,8 +19,8 @@ import org.jvnet.hudson.test.JenkinsRule;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.describedAs;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
