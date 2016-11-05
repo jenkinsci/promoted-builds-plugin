@@ -1,11 +1,11 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
-import com.google.common.base.Preconditions;
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import javaposse.jobdsl.dsl.Context;
 import javaposse.jobdsl.dsl.DslContext;
 import javaposse.jobdsl.dsl.JobManagement;
+import javaposse.jobdsl.dsl.Preconditions;
 import javaposse.jobdsl.plugin.DslEnvironment;
 
 import java.util.ArrayList;
@@ -32,8 +32,7 @@ public class PromotionsContext implements Context {
         PromotionContext promotionContext = dslEnvironment.createContext(PromotionContext.class);
         promotionContext.name = name;
         executeInContext(promotionClosure, promotionContext);
-        Preconditions.checkNotNull(promotionContext.getName(), "promotion name cannot be null");
-        Preconditions.checkArgument(promotionContext.getName().length() > 0);
+        Preconditions.checkNotNullOrEmpty(promotionContext.getName(), "promotion name cannot be null");
         promotionContexts.add(promotionContext);
     }
 }
