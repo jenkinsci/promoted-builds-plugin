@@ -7,14 +7,23 @@ import groovy.lang.MetaClass;
 import groovy.util.Node;
 import groovy.util.NodeBuilder;
 import groovy.util.NodeList;
+import groovy.util.XmlNodePrinter;
+import groovy.util.XmlParser;
 import hudson.plugins.promoted_builds.PromotionProcess;
+import javaposse.jobdsl.dsl.AbstractContext;
+import javaposse.jobdsl.dsl.ContextHelper;
 import javaposse.jobdsl.dsl.DslContext;
-import javaposse.jobdsl.dsl.Item;
 import javaposse.jobdsl.dsl.JobManagement;
 import javaposse.jobdsl.dsl.helpers.step.StepContext;
 import javaposse.jobdsl.plugin.DslEnvironment;
 import org.codehaus.groovy.runtime.InvokerHelper;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,14 +32,22 @@ import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 /**
  * Context for defining a {@link hudson.plugins.promoted_builds.PromotionProcess}
  */
-public class PromotionContext extends Item {
+public class PromotionContext extends AbstractContext {
 
     // never persist the MetaClass
     private transient MetaClass metaClass;
 
     protected final DslEnvironment dslEnvironment;
 
-    private List<Node> actions = new ArrayList<Node>();
+    private List<Node> actions = new ArrayList<>();
+
+    protected String name;
+
+    private final List<Closure> configureBlocks = new ArrayList<>();
+
+    public String getName() {
+        return name;
+    }
 
     /**
      *
@@ -40,7 +57,7 @@ public class PromotionContext extends Item {
      */
     @Deprecated
     public void name(final String name) {
-        setName(name);
+        this.name = name;
     }
 
     /**
@@ -132,6 +149,31 @@ public class PromotionContext extends Item {
                 }
             }
         });
+    }
+
+    public void configure(final Closure<?> closure) {
+        configureBlocks.add(closure);
+    }
+
+    public String getXml() throws ParserConfigurationException, SAXException, IOException {
+        Writer xmlOutput = new StringWriter();
+        XmlNodePrinter xmlNodePrinter = new XmlNodePrinter(new PrintWriter(xmlOutput), "    ");
+        xmlNodePrinter.setPreserveWhitespace(true);
+        xmlNodePrinter.setExpandEmptyElements(true);
+        xmlNodePrinter.setQuote("'"); // Use single quote for attributes
+        xmlNodePrinter.print(getNode());
+
+        return xmlOutput.toString();
+    }
+
+    public Node getNode() throws IOException, SAXException, ParserConfigurationException {
+        Node node = getNodeTemplate();
+        ContextHelper.executeConfigureBlocks(node, configureBlocks);
+        return node;
+    }
+
+    protected Node getNodeTemplate() throws ParserConfigurationException, SAXException, IOException {
+        return new XmlParser().parse(getClass().getResourceAsStream(getClass().getSimpleName() + "-template.xml"));
     }
 
     @Override

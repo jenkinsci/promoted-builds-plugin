@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,8 +23,10 @@ import javaposse.jobdsl.dsl.helpers.properties.PropertiesContext;
 import javaposse.jobdsl.plugin.ContextExtensionPoint;
 import javaposse.jobdsl.plugin.DslEnvironment;
 import javaposse.jobdsl.plugin.DslExtensionMethod;
+import org.xml.sax.SAXException;
 
 import javax.annotation.Nullable;
+import javax.xml.parsers.ParserConfigurationException;
 
 import static com.google.common.collect.Lists.transform;
 
@@ -87,7 +88,6 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
         if (promotionProcesses != null && promotionProcesses.size() > 0) {
             for (PromotionContext promotionProcess : promotionProcesses) {
                 final String name = promotionProcess.getName();
-                String xml = promotionProcess.getXml();
                 File dir = new File(item.getRootDir(), "promotions/" + name);
                 File configXml = Items.getConfigFile(dir).getFile();
                 boolean created = configXml.getParentFile().mkdirs();
@@ -98,13 +98,12 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
                     createUpdate = "Updated";
                 }
                 try {
+                    String xml = promotionProcess.getXml();
                     InputStream in = new ByteArrayInputStream(xml.getBytes("UTF-8"));
                     IOUtils.copy(in, configXml);
                     LOGGER.log(Level.INFO, String.format(createUpdate + " promotion with name %s for %s", name, item.getName()));
                     update = true;
-                } catch (UnsupportedEncodingException e) {
-                    throw new IllegalStateException("Error handling extension code", e);
-                } catch (IOException e) {
+                } catch (ParserConfigurationException | SAXException | IOException e) {
                     throw new IllegalStateException("Error handling extension code", e);
                 }
             }

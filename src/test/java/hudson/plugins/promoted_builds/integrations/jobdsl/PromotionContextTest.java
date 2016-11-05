@@ -32,7 +32,7 @@ public class PromotionContextTest {
     @Before
     public void setUp() throws Exception {
         jobManagement = new MemoryJobManagement();
-        item = new FreeStyleJob(jobManagement);
+        item = new FreeStyleJob(jobManagement, "foo");
         promotionContext = new PromotionContext(jobManagement, new DslEnvironmentImpl(jobManagement, item));
     }
 
@@ -93,7 +93,7 @@ public class PromotionContextTest {
      */
     @Test
     @For(ReleasePromotionCondition.class)
-    public void testReleaseConditionNameClashTrick() {
+    public void testReleaseConditionNameClashTrick() throws Throwable {
         promotionContext.conditions(new Closure(new Object()) {
             public void doCall() throws Exception {
                 ((ConditionsContext) getDelegate()).releaseBuild();
@@ -107,7 +107,7 @@ public class PromotionContextTest {
 
     @Test
     @For({ManualConditionConverter.class, JobDslManualCondition.class})
-    public void testManualConditionCustomSerializationTrick() {
+    public void testManualConditionCustomSerializationTrick() throws Throwable {
         final String expectedUsers = "expectedUsers";
         final String expectedParameterName = "PARAMETER_NAME";
         final String expectedParameter2Name = "UNICORNS";

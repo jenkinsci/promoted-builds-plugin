@@ -16,7 +16,7 @@ import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 public class PromotionsContext extends AbstractContext {
     protected final DslEnvironment dslEnvironment;
 
-    protected List<PromotionContext> promotionContexts = new ArrayList<PromotionContext>();
+    protected List<PromotionContext> promotionContexts = new ArrayList<>();
 
     public PromotionsContext(JobManagement jobManagement, DslEnvironment dslEnvironment) {
         super(jobManagement);
@@ -29,7 +29,7 @@ public class PromotionsContext extends AbstractContext {
 
     public void promotion(String name, @DslContext(PromotionContext.class) Closure promotionClosure) {
         PromotionContext promotionContext = dslEnvironment.createContext(PromotionContext.class);
-        promotionContext.setName(name);
+        promotionContext.name = name;
         executeInContext(promotionClosure, promotionContext);
         Preconditions.checkNotNull(promotionContext.getName(), "promotion name cannot be null");
         Preconditions.checkArgument(promotionContext.getName().length() > 0);
