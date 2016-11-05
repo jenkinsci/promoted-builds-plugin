@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -173,7 +174,9 @@ public class PromotionContext extends AbstractContext {
     }
 
     protected Node getNodeTemplate() throws ParserConfigurationException, SAXException, IOException {
-        return new XmlParser().parse(getClass().getResourceAsStream(getClass().getSimpleName() + "-template.xml"));
+        try (final InputStream resourceAsStream = getClass().getResourceAsStream(getClass().getSimpleName() + "-template.xml")) {
+            return new XmlParser().parse(resourceAsStream);
+        }
     }
 
     @Override
