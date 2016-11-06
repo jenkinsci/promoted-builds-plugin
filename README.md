@@ -130,10 +130,40 @@ These were retrieved from github [here][2].
 freeStyleJob(String jobName) {
   properties {
     promotions {
-      promotion(String promotionName) {
+      promotion(String promotionName) { // (there was no String argument before X.XX)
         icon(String icon)
-        label(String labelExpression)
+        label(String labelExpression) // Since X.XX
         conditions {
+
+          // **************
+          // [ START ] Static DSL
+          // **************
+
+          selfPromotion(boolean evenIfUnstable)
+
+          parameterizedSelfPromotion(boolean evenIfUnstable, String parameterName, String parameterValue)
+
+          releaseBuild() // requires the Release plugin
+
+          downstream(boolean evenIfUnstable, String jobs)
+
+          upstream(String promotionNames)
+
+          manual(String users)
+
+          manual(String users) {
+            parameters {
+              textParam(String parameterName, String defaultValue, String description)
+            }
+          }
+
+          // **************
+          // [  END  ] Static DSL
+          // **************
+
+          // **************
+          // The below conditions are part of the Automatically Generated DSL support, syntax and availability may vary. As such, only conditions bundled with this plugin are shown.
+          // **************
           selfPromotion {
             evenIfUnstable(boolean flag) // required
           }
@@ -142,7 +172,6 @@ freeStyleJob(String jobName) {
             parameterName(String name) // required
             parameterValue(String value) // required
           }
-          release {} // FIXME check compatibility with plugin
           downstream {
             jobs(String jobNames) // required
             evenIfUnstable(boolean flag) // required
@@ -177,33 +206,6 @@ freeStyleJob(String jobName) {
 }
 ```
 
-```groovy  
-freeStyleJob(String jobname) {
-  properties{
-    promotions {
-      promotion {
-        name(String promotionName)
-        icon(String iconName)
-        conditions {
-          selfPromotion(boolean evenIfUnstable = true)
-          parameterizedSelfPromotion(boolean evenIfUnstable = true, String parameterName, String parameterValue)
-          releaseBuild()
-          downstream(boolean evenIfUnstable = true, String jobs)
-          upstream(String promotionNames)
-          manual(String user){
-            parameters{
-              textParam(String parameterName, String defaultValue, String description)
-          }
-        }
-        actions {
-          shell(String command)
-        }
-      }
-    }
-  }
-}
-```
-
 See [StepContext](https://jenkinsci.github.io/job-dsl-plugin/#path/job-steps) in the API Viewer for full documentation about the possible actions.
 
 ### Example
@@ -224,6 +226,36 @@ freeStyleJob('test-job') {
             customAttribute 'customValue'
           }
         }
+      }
+    }
+  }
+}
+```
+
+
+### Migration
+
+DSL prior to X.XX
+```groovy
+freeStyleJob('example') {
+  properties {
+    promotions {
+      promotion {
+        name('Promotion name')
+        restrict('!master')
+      }
+    }
+  }
+}
+```
+
+DSL since X.XX
+```groovy
+freeStyleJob('example') {
+  properties {
+    promotions {
+      promotion('Promotion name') {
+        label('!master')
       }
     }
   }
