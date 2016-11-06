@@ -10,11 +10,11 @@ import groovy.util.XmlNodePrinter;
 import groovy.util.XmlParser;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import javaposse.jobdsl.dsl.Context;
-import javaposse.jobdsl.dsl.ContextHelper;
 import javaposse.jobdsl.dsl.DslContext;
 import javaposse.jobdsl.dsl.JobManagement;
 import javaposse.jobdsl.dsl.helpers.step.StepContext;
 import javaposse.jobdsl.plugin.DslEnvironment;
+import org.codehaus.groovy.runtime.GroovyCategorySupport;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -179,7 +179,8 @@ public class PromotionContext implements Context {
      */
     public Node getNode() throws IOException, SAXException, ParserConfigurationException {
         Node node = getNodeTemplate();
-        ContextHelper.executeConfigureBlocks(node, configureBlocks);
+        // we don't make use of Job DSL ContextHelper because it is not part of the public API
+        executeConfigureBlocks(node, configureBlocks);
         return node;
     }
 
@@ -189,4 +190,38 @@ public class PromotionContext implements Context {
         }
     }
 
+    /**
+     * Duplication of Job DSL <a
+     * href="https://github.com/jenkinsci/job-dsl-plugin/blob/job-dsl-1.52/job-dsl-core/src/main/groovy/javaposse/jobdsl/dsl/ContextHelper.groovy#L20"
+     * >ContextHelper</a> to avoid use of non-public API. Code was modified to account for Java compilation.
+     *
+     * @param node
+     * @param configureBlock
+     */
+    private static void executeConfigureBlock(final Node node, final Closure configureBlock) {
+        if (configureBlock != null) {
+            configureBlock.setDelegate(new MissingPropertyToStringDelegate(node));
+
+            GroovyCategorySupport.use(NodeEnhancement.class, new Closure(null) {
+                @SuppressFBWarnings(value = "UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS", justification = "Dynamically invoked when the closure gets called")
+                protected void doCall() {
+                    configureBlock.call(node);
+                }
+            });
+        }
+    }
+
+    /**
+     * Duplication of Job DSL <a
+     * href="https://github.com/jenkinsci/job-dsl-plugin/blob/job-dsl-1.52/job-dsl-core/src/main/groovy/javaposse/jobdsl/dsl/ContextHelper.groovy#L30"
+     * >ContextHelper</a> to avoid use of non-public API. Code was modified to account for Java compilation.
+     *
+     * @param node
+     * @param configureBlocks
+     */
+    private static void executeConfigureBlocks(Node node, List<Closure> configureBlocks) {
+        for (Closure it: configureBlocks) {
+            executeConfigureBlock(node, it);
+        }
+    }
 }
