@@ -49,7 +49,7 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
         @Override
         public String apply(@Nullable PromotionContext input) {
             if (input != null) {
-                return input.getName();
+                return input.name;
             }
             // throw NPE as documented by Function#apply(Object)
             throw new NullPointerException("Unexpected null element");
@@ -79,7 +79,7 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
         Collection<PromotionContext>  promotionProcesses = (List<PromotionContext>) dslEnvironment.get(PROMOTION_PROCESSES);
         if (promotionProcesses != null && promotionProcesses.size() > 0) {
             for (PromotionContext promotionProcess : promotionProcesses) {
-                final String name = promotionProcess.getName();
+                final String name = PROMOTION_CONTEXT_NAME_EXTRACTOR.apply(promotionProcess);
                 File dir = new File(item.getRootDir(), "promotions/" + name);
                 File configXml = Items.getConfigFile(dir).getFile();
                 boolean created = configXml.getParentFile().mkdirs();

@@ -45,10 +45,6 @@ public class PromotionContext implements Context {
         this.dslEnvironment = dslEnvironment;
     }
 
-    public String getName() {
-        return name;
-    }
-
     /**
      *
      * @param name
@@ -57,6 +53,7 @@ public class PromotionContext implements Context {
      */
     @Deprecated
     public void name(final String name) {
+        jobManagement.logDeprecationWarning();
         this.name = name;
     }
 
@@ -144,10 +141,22 @@ public class PromotionContext implements Context {
         });
     }
 
+    /**
+     * Enqueue a {@link Node} manipulation operation
+     * @param closure Operation to enqueue. Will be given a single {@link Node} argument representing the root of the
+     *                configuration.
+     */
     public void configure(final Closure<?> closure) {
         configureBlocks.add(closure);
     }
 
+    /**
+     * Retrieve an XML string representation of {@link #getNode()}
+     * @return XML for the current promotion definition. Unlikely to be useful for DSL script authors.
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
     public String getXml() throws ParserConfigurationException, SAXException, IOException {
         Writer xmlOutput = new StringWriter();
         XmlNodePrinter xmlNodePrinter = new XmlNodePrinter(new PrintWriter(xmlOutput), "    ");
@@ -159,6 +168,15 @@ public class PromotionContext implements Context {
         return xmlOutput.toString();
     }
 
+    /**
+     * Trigger processing of the {@link #configure(Closure) queued operations} against a
+     * {@link #getNodeTemplate() template}
+     * @return  {@link Node Node tree} for the current promotion definition. Unlikely to be useful for DSL script
+     *          authors (instance is transient).
+     * @throws IOException
+     * @throws SAXException
+     * @throws ParserConfigurationException
+     */
     public Node getNode() throws IOException, SAXException, ParserConfigurationException {
         Node node = getNodeTemplate();
         ContextHelper.executeConfigureBlocks(node, configureBlocks);
