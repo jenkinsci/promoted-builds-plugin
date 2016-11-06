@@ -73,9 +73,9 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
         notifyItemCreated(item, dslEnvironment, false);
     }
 
-    @SuppressWarnings("unchecked")
     public void notifyItemCreated(Item item, DslEnvironment dslEnvironment, boolean update) {
         LOGGER.log(Level.INFO, String.format("Creating promotions for %s", item.getName()));
+        @SuppressWarnings("unchecked")
         Collection<PromotionContext>  promotionProcesses = (List<PromotionContext>) dslEnvironment.get(PROMOTION_PROCESSES);
         if (promotionProcesses != null && promotionProcesses.size() > 0) {
             for (PromotionContext promotionProcess : promotionProcesses) {
@@ -84,16 +84,16 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
                 File configXml = Items.getConfigFile(dir).getFile();
                 boolean created = configXml.getParentFile().mkdirs();
                 String createUpdate;
-                if(created){
+                if (created) {
                     createUpdate = "Added";
-                }else{
+                } else {
                     createUpdate = "Updated";
                 }
                 try {
                     String xml = promotionProcess.getXml();
                     InputStream in = new ByteArrayInputStream(xml.getBytes("UTF-8"));
                     IOUtils.copy(in, configXml);
-                    LOGGER.log(Level.INFO, String.format(createUpdate + " promotion with name %s for %s", name, item.getName()));
+                    LOGGER.log(Level.INFO, String.format("%s promotion with name %s for %s", createUpdate, name, item.getName()));
                     update = true;
                 } catch (ParserConfigurationException | SAXException | IOException e) {
                     throw new IllegalStateException("Error handling extension code", e);
