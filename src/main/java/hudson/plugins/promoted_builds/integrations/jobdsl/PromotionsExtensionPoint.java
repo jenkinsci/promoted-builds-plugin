@@ -1,24 +1,13 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.common.base.Function;
-import com.thoughtworks.xstream.XStream;
-
 import hudson.Extension;
 import hudson.model.AbstractItem;
+import hudson.model.Descriptor.FormException;
 import hudson.model.Item;
 import hudson.model.Items;
-import hudson.model.Descriptor.FormException;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.util.IOUtils;
-import hudson.util.XStream2;
 import javaposse.jobdsl.dsl.helpers.properties.PropertiesContext;
 import javaposse.jobdsl.plugin.ContextExtensionPoint;
 import javaposse.jobdsl.plugin.DslEnvironment;
@@ -27,6 +16,16 @@ import org.xml.sax.SAXException;
 
 import javax.annotation.Nullable;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.google.common.collect.Lists.transform;
 
