@@ -2,9 +2,12 @@ package hudson.plugins.promoted_builds;
 
 import hudson.EnvVars;
 import hudson.FilePath;
+import hudson.console.ConsoleLogFilter;
 import hudson.console.HyperlinkNote;
 import hudson.model.Action;
 import hudson.model.BuildListener;
+import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.StreamBuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Cause.UserCause;
@@ -37,6 +40,7 @@ import org.kohsuke.stapler.export.Exported;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -316,6 +320,22 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         protected Result doRun(BuildListener listener) throws Exception {
             AbstractBuild<?, ?> target = getTarget();
+
+            OutputStream logger = listener.getLogger();
+            AbstractProject rootProject = project.getRootProject();
+            // Global log filters
+            for (ConsoleLogFilter filter : ConsoleLogFilter.all()) {
+                logger = filter.decorateLogger(target, logger);
+            }
+
+            // Project specific log filters
+            if (rootProject instanceof BuildableItemWithBuildWrappers) {
+                BuildableItemWithBuildWrappers biwbw = (BuildableItemWithBuildWrappers) rootProject;
+                for (BuildWrapper bw : biwbw.getBuildWrappersList()) {
+                    logger = bw.decorateLogger(target, logger);
+                }
+            }
+            listener = new StreamBuildListener(logger);
 
             listener.getLogger().println(
                 Messages.Promotion_RunnerImpl_Promoting(
