@@ -324,7 +324,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
      * Gets {@link AbstractProject} that contains us.
      * @return Owner project
      */
-    public synchronized AbstractProject<?,?> getOwner() {
+    public AbstractProject<?,?> getOwner() {
         return owner;
     }
 
