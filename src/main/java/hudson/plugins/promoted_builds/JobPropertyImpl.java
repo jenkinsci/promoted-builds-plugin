@@ -214,18 +214,20 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     }
 
     @Override
-    protected synchronized void setOwner(AbstractProject<?,?> owner) {
+    protected void setOwner(AbstractProject<?,?> owner) {
         super.setOwner(owner);
 
         // readResolve is too early because we don't have our parent set yet,
         // so use this as the initialization opportunity.
         // CopyListener is also using setOwner to re-init after copying config from another job.
-        processes = new ArrayList<PromotionProcess>(ItemGroupMixIn.<String,PromotionProcess>loadChildren(
-                this,getRootDir(),ItemGroupMixIn.KEYED_BY_NAME).values());
-        try {
-            buildActiveProcess();
-        } catch (IOException e) {
-            throw new Error(e);
+        synchronized (this) {
+            processes = new ArrayList<PromotionProcess>(ItemGroupMixIn.<String, PromotionProcess>loadChildren(
+                    this, getRootDir(), ItemGroupMixIn.KEYED_BY_NAME).values());
+            try {
+                buildActiveProcess();
+            } catch (IOException e) {
+                throw new Error(e);
+            }
         }
     }
 
