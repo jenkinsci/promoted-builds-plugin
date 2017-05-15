@@ -17,7 +17,9 @@ import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,14 +27,15 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-
 import javax.servlet.ServletException;
 
 import net.sf.json.JSONArray;
@@ -52,7 +55,20 @@ import org.kohsuke.stapler.export.Exported;
  */
 public class ManualCondition extends PromotionCondition {
     private String users;
+        
     private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
+    
+    //TODO ======================
+    //to use Custom label for approve button, add deamon property 'ManualCondition.approveButtonLabel' to "/etc/init.d/jenkins" file in value to JAVA_CMD
+	//sample: JAVA_CMD="$JENKINS_JAVA_CMD $JENKINS_JAVA_OPTIONS -DJENKINS_HOME=$JENKINS_HOME -DManualCondition.approveButtonLabel=CUSTOM_VALUE -jar $JENKINS_WAR"
+    public String getExecuteButtonLabel() {
+        String label = System.getProperty(this.getClass().getSimpleName()+".approveButtonLabel");
+        if(null == label) {
+    	    label = "Approve";
+    	}
+        return label;
+    }
+    //===========================
     
     /**
      * 
@@ -114,7 +130,7 @@ public class ManualCondition extends PromotionCondition {
         List<ManualApproval> approvals = build.getActions(ManualApproval.class);
 
         for (ManualApproval approval : approvals) {
-            if (approval.name.equals(promotionProcess.getName()))
+        	if (approval.name.equals(promotionProcess.getName()))
                 return approval.badge;
         }
 
