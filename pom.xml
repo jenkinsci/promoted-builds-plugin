@@ -150,6 +150,12 @@
       <version>1.0</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>subversion</artifactId>
+      <version>2.5.7</version>
+      <scope>test</scope>
+    </dependency>
     <dependency> <!-- required to workaround the missing CookieSpecProvider class -->
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
