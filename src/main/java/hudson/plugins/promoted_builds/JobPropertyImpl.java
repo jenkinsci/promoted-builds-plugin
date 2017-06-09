@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -35,7 +36,6 @@ import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import hudson.model.listeners.ItemListener;
-import hudson.remoting.Callable;
 import hudson.util.IOUtils;
 import javax.annotation.CheckForNull;
 import jenkins.model.Jenkins;
@@ -305,7 +305,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         }
         try {
             IOUtils.copy(xml, configXml);
-            PromotionProcess result = Items.whileUpdatingByXml(new Callable<PromotionProcess,IOException>() {
+            PromotionProcess result = Items.whileUpdatingByXml(new MasterToSlaveCallable<PromotionProcess, IOException>() {
                 @Override public PromotionProcess call() throws IOException {
                     setOwner(owner);
                     return getItem(name);
