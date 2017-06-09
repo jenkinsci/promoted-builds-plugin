@@ -14,6 +14,7 @@ import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import org.junit.Rule;
+import org.junit.Test;
 import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.JenkinsRule;
 
@@ -27,6 +28,7 @@ public class SelfPromotionTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
+    @Test
     public void testBasic() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
@@ -65,6 +67,7 @@ public class SelfPromotionTest {
         assertTrue(badge.contains(promo2));
     }
 
+    @Test
     public void testUnstable() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
@@ -103,7 +106,7 @@ public class SelfPromotionTest {
         assertTrue(badge.contains(promo2));
     }
 
-
+    @Test
     public void testFailure() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
@@ -142,6 +145,7 @@ public class SelfPromotionTest {
     }
 
     @Bug(22679)
+    @Test
     // @Bug(34826) // Can be reproduced in Jenkins 2.3 +
     public void testPromotionEnvironmentShouldIncludeTargetParameters() throws Exception {
         String paramName = "param";
