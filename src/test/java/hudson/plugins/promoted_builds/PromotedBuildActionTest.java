@@ -6,23 +6,32 @@ import hudson.model.Cause.UserCause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.util.IOException2;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author Kohsuke Kawaguchi
  */
-public class PromotedBuildActionTest extends HudsonTestCase {
+public class PromotedBuildActionTest {
+
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
+
+    @Test
     public void testDeletedPromotionProcess() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = j.createFreeStyleProject();
         JobPropertyImpl base = new JobPropertyImpl(p);
         p.addProperty(base);
         PromotionProcess foo = base.addProcess("foo");
 
         // promote a build
-        FreeStyleBuild b1 = assertBuildStatusSuccess(p.scheduleBuild2(0));
+        FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         foo.promote(b1,new UserCause(),new ManualPromotionBadge());
 
         // now delete the promotion process
@@ -31,7 +40,7 @@ public class PromotedBuildActionTest extends HudsonTestCase {
         assertTrue(base.getActiveItems().isEmpty());
 
         // make sure that the page renders OK without any error
-        HtmlPage page = createWebClient().getPage(p);
+        HtmlPage page = j.createWebClient().getPage(p);
         List<?> candidates = page.getByXPath("//IMG");
         for (Object candidate : candidates) {
             if (!(candidate instanceof HtmlImage)) {

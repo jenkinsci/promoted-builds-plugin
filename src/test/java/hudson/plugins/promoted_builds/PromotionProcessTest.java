@@ -15,7 +15,9 @@ import hudson.tasks.Recorder;
 import hudson.tasks.Shell;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import net.sf.json.JSONObject;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.kohsuke.stapler.Stapler;
 
 import java.util.ArrayList;
@@ -24,18 +26,24 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static hudson.plugins.promoted_builds.util.ItemListenerHelper.fireItemListeners;
+import static org.junit.Assert.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class PromotionProcessTest extends HudsonTestCase {
-    public void test1() throws Exception {
-        FreeStyleProject up = createFreeStyleProject("up");
-        FreeStyleProject down = createFreeStyleProject();
+public class PromotionProcessTest {
 
-        List<Recorder> recorders = Arrays.asList(
-                new ArtifactArchiver("a.jar", null, false),
-                new Fingerprinter("", true));
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
+
+    @Test
+    public void test1() throws Exception {
+        FreeStyleProject up = j.createFreeStyleProject("up");
+        FreeStyleProject down = j.createFreeStyleProject();
+
+        Recorder r1 = new ArtifactArchiver("a.jar", null, false);
+        Recorder r2 = new Fingerprinter("", true);
+        List<Recorder> recorders = Arrays.asList(r1, r2);
 
         // upstream job
         up.getBuildersList().add(new Shell("date > a.jar"));
@@ -48,7 +56,7 @@ public class PromotionProcessTest extends HudsonTestCase {
         proc.conditions.add(new DownstreamPassCondition(down.getName()));
 
         // this is the test job
-        String baseUrl = new WebClient().getContextPath() + "job/up/lastSuccessfulBuild";
+        String baseUrl = j.createWebClient().getContextPath() + "job/up/lastSuccessfulBuild";
         down.getBuildersList().add(new Shell(
             "wget -N "+baseUrl+"/artifact/a.jar \\\n"+
             "  || curl "+baseUrl+"/artifact/a.jar > a.jar\n"+
@@ -60,13 +68,13 @@ public class PromotionProcessTest extends HudsonTestCase {
         fireItemListeners();
 
         // not yet promoted while the downstream is failing
-        FreeStyleBuild up1 = assertBuildStatusSuccess(up.scheduleBuild2(0).get());
-        assertBuildStatus(Result.FAILURE,down.scheduleBuild2(0).get());
+        FreeStyleBuild up1 = j.assertBuildStatusSuccess(up.scheduleBuild2(0).get());
+        j.assertBuildStatus(Result.FAILURE,down.scheduleBuild2(0).get());
         Thread.sleep(1000); // give it a time to not promote
         assertEquals(0,proc.getBuilds().size());
 
         // a successful downstream build promotes upstream
-        assertBuildStatusSuccess(down.scheduleBuild2(0).get());
+        j.assertBuildStatusSuccess(down.scheduleBuild2(0).get());
         Thread.sleep(1000); // give it a time to promote
         assertEquals(1,proc.getBuilds().size());
 
@@ -78,16 +86,16 @@ public class PromotionProcessTest extends HudsonTestCase {
         }
 
         // make sure the UI persists the setup
-        configRoundtrip(up);
-
+        j.configRoundtrip(up);
     }
 
     /**
      * Tests a promotion induced by the pseudo upstream/downstream cause relationship
      */
+    @Test
     public void testPromotionWithoutFingerprint() throws Exception {
-        FreeStyleProject up = createFreeStyleProject("up");
-        FreeStyleProject down = createFreeStyleProject();
+        FreeStyleProject up = j.createFreeStyleProject("up");
+        FreeStyleProject down = j.createFreeStyleProject();
 
         // promote if the downstream passes
         JobPropertyImpl promotion = new JobPropertyImpl(up);
@@ -97,7 +105,7 @@ public class PromotionProcessTest extends HudsonTestCase {
 
         // trigger downstream automatically to create relationship
         up.getPublishersList().add(new BuildTrigger(down.getName(), Result.SUCCESS));
-        hudson.rebuildDependencyGraph();
+        j.jenkins.rebuildDependencyGraph();
         
         // this is the downstream job
         down.getBuildersList().add(new Shell(
@@ -105,12 +113,12 @@ public class PromotionProcessTest extends HudsonTestCase {
         ));
 
         // not yet promoted while the downstream is failing
-        FreeStyleBuild up1 = assertBuildStatusSuccess(up.scheduleBuild2(0).get());
+        FreeStyleBuild up1 = j.assertBuildStatusSuccess(up.scheduleBuild2(0).get());
         waitForCompletion(down,1);
         assertEquals(0,proc.getBuilds().size());
 
         // do it one more time and this time it should work
-        FreeStyleBuild up2 = assertBuildStatusSuccess(up.scheduleBuild2(0).get());
+        FreeStyleBuild up2 = j.assertBuildStatusSuccess(up.scheduleBuild2(0).get());
         waitForCompletion(down,2);
         assertEquals(1,proc.getBuilds().size());
 
@@ -126,12 +134,13 @@ public class PromotionProcessTest extends HudsonTestCase {
         // wait for the build completion
         while (down.getBuildByNumber(n)==null)
             Thread.sleep(100);
-        waitUntilNoActivity();
+        j.waitUntilNoActivity();
         assertFalse(down.getBuildByNumber(n).isBuilding());
     }
 
+    @Test
     public void testCaptureXml() throws Exception {
-        executeOnServer(new Callable<Object>() {
+        j.executeOnServer(new Callable<Object>() {
             public Object call() throws Exception {
                 JSONObject o = new JSONObject()
                         .accumulate("name", "foo")
@@ -150,32 +159,39 @@ public class PromotionProcessTest extends HudsonTestCase {
             }
         });
     }
-   
+
+    @Test
     public void testIsVisibleByDefault() throws Exception {
-        FreeStyleProject project = createFreeStyleProject("project");
+        FreeStyleProject project = j.createFreeStyleProject("project");
         JobPropertyImpl jobProperty = new JobPropertyImpl(project);
         project.addProperty(jobProperty);
         PromotionProcess promotionProcess = jobProperty.addProcess( "Promotion");
         assertTrue(promotionProcess.isVisible());
     }
+
+    @Test
     public void testIsVisibleFalseReturnsNotVisible() throws Exception{
-        FreeStyleProject project = createFreeStyleProject("project");
+        FreeStyleProject project = j.createFreeStyleProject("project");
         JobPropertyImpl jobProperty = new JobPropertyImpl(project);
         project.addProperty(jobProperty);
         PromotionProcess promotionProcess = jobProperty.addProcess( "Promotion");
         promotionProcess.isVisible = "false";
         assertFalse(promotionProcess.isVisible());
     }
+
+    @Test
     public void testIsVisibleTrueReturnsVisible() throws Exception{
-        FreeStyleProject project = createFreeStyleProject("project");
+        FreeStyleProject project = j.createFreeStyleProject("project");
         JobPropertyImpl jobProperty = new JobPropertyImpl(project);
         project.addProperty(jobProperty);
         PromotionProcess promotionProcess = jobProperty.addProcess( "Promotion");
         promotionProcess.isVisible = "true";
         assertTrue(promotionProcess.isVisible());
     }
+
+    @Test
     public void testIsVisibleResolvesDefaultParameterValue() throws Exception{
-        FreeStyleProject project = createFreeStyleProject("project");
+        FreeStyleProject project = j.createFreeStyleProject("project");
         final List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         ParametersDefinitionProperty parametersProperty = new ParametersDefinitionProperty(parameters);
         parameters.add(new StringParameterDefinition("Visibility", "false"));
@@ -186,8 +202,10 @@ public class PromotionProcessTest extends HudsonTestCase {
         promotionProcess.isVisible = "${Visibility}";
         assertFalse(promotionProcess.isVisible());
     }
+
+    @Test
     public void testIsVisibleResolvesDefaultParameterValueIndirectly() throws Exception{
-        FreeStyleProject project = createFreeStyleProject("project");
+        FreeStyleProject project = j.createFreeStyleProject("project");
         final List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         ParametersDefinitionProperty parametersProperty = new ParametersDefinitionProperty(parameters);
         parameters.add(new StringParameterDefinition("IndirectVisibility", "false"));

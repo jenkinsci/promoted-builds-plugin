@@ -12,8 +12,6 @@ import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.plugins.promoted_builds.Status;
-import hudson.plugins.promoted_builds.JobPropertyImpl.DescriptorImpl;
-import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
 
 import java.util.ArrayList;
@@ -21,21 +19,27 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 
-import jenkins.model.Jenkins;
-
-import org.jvnet.hudson.test.HudsonTestCase;
-
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import hudson.model.StringParameterValue;
 import hudson.model.TaskListener;
+import org.junit.Rule;
+import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
+
+import static com.gargoylesoftware.htmlunit.html.HtmlFormUtil.submit;
+import static org.junit.Assert.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class ManualConditionTest extends HudsonTestCase {
+public class ManualConditionTest {
+
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
+
 	public static List<HtmlForm> getFormsByName(HtmlPage page, String name){
         List<HtmlForm> forms=new ArrayList<HtmlForm>();
         for (HtmlForm f:page.getForms()){
@@ -48,11 +52,12 @@ public class ManualConditionTest extends HudsonTestCase {
 	public static List<HtmlElement> getFormParameters(HtmlForm form){
 		return form.getElementsByAttribute("div", "name", "parameter");
 	}
-	
+
+	@Test
     public void testManualPromotionProcess() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = j.createFreeStyleProject();
         
-        ExtensionList<Descriptor> list = hudson.getExtensionList(Descriptor.class);
+        ExtensionList<Descriptor> list = j.jenkins.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(p);
         p.addProperty(base);
@@ -63,7 +68,7 @@ public class ManualConditionTest extends HudsonTestCase {
         condition.getParameterDefinitions().add(new StringParameterDefinition("bogus_string_param_2", "bogus_value_2", "Bog parameter"));
         foo.conditions.add(condition);
         
-        FreeStyleBuild b1 = assertBuildStatusSuccess(p.scheduleBuild2(0));
+        FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         
         // promote a build
         
@@ -71,7 +76,7 @@ public class ManualConditionTest extends HudsonTestCase {
         //try to add duplicate values
         paramValues.addAll(condition.createDefaultValues());
         
-        assertBuildStatusSuccess(condition.approve(b1, foo, paramValues));
+        j.assertBuildStatusSuccess(condition.approve(b1, foo, paramValues));
         ManualApproval manualApproval=b1.getAction(ManualApproval.class);
         assertNotNull(manualApproval);
         
@@ -82,12 +87,13 @@ public class ManualConditionTest extends HudsonTestCase {
     }
     
     @Issue("SECURITY-170")
+    @Test
     /**
      * Verify that the plugin is tolerant against SECURITY-170 in Manual conditions
      */
     public void testManualPromotionProcessWithInvalidParam() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
-        ExtensionList<Descriptor> list = hudson.getExtensionList(Descriptor.class);
+        FreeStyleProject p = j.createFreeStyleProject();
+        ExtensionList<Descriptor> list = j.jenkins.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(p);
         p.addProperty(base);
@@ -97,12 +103,12 @@ public class ManualConditionTest extends HudsonTestCase {
         condition.getParameterDefinitions().add(new StringParameterDefinition("FOO", "BAR", "Test parameter"));
         foo.conditions.add(condition);
         
-        FreeStyleBuild b1 = assertBuildStatusSuccess(p.scheduleBuild2(0));
+        FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         
         // Promote a build. Also add one invalid parameter 
         List<ParameterValue> paramValues = condition.createDefaultValues();
         paramValues.add(new StringParameterValue("INVALID_PARAM", "hacked!"));
-        assertBuildStatusSuccess(condition.approve(b1, foo, paramValues));
+        j.assertBuildStatusSuccess(condition.approve(b1, foo, paramValues));
         ManualApproval manualApproval = b1.getAction(ManualApproval.class);
         assertNotNull(manualApproval);
         List<ParameterValue> parameterValues = manualApproval.badge.getParameterValues();
@@ -116,11 +122,12 @@ public class ManualConditionTest extends HudsonTestCase {
         assertNotNull("INVALID_PARAM should not be injected into the environment", 
                 pb.getEnvironment(TaskListener.NULL).get("INVALID_PARAM", null));
     }
-	
+
+    @Test
     public void testManualPromotionProcessViaWebClient() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = j.createFreeStyleProject();
         
-        ExtensionList<Descriptor> list = hudson.getExtensionList(Descriptor.class);
+        ExtensionList<Descriptor> list = j.jenkins.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(p);
         p.addProperty(base);
@@ -130,9 +137,9 @@ public class ManualConditionTest extends HudsonTestCase {
         condition.getParameterDefinitions().add(new StringParameterDefinition("bogus_string_param_2", "bogus_value_2", "Bog parameter"));
         foo.conditions.add(condition);
         
-        FreeStyleBuild b1 = assertBuildStatusSuccess(p.scheduleBuild2(0));
+        FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         assertNull(b1.getAction(ManualApproval.class));
-        HtmlPage page=createWebClient().getPage(b1, "promotion");
+        HtmlPage page=j.createWebClient().getPage(b1, "promotion");
         //Approve Promotion
         List<HtmlForm> forms=getFormsByName(page, "approve");
         assertFalse(forms.isEmpty());
@@ -154,7 +161,7 @@ public class ManualConditionTest extends HudsonTestCase {
         assertTrue(builds.size()==1);
         
         //Re-Execute approved promotion
-        page=createWebClient().getPage(b1, "promotion");
+        page=j.createWebClient().getPage(b1, "promotion");
         forms=getFormsByName(page,"build");
         assertFalse(forms.isEmpty());
         assertTrue(forms.size()==1);
