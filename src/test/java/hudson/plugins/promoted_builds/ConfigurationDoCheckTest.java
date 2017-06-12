@@ -1,13 +1,12 @@
 package hudson.plugins.promoted_builds;
 
-import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import hudson.tasks.JavadocArchiver;
 import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import static com.gargoylesoftware.htmlunit.html.HtmlFormUtil.submit;
@@ -22,7 +21,7 @@ public class ConfigurationDoCheckTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
-    @Bug(7972)
+    @Issue("7972")
     @Test
     public void testCheckProcessNameRequired() throws Exception {
         FreeStyleProject down = j.createFreeStyleProject();
@@ -45,7 +44,7 @@ public class ConfigurationDoCheckTest {
 
     }
 
-    @Bug(7972)
+    @Issue("7972")
     @Test
     public void testCheckInvalidProcessName() throws Exception {
         FreeStyleProject down = j.createFreeStyleProject();

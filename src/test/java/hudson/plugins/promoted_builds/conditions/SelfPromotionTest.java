@@ -15,7 +15,7 @@ import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import static org.junit.Assert.*;
@@ -144,9 +144,9 @@ public class SelfPromotionTest {
         assertFalse(badge.contains(promo2));
     }
 
-    @Bug(22679)
+    @Issue("22679")
     @Test
-    // @Bug(34826) // Can be reproduced in Jenkins 2.3 +
+    // @Issue("34826") // Can be reproduced in Jenkins 2.3 +
     public void testPromotionEnvironmentShouldIncludeTargetParameters() throws Exception {
         String paramName = "param";
 

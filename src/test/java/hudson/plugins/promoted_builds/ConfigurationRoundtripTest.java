@@ -28,7 +28,7 @@ import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import hudson.tasks.JavadocArchiver;
 import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
 
@@ -81,7 +81,7 @@ public class ConfigurationRoundtripTest {
     }
 
     @LocalData
-    @Bug(17341)
+    @Issue("17341")
     @Test
     public void testLoad() throws Exception {
         FreeStyleProject jProj = j.jenkins.getItemByFullName("j", FreeStyleProject.class);
