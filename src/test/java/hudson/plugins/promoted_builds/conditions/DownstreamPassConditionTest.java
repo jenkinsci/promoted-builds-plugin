@@ -44,7 +44,7 @@ public final class DownstreamPassConditionTest {
     public JenkinsRule j =  new JenkinsRule();
 
     @Test
-    @Issue("7739")
+    @Issue("JENKINS-7739")
     public void shouldEvaluateUpstreamRecursively() throws Exception {
         final FreeStyleProject job1 = j.createFreeStyleProject("job1");
         final FreeStyleProject job2 = j.createFreeStyleProject("job2");

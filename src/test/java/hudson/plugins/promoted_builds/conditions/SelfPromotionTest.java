@@ -144,9 +144,9 @@ public class SelfPromotionTest {
         assertFalse(badge.contains(promo2));
     }
 
-    @Issue("22679")
+    @Issue("JENKINS-22679")
     @Test
-    // @Issue("34826") // Can be reproduced in Jenkins 2.3 +
+    // @Issue("JENKINS-34826") // Can be reproduced in Jenkins 2.3 +
     public void testPromotionEnvironmentShouldIncludeTargetParameters() throws Exception {
         String paramName = "param";
 

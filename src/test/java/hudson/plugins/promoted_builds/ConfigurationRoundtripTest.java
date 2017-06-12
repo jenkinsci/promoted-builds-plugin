@@ -81,7 +81,7 @@ public class ConfigurationRoundtripTest {
     }
 
     @LocalData
-    @Issue("17341")
+    @Issue("JENKINS-17341")
     @Test
     public void testLoad() throws Exception {
         FreeStyleProject jProj = j.jenkins.getItemByFullName("j", FreeStyleProject.class);

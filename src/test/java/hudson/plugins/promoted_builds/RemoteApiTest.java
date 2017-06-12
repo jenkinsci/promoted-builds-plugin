@@ -46,7 +46,7 @@ import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 /** Verifies use of REST API to manipulate promotions. */
-@Issue("8963")
+@Issue("JENKINS-8963")
 public class RemoteApiTest {
 
     @Rule public JenkinsRule r = new JenkinsRule();

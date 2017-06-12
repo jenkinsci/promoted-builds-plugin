@@ -21,7 +21,7 @@ public class ConfigurationDoCheckTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
-    @Issue("7972")
+    @Issue("JENKINS-7972")
     @Test
     public void testCheckProcessNameRequired() throws Exception {
         FreeStyleProject down = j.createFreeStyleProject();
@@ -44,7 +44,7 @@ public class ConfigurationDoCheckTest {
 
     }
 
-    @Issue("7972")
+    @Issue("JENKINS-7972")
     @Test
     public void testCheckInvalidProcessName() throws Exception {
         FreeStyleProject down = j.createFreeStyleProject();

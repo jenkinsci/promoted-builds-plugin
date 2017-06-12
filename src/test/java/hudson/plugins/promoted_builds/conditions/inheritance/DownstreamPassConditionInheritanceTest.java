@@ -46,7 +46,7 @@ public final class DownstreamPassConditionInheritanceTest {
     public InheritanceProjectRule j =  new InheritanceProjectRule();
 
     @Test
-    @Issue("7739")
+    @Issue("JENKINS-7739")
     public void shouldEvaluateUpstreamRecursively() throws Exception {
         final InheritanceProjectsPair pair1 = j.createInheritanceProjectDerivedWithBase();
         final InheritanceProjectsPair pair2 = j.createInheritanceProjectDerivedWithBase();

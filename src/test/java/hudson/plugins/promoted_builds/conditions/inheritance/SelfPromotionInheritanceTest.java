@@ -169,7 +169,7 @@ public class SelfPromotionInheritanceTest  {
     }
 
     @Test
-    @Issue("22679")
+    @Issue("JENKINS-22679")
     public void testPromotionEnvironmentShouldIncludeTargetParameters() throws Exception {
         String paramName = "param";
 
