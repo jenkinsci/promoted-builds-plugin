@@ -14,7 +14,9 @@ import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.Fingerprinter;
 import hudson.tasks.Recorder;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
@@ -22,9 +24,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import static hudson.plugins.promoted_builds.util.ItemListenerHelper.fireItemListeners;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public class KeepBuildForeverActionTest extends HudsonTestCase {
-    
+public class KeepBuildForeverActionTest {
+
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
+
+    @Test
     public void testCanMarkBuildKeepForever() throws Exception {
         FreeStyleProject upJob = createProject("up");
         upJob.getBuildersList().add(successfulBuilder());
@@ -37,14 +46,15 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
         fireItemListeners();
 
-        FreeStyleBuild upBuild = assertBuildStatusSuccess(upJob.scheduleBuild2(0).get());
+        FreeStyleBuild upBuild = j.assertBuildStatusSuccess(upJob.scheduleBuild2(0).get());
         assertFalse(upBuild.isKeepLog());
         
-        assertBuildStatusSuccess(downJob.scheduleBuild2(0).get());
+        j.assertBuildStatusSuccess(downJob.scheduleBuild2(0).get());
         waitForBuild(promotionJob, 1);
         assertTrue(upBuild.isKeepLog());
     }
-    
+
+    @Test
     public void testDoesNotMarkBuildIfPromotionNotGoodEnough() throws Exception {
         FreeStyleProject upJob = createProject("up");
         upJob.getBuildersList().add(successfulBuilder());
@@ -58,14 +68,15 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
         fireItemListeners();
 
-        FreeStyleBuild upBuild = assertBuildStatusSuccess(upJob.scheduleBuild2(0).get());
+        FreeStyleBuild upBuild = j.assertBuildStatusSuccess(upJob.scheduleBuild2(0).get());
         assertFalse(upBuild.isKeepLog());
         
-        assertBuildStatusSuccess(downJob.scheduleBuild2(0).get());
+        j.assertBuildStatusSuccess(downJob.scheduleBuild2(0).get());
         waitForBuild(promotionJob, 1);
         assertFalse(upBuild.isKeepLog());
     }
 
+    @Test
     public void testDoesNotCareAboutResultOfOriginalBuild() throws Exception {
         FreeStyleProject upJob = createProject("up");
         upJob.getBuildersList().add(new FixedResultBuilder(Result.FAILURE));
@@ -78,14 +89,15 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
         fireItemListeners();
 
-        FreeStyleBuild upBuild = assertBuildStatus(Result.FAILURE, upJob.scheduleBuild2(0).get());
+        FreeStyleBuild upBuild = j.assertBuildStatus(Result.FAILURE, upJob.scheduleBuild2(0).get());
         assertFalse(upBuild.isKeepLog());
         
-        assertBuildStatusSuccess(downJob.scheduleBuild2(0).get());
+        j.assertBuildStatusSuccess(downJob.scheduleBuild2(0).get());
         waitForBuild(promotionJob, 1);
         assertTrue(upBuild.isKeepLog());
     }
 
+    @Test
     public void testDoesNotMarkBuildIfBuildNotPromotion() throws Exception {
         FreeStyleProject job = createProject("job");
         job.getBuildersList().add(successfulBuilder());
@@ -94,7 +106,7 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
         // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
         fireItemListeners();
 
-        FreeStyleBuild build = assertBuildStatus(Result.FAILURE, job.scheduleBuild2(0).get());
+        FreeStyleBuild build = j.assertBuildStatus(Result.FAILURE, job.scheduleBuild2(0).get());
         assertFalse(build.isKeepLog());
     }
 
@@ -135,16 +147,15 @@ public class KeepBuildForeverActionTest extends HudsonTestCase {
     }
     
     private FreeStyleProject createProject(String name) throws Exception {
-        FreeStyleProject project = createFreeStyleProject(name);
+        FreeStyleProject project = j.createFreeStyleProject(name);
         project.getPublishersList().replaceBy(createFingerprinters());
         return project;
     }
     
     private List<Recorder> createFingerprinters() {
-        return Arrays.asList(
-            new ArtifactArchiver("*", null, false),
-            new Fingerprinter("", true)
-        );
+        Recorder r1 = new ArtifactArchiver("*", null, false);
+        Recorder r2 = new Fingerprinter("", true);
+        return Arrays.asList(r1, r2);
     }
 
     private FixedResultBuilder successfulBuilder() {

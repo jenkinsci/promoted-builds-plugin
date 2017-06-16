@@ -26,7 +26,7 @@ package hudson.plugins.promoted_builds.conditions;
 import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import hudson.model.FreeStyleBuild;
@@ -37,7 +37,6 @@ import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.plugins.promoted_builds.Status;
 import hudson.tasks.BuildTrigger;
-import jenkins.model.Jenkins;
 
 public final class DownstreamPassConditionTest {
 
@@ -45,7 +44,7 @@ public final class DownstreamPassConditionTest {
     public JenkinsRule j =  new JenkinsRule();
 
     @Test
-    @Bug(7739)
+    @Issue("JENKINS-7739")
     public void shouldEvaluateUpstreamRecursively() throws Exception {
         final FreeStyleProject job1 = j.createFreeStyleProject("job1");
         final FreeStyleProject job2 = j.createFreeStyleProject("job2");

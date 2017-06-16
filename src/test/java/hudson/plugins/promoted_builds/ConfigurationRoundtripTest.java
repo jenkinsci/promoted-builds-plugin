@@ -26,21 +26,33 @@ package hudson.plugins.promoted_builds;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import hudson.tasks.JavadocArchiver;
-import org.jvnet.hudson.test.Bug;
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.LocalData;
+
+import static com.gargoylesoftware.htmlunit.html.HtmlFormUtil.submit;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class ConfigurationRoundtripTest extends HudsonTestCase {
+public class ConfigurationRoundtripTest {
+
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
+
     /**
      * Configuration roundtrip test to detect data loss.
      */
+    @Test
     public void testRoundtrip() throws Exception {
-        FreeStyleProject down = createFreeStyleProject();
+        FreeStyleProject down = j.createFreeStyleProject();
 
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = j.createFreeStyleProject();
         JobPropertyImpl pp = new JobPropertyImpl(p);
         p.addProperty(pp);
 
@@ -51,7 +63,8 @@ public class ConfigurationRoundtripTest extends HudsonTestCase {
         proc.icon = "star-blue";
 
         // round trip
-        submit(new WebClient().getPage(p,"configure").getFormByName("config"));
+        JenkinsRule.WebClient wc = j.createWebClient();
+        submit(wc.getPage(p,"configure").getFormByName("config"));
 
         // assert that the configuration is still intact
         pp = p.getProperty(JobPropertyImpl.class);
@@ -68,11 +81,12 @@ public class ConfigurationRoundtripTest extends HudsonTestCase {
     }
 
     @LocalData
-    @Bug(17341)
+    @Issue("JENKINS-17341")
+    @Test
     public void testLoad() throws Exception {
-        FreeStyleProject j = jenkins.getItemByFullName("j", FreeStyleProject.class);
-        assertNotNull(j);
-        Promotion p = j.getProperty(JobPropertyImpl.class).getItem("OK").getBuildByNumber(1);
+        FreeStyleProject jProj = j.jenkins.getItemByFullName("j", FreeStyleProject.class);
+        assertNotNull(jProj);
+        Promotion p = jProj.getProperty(JobPropertyImpl.class).getItem("OK").getBuildByNumber(1);
         assertNotNull(p);
     }
 

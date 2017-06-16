@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>2.17</version>
+    <version>2.29</version>
   </parent>
 
   <artifactId>promoted-builds</artifactId>
@@ -12,10 +12,10 @@
   <packaging>hpi</packaging>
 
   <name>Jenkins promoted builds plugin</name>
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin</url>
+  <url>https://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin</url>
 
   <properties>
-    <jenkins.version>1.565</jenkins.version>
+    <jenkins.version>1.609.3</jenkins.version>
     <java.level>6</java.level>
   </properties>
 
@@ -48,34 +48,15 @@
   </licenses>
 
   <repositories>
-    <!-- needed unless you have a profile for those -->
-    <repository>
-      <id>jenkins-releases</id>
-      <url>http://repo.jenkins-ci.org/releases/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
     <repository>
       <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
+      <url>https://repo.jenkins-ci.org/public/</url>
     </repository>
   </repositories>
-
   <pluginRepositories>
-    <!-- needed unless you have a profile for those -->
     <pluginRepository>
       <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
+      <url>https://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -83,7 +64,7 @@
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>maven-plugin</artifactId>
-      <version>2.0</version>
+      <version>2.13</version>
     </dependency>
     <dependency>
       <groupId>com.sonyericsson.hudson.plugins.rebuild</groupId>
@@ -106,7 +87,7 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>token-macro</artifactId>
-      <version>1.10</version>
+      <version>1.12.1</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -124,7 +105,7 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>script-security</artifactId>
-      <version>1.16</version>
+      <version>1.26</version>
     </dependency>
     <dependency>
       <groupId>org.jvnet.hudson</groupId>
@@ -135,19 +116,19 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>parameterized-trigger</artifactId>
-      <version>2.30</version>
+      <version>2.33</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-auth</artifactId>
-      <version>1.0</version>
+      <version>1.6</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-project</artifactId>
-      <version>1.0</version>
+      <version>1.11</version>
       <scope>test</scope>
     </dependency>
     <dependency> <!-- required to workaround the missing CookieSpecProvider class -->

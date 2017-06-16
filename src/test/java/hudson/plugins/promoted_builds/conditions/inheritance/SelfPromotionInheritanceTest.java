@@ -26,7 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.Issue;
 
 
 /**
@@ -169,7 +169,7 @@ public class SelfPromotionInheritanceTest  {
     }
 
     @Test
-    @Bug(22679)
+    @Issue("JENKINS-22679")
     public void testPromotionEnvironmentShouldIncludeTargetParameters() throws Exception {
         String paramName = "param";
 

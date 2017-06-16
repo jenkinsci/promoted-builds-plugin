@@ -42,11 +42,11 @@ import jenkins.model.Jenkins;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
-import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 /** Verifies use of REST API to manipulate promotions. */
-@Bug(8963)
+@Issue("JENKINS-8963")
 public class RemoteApiTest {
 
     @Rule public JenkinsRule r = new JenkinsRule();

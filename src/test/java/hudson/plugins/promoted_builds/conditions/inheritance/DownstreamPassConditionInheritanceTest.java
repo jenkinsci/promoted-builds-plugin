@@ -26,7 +26,6 @@ package hudson.plugins.promoted_builds.conditions.inheritance;
 import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.Test;
-import org.jvnet.hudson.test.Bug;
 
 import hudson.model.Result;
 import hudson.plugins.project_inheritance.projects.InheritanceBuild;
@@ -39,7 +38,7 @@ import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import hudson.plugins.promoted_builds.inheritance.helpers.InheritanceProjectRule;
 import hudson.plugins.promoted_builds.inheritance.helpers.InheritanceProjectsPair;
 import hudson.tasks.BuildTrigger;
-import jenkins.model.Jenkins;
+import org.jvnet.hudson.test.Issue;
 
 public final class DownstreamPassConditionInheritanceTest {
 
@@ -47,7 +46,7 @@ public final class DownstreamPassConditionInheritanceTest {
     public InheritanceProjectRule j =  new InheritanceProjectRule();
 
     @Test
-    @Bug(7739)
+    @Issue("JENKINS-7739")
     public void shouldEvaluateUpstreamRecursively() throws Exception {
         final InheritanceProjectsPair pair1 = j.createInheritanceProjectDerivedWithBase();
         final InheritanceProjectsPair pair2 = j.createInheritanceProjectDerivedWithBase();
