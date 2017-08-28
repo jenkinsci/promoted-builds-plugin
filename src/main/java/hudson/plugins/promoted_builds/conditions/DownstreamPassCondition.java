@@ -27,13 +27,17 @@ import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.plugins.promoted_builds.util.JenkinsHelper;
+import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.acegisecurity.context.SecurityContext;
+import org.acegisecurity.context.SecurityContextHolder;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -262,67 +266,74 @@ public class DownstreamPassCondition extends PromotionCondition {
         @Override
         public void onCompleted(AbstractBuild<?,?> build, TaskListener listener) {
             // this is not terribly efficient,
-            EnvVars buildEnvironment = new EnvVars(build.getBuildVariables());
-            for(AbstractProject<?,?> j : JenkinsHelper.getInstance().getAllItems(AbstractProject.class)) {
-                boolean warned = false; // used to avoid warning for the same project more than once.
+            SecurityContext previousCtx = ACL.impersonate(ACL.SYSTEM);
+            try {
+                EnvVars buildEnvironment = new EnvVars(build.getBuildVariables());
+                for (AbstractProject<?, ?> j : JenkinsHelper.getInstance().getAllItems(AbstractProject.class)) {
+                    boolean warned = false; // used to avoid warning for the same project more than once.
 
-                JobPropertyImpl jp = j.getProperty(JobPropertyImpl.class);
-                if(jp!=null) {
-                    for (PromotionProcess p : jp.getItems()) {
-                        boolean considerPromotion = false;
-                        for (PromotionCondition cond : p.conditions) {
-                            if (cond instanceof DownstreamPassCondition) {
-                                DownstreamPassCondition dpcond = (DownstreamPassCondition) cond;
-                                if(dpcond.contains(j.getParent(), build.getParent(), buildEnvironment)) {
-                                    considerPromotion = true;
-                                    break;
+                    JobPropertyImpl jp = j.getProperty(JobPropertyImpl.class);
+                    if (jp != null) {
+                        for (PromotionProcess p : jp.getItems()) {
+                            boolean considerPromotion = false;
+                            for (PromotionCondition cond : p.conditions) {
+                                if (cond instanceof DownstreamPassCondition) {
+                                    DownstreamPassCondition dpcond = (DownstreamPassCondition) cond;
+                                    if (j.getACL().hasPermission(previousCtx.getAuthentication(), Item.READ)
+                                            && dpcond.contains(j.getParent(), build.getParent(), buildEnvironment)) {
+                                        considerPromotion = true;
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                        if(considerPromotion) {
-                            try {
-                                AbstractBuild<?,?> u = build.getUpstreamRelationshipBuild(j);
-                                if (u==null) {
-                                    // if the fingerprint doesn't tell us, perhaps the cause would tell us?
-                                    final Stack<List<Cause>> stack = new Stack<List<Cause>>();
-                                    stack.push(build.getCauses());
+                            if (considerPromotion) {
+                                try {
+                                    AbstractBuild<?, ?> u = build.getUpstreamRelationshipBuild(j);
+                                    if (u == null) {
+                                        // if the fingerprint doesn't tell us, perhaps the cause would tell us?
+                                        final Stack<List<Cause>> stack = new Stack<List<Cause>>();
+                                        stack.push(build.getCauses());
 
-                                    while(!stack.isEmpty()) {
-                                        for (UpstreamCause uc : Util.filter(stack.pop(), UpstreamCause.class)) {
-                                            if (uc.getUpstreamProject().equals(j.getFullName())) {
-                                                u = j.getBuildByNumber(uc.getUpstreamBuild());
-                                                if (u!=null) {
-                                                    // remember that this build is a pseudo-downstream of the discovered build.
-                                                    PseudoDownstreamBuilds pdb = u.getAction(PseudoDownstreamBuilds.class);
-                                                    if (pdb==null)
-                                                        u.addAction(pdb=new PseudoDownstreamBuilds());
-                                                    pdb.add(build);
-                                                    u.save();
-                                                    break;
+                                        while (!stack.isEmpty()) {
+                                            for (UpstreamCause uc : Util.filter(stack.pop(), UpstreamCause.class)) {
+                                                if (uc.getUpstreamProject().equals(j.getFullName())) {
+                                                    u = j.getBuildByNumber(uc.getUpstreamBuild());
+                                                    if (u != null) {
+                                                        // remember that this build is a pseudo-downstream of the discovered build.
+                                                        PseudoDownstreamBuilds pdb = u.getAction(PseudoDownstreamBuilds.class);
+                                                        if (pdb == null)
+                                                            u.addAction(pdb = new PseudoDownstreamBuilds());
+                                                        pdb.add(build);
+                                                        u.save();
+                                                        break;
+                                                    }
                                                 }
+                                                stack.push(uc.getUpstreamCauses());
                                             }
-                                            stack.push(uc.getUpstreamCauses());
                                         }
                                     }
-                                }
-                                if (u==null) {
-                                    // no upstream build. perhaps a configuration problem?
-                                    if(build.getResult()==Result.SUCCESS && !warned) {
-                                        listener.getLogger().println("WARNING: "+j.getFullDisplayName()+" appears to use this job as a promotion criteria, " +
-                                            "but no fingerprint is recorded. Fingerprint needs to be enabled on both this job and "+j.getFullDisplayName()+". " +
-                                                "See https://wiki.jenkins-ci.org/display/JENKINS/Fingerprint for more details");
-                                        warned = true;
+                                    if (u == null) {
+                                        // no upstream build. perhaps a configuration problem?
+                                        if (build.getResult() == Result.SUCCESS && !warned) {
+                                            listener.getLogger().println("WARNING: " + j.getFullDisplayName() + " appears to use this job as a promotion criteria, " +
+                                                    "but no fingerprint is recorded. Fingerprint needs to be enabled on both this job and " + j.getFullDisplayName() + ". " +
+                                                    "See https://wiki.jenkins-ci.org/display/JENKINS/Fingerprint for more details");
+                                            warned = true;
+                                        }
                                     }
-                                }
 
-                                if(u!=null && p.considerPromotion2(u)!=null)
-                                    listener.getLogger().println("Promoted "+HyperlinkNote.encodeTo('/'+u.getUrl(),u.getFullDisplayName()));
-                            } catch (IOException e) {
-                                e.printStackTrace(listener.error("Failed to promote a build"));
+                                    if (u != null && p.considerPromotion2(u) != null)
+                                        listener.getLogger().println("Promoted " + HyperlinkNote.encodeTo('/' + u.getUrl(), u.getFullDisplayName()));
+                                } catch (IOException e) {
+                                    e.printStackTrace(listener.error("Failed to promote a build"));
+                                }
                             }
                         }
                     }
                 }
+            }
+            finally {
+                SecurityContextHolder.setContext(previousCtx);
             }
         }
 
