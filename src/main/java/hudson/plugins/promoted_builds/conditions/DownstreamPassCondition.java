@@ -269,11 +269,11 @@ public class DownstreamPassCondition extends PromotionCondition {
             SecurityContext previousCtx = ACL.impersonate(ACL.SYSTEM);
             try {
                 EnvVars buildEnvironment = new EnvVars(build.getBuildVariables());
-                for (AbstractProject<?, ?> j : JenkinsHelper.getInstance().getAllItems(AbstractProject.class)) {
+                for (AbstractProject<?,?> j : JenkinsHelper.getInstance().getAllItems(AbstractProject.class)) {
                     boolean warned = false; // used to avoid warning for the same project more than once.
 
                     JobPropertyImpl jp = j.getProperty(JobPropertyImpl.class);
-                    if (jp != null) {
+                    if (jp!=null) {
                         for (PromotionProcess p : jp.getItems()) {
                             boolean considerPromotion = false;
                             for (PromotionCondition cond : p.conditions) {
@@ -288,8 +288,8 @@ public class DownstreamPassCondition extends PromotionCondition {
                             }
                             if (considerPromotion) {
                                 try {
-                                    AbstractBuild<?, ?> u = build.getUpstreamRelationshipBuild(j);
-                                    if (u == null) {
+                                    AbstractBuild<?,?> u = build.getUpstreamRelationshipBuild(j);
+                                    if (u==null) {
                                         // if the fingerprint doesn't tell us, perhaps the cause would tell us?
                                         final Stack<List<Cause>> stack = new Stack<List<Cause>>();
                                         stack.push(build.getCauses());
@@ -298,11 +298,11 @@ public class DownstreamPassCondition extends PromotionCondition {
                                             for (UpstreamCause uc : Util.filter(stack.pop(), UpstreamCause.class)) {
                                                 if (uc.getUpstreamProject().equals(j.getFullName())) {
                                                     u = j.getBuildByNumber(uc.getUpstreamBuild());
-                                                    if (u != null) {
+                                                    if (u!=null) {
                                                         // remember that this build is a pseudo-downstream of the discovered build.
                                                         PseudoDownstreamBuilds pdb = u.getAction(PseudoDownstreamBuilds.class);
-                                                        if (pdb == null)
-                                                            u.addAction(pdb = new PseudoDownstreamBuilds());
+                                                        if (pdb==null)
+                                                            u.addAction(pdb=new PseudoDownstreamBuilds());
                                                         pdb.add(build);
                                                         u.save();
                                                         break;
@@ -314,16 +314,16 @@ public class DownstreamPassCondition extends PromotionCondition {
                                     }
                                     if (u == null) {
                                         // no upstream build. perhaps a configuration problem?
-                                        if (build.getResult() == Result.SUCCESS && !warned) {
-                                            listener.getLogger().println("WARNING: " + j.getFullDisplayName() + " appears to use this job as a promotion criteria, " +
-                                                    "but no fingerprint is recorded. Fingerprint needs to be enabled on both this job and " + j.getFullDisplayName() + ". " +
+                                        if (build.getResult()==Result.SUCCESS && !warned) {
+                                            listener.getLogger().println("WARNING: "+j.getFullDisplayName()+" appears to use this job as a promotion criteria, " +
+                                                    "but no fingerprint is recorded. Fingerprint needs to be enabled on both this job and "+j.getFullDisplayName()+". " +
                                                     "See https://wiki.jenkins-ci.org/display/JENKINS/Fingerprint for more details");
                                             warned = true;
                                         }
                                     }
 
-                                    if (u != null && p.considerPromotion2(u) != null)
-                                        listener.getLogger().println("Promoted " + HyperlinkNote.encodeTo('/' + u.getUrl(), u.getFullDisplayName()));
+                                    if (u!=null && p.considerPromotion2(u)!=null)
+                                        listener.getLogger().println("Promoted " + HyperlinkNote.encodeTo('/'+u.getUrl(), u.getFullDisplayName()));
                                 } catch (IOException e) {
                                     e.printStackTrace(listener.error("Failed to promote a build"));
                                 }
