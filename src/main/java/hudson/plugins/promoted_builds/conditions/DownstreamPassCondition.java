@@ -279,8 +279,8 @@ public class DownstreamPassCondition extends PromotionCondition {
                             for (PromotionCondition cond : p.conditions) {
                                 if (cond instanceof DownstreamPassCondition) {
                                     DownstreamPassCondition dpcond = (DownstreamPassCondition) cond;
-                                    if (j.getACL().hasPermission(previousCtx.getAuthentication(), Item.READ)
-                                            && dpcond.contains(j.getParent(), build.getParent(), buildEnvironment)) {
+                                    if (dpcond.contains(j.getParent(), build.getParent(), buildEnvironment)
+                                            && j.getACL().hasPermission(previousCtx.getAuthentication(), Item.READ)) {
                                         considerPromotion = true;
                                         break;
                                     }
