@@ -266,9 +266,9 @@ public class DownstreamPassCondition extends PromotionCondition {
         @Override
         public void onCompleted(AbstractBuild<?,?> build, TaskListener listener) {
             // this is not terribly efficient,
+            EnvVars buildEnvironment = new EnvVars(build.getBuildVariables());
             SecurityContext previousCtx = ACL.impersonate(ACL.SYSTEM);
             try {
-                EnvVars buildEnvironment = new EnvVars(build.getBuildVariables());
                 for (AbstractProject<?,?> j : JenkinsHelper.getInstance().getAllItems(AbstractProject.class)) {
                     boolean warned = false; // used to avoid warning for the same project more than once.
 
