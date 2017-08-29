@@ -312,7 +312,7 @@ public class DownstreamPassCondition extends PromotionCondition {
                                             }
                                         }
                                     }
-                                    if (u == null) {
+                                    if (u==null) {
                                         // no upstream build. perhaps a configuration problem?
                                         if (build.getResult()==Result.SUCCESS && !warned) {
                                             listener.getLogger().println("WARNING: "+j.getFullDisplayName()+" appears to use this job as a promotion criteria, " +
