@@ -24,19 +24,14 @@
 package hudson.plugins.promoted_builds.conditions;
 
 import static org.junit.Assert.*;
-
-import org.acegisecurity.Authentication;
-import org.acegisecurity.context.SecurityContextHolder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import hudson.model.Actionable;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
-import hudson.model.User;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.PromotionProcess;
@@ -75,45 +70,7 @@ public final class DownstreamPassConditionTest {
         assertEquals("fingerprint relation", run3.getUpstreamRelationship(job1), -1);
         assertFalse("no promotion process", process.getBuilds().isEmpty());
 
-        assertPromotedSuccessfully(run1);
-    }
-
-    @Test
-    @Issue("JENKINS-37368")
-    public void shouldResetSecurityContext() throws Exception {
-        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
-        User user1 = User.get("user1");
-
-        Authentication originalAuth = user1.impersonate();
-        SecurityContextHolder.getContext().setAuthentication(originalAuth);
-
-        final FreeStyleProject job1 = j.createFreeStyleProject("job1");
-        final FreeStyleProject job2 = j.createFreeStyleProject("job2");
-
-        final JobPropertyImpl property = new JobPropertyImpl(job1);
-        job1.addProperty(property);
-
-        final PromotionProcess process = property.addProcess("promotion");
-        process.conditions.add(new DownstreamPassCondition(job2.getFullName()));
-
-        job1.getPublishersList().add(new BuildTrigger(job2.getFullName(), Result.SUCCESS));
-        j.jenkins.rebuildDependencyGraph();
-
-        final FreeStyleBuild run1 = j.buildAndAssertSuccess(job1);
-        j.waitUntilNoActivity();
-        j.assertBuildStatusSuccess(job2.getLastBuild());
-        j.waitUntilNoActivity();
-
-        assertPromotedSuccessfully(run1);
-
-        assertEquals("security context not reset", SecurityContextHolder.getContext().getAuthentication(), originalAuth);
-    }
-
-    /**
-     * Asserts that a build was promoted successfully.
-     */
-    private void assertPromotedSuccessfully(Actionable build) {
-        final PromotedBuildAction action = build.getAction(PromotedBuildAction.class);
+        final PromotedBuildAction action = run1.getAction(PromotedBuildAction.class);
         assertNotNull("no promoted action", action);
 
         final Status promotion = action.getPromotion("promotion");
