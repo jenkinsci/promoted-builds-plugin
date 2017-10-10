@@ -1,7 +1,8 @@
 
 package hudson.plugins.promoted_builds.inheritance;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import hudson.Extension;
 import hudson.model.JobProperty;
@@ -19,7 +20,7 @@ import hudson.plugins.promoted_builds.JobPropertyImpl;
 @Extension(optional=true)
 public class JobPropertyImplSelector extends InheritanceSelector<JobProperty<?>> {
     private static final long serialVersionUID = 1L;
-    private static final Logger logger = Logger.getLogger(JobPropertyImplSelector.class);
+    private static final Logger logger = Logger.getLogger(JobPropertyImplSelector.class.getName());
 
     @Override
     public boolean isApplicableFor(Class<?> clazz){
@@ -59,7 +60,7 @@ public class JobPropertyImplSelector extends InheritanceSelector<JobProperty<?>>
             JobPropertyImpl newJobProperty = new JobPropertyImpl(jobPropertyImpl, caller);
             return newJobProperty;
         } catch (Exception ex){
-            logger.error("Error during hacking up JobPropertyImpl", ex );
+            logger.log(Level.WARNING, "Error during hacking up JobPropertyImpl", ex );
         }
         return jobProperty;
     }
