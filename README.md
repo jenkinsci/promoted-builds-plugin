@@ -1,8 +1,6 @@
 
 See the wiki at: <http://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin>
 
-Build Status: [![Build Status](https://jenkins.ci.cloudbees.com/job/plugins/job/promoted-builds-plugin/badge/icon)](https://jenkins.ci.cloudbees.com/job/plugins/job/promoted-builds-plugin/)
-
 This plugin allows you to distinguish good builds from bad builds by
 introducing the notion of 'promotion'.Put simply, a promoted build is a
 successful build that passed additional criteria (such as more comprehensive
