@@ -29,9 +29,15 @@ import hudson.model.Run;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
+/**
+ * Disables the rebuild button for {@link Promotion} objects since rebuilding
+ * is handled separately for them.
+ *
+ * @see Status
+ */
 @Extension
 @Restricted(NoExternalUse.class)
-public class RebuildPromotionSuppressor extends RebuildValidator {
+public class PromotionRebuildValidator extends RebuildValidator {
 
     @Override
     public boolean isApplicable(Run build) {

@@ -1,5 +1,6 @@
 package hudson.plugins.promoted_builds;
 
+import com.sonyericsson.rebuild.RebuildAction;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.console.ConsoleLogFilter;
@@ -73,6 +74,16 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
     public Promotion(PromotionProcess project, File buildDir) throws IOException {
         super(project, buildDir);
+    }
+
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        // JENKINS-22068: Remove any RebuildAction attached to this promotion before PromotionRebuildValidator was added.
+        RebuildAction a = getAction(RebuildAction.class);
+        if (a != null) {
+            getActions().remove(a);
+        }
     }
 
     /**
