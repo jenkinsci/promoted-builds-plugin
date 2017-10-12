@@ -1,5 +1,6 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.Functions;
 import hudson.model.FreeStyleProject;
 import hudson.model.Items;
 import hudson.model.ParameterDefinition;
@@ -9,6 +10,7 @@ import hudson.model.StringParameterDefinition;
 import hudson.model.FreeStyleBuild;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.tasks.ArtifactArchiver;
+import hudson.tasks.BatchFile;
 import hudson.tasks.BuildTrigger;
 import hudson.tasks.Fingerprinter;
 import hudson.tasks.Recorder;
@@ -46,7 +48,9 @@ public class PromotionProcessTest {
         List<Recorder> recorders = Arrays.asList(r1, r2);
 
         // upstream job
-        up.getBuildersList().add(new Shell("date > a.jar"));
+        up.getBuildersList().add(Functions.isWindows()
+                ? new BatchFile("date > a.jar")
+                : new Shell("date > a.jar"));
         up.getPublishersList().replaceBy(recorders);
 
         // promote if the downstream passes
@@ -57,11 +61,15 @@ public class PromotionProcessTest {
 
         // this is the test job
         String baseUrl = j.createWebClient().getContextPath() + "job/up/lastSuccessfulBuild";
-        down.getBuildersList().add(new Shell(
-            "wget -N "+baseUrl+"/artifact/a.jar \\\n"+
-            "  || curl "+baseUrl+"/artifact/a.jar > a.jar\n"+
-            "expr $BUILD_NUMBER % 2 - 1\n"  // expr exits with non-zero status if result is zero
-        ));
+        String artifactUrl = baseUrl + "/artifact/a.jar";
+        down.getBuildersList().add(Functions.isWindows()
+                ? new BatchFile("powershell -command \"Invoke-WebRequest "+artifactUrl+" -OutFile a.jar\"\r\n"+
+                        "set /a \"exitCode=(BUILD_NUMBER%%2)-1\"\r\n"+
+                        "exit /b %exitCode%\r\n")
+                : new Shell("wget -N "+artifactUrl+" \\\n"+
+                        "  || curl "+artifactUrl+" > a.jar\n"+
+                        "expr $BUILD_NUMBER % 2 - 1\n") // expr exits with non-zero status if result is zero
+        );
         down.getPublishersList().replaceBy(recorders);
 
         // fire ItemListeners, this includes ArtifactArchiver,Migrator to make this test compatible with jenkins 1.575+
@@ -108,9 +116,11 @@ public class PromotionProcessTest {
         j.jenkins.rebuildDependencyGraph();
         
         // this is the downstream job
-        down.getBuildersList().add(new Shell(
-            "expr $BUILD_NUMBER % 2 - 1\n"  // expr exits with non-zero status if result is zero
-        ));
+        down.getBuildersList().add(Functions.isWindows()
+                ? new BatchFile("set /a \"exitCode=(BUILD_NUMBER%%2)-1\"\r\n"+
+                        "exit /b %exitCode%\r\n")
+                : new Shell("expr $BUILD_NUMBER % 2 - 1\n")  // expr exits with non-zero status if result is zero
+        );
 
         // not yet promoted while the downstream is failing
         FreeStyleBuild up1 = j.assertBuildStatusSuccess(up.scheduleBuild2(0).get());
