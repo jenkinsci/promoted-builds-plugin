@@ -1,6 +1,5 @@
 package hudson.plugins.promoted_builds;
 
-import com.sonyericsson.rebuild.RebuildAction;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.console.ConsoleLogFilter;
@@ -56,6 +55,9 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.HttpResponses;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * Records a promotion process.
@@ -76,16 +78,6 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         super(project, buildDir);
     }
 
-    @Override
-    protected void onLoad() {
-        super.onLoad();
-        // JENKINS-22068: Remove any RebuildAction attached to this promotion before PromotionRebuildValidator was added.
-        RebuildAction a = getAction(RebuildAction.class);
-        if (a != null) {
-            getActions().remove(a);
-        }
-    }
-
     /**
      * Gets the build that this promotion promoted.
      *
@@ -95,7 +87,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     @Exported
     public AbstractBuild<?,?> getTarget() {
         PromotionTargetAction pta = getAction(PromotionTargetAction.class);
-        return pta.resolve(this);
+        return pta == null ? null : pta.resolve(this);
     }
 
     @Override public AbstractBuild<?,?> getRootBuild() {
@@ -297,8 +289,14 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     }
 
     public void run() {
-        getStatus().addPromotionAttempt(this);
+        if (getTarget() != null) {
+            getStatus().addPromotionAttempt(this);
+        }
         run(new RunnerImpl(this));
+    }
+
+    public void doRebuild(StaplerRequest req, StaplerResponse rsp) throws IOException {
+        throw HttpResponses.error(404, "Promotions may not be rebuilt directly");
     }
 
     protected class RunnerImpl extends AbstractRunner {
@@ -310,6 +308,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
+            if (getTarget() == null) {
+                throw new IOException("No Promotion target, cannot retrieve workspace");
+            }
             String customWorkspace = Promotion.this.getProject().getCustomWorkspace();
             if (customWorkspace != null) {
                 final FilePath rootPath = n.getRootPath();
@@ -397,7 +398,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             if(getResult()== Result.SUCCESS)
                 getStatus().onSuccessfulPromotion(Promotion.this);
             // persist the updated build record
-            getTarget().save();
+            if (getTarget() != null) {
+                getTarget().save();
+            }
 
             if (getResult() == Result.SUCCESS) {
                 // we should evaluate any other pending promotions in case
