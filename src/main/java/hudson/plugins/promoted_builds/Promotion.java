@@ -288,15 +288,15 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     	return definitions;
     }
 
+    public void doRebuild(StaplerRequest req, StaplerResponse rsp) throws IOException {
+        throw HttpResponses.error(404, "Promotions may not be rebuilt directly");
+    }
+
     public void run() {
         if (getTarget() != null) {
             getStatus().addPromotionAttempt(this);
         }
         run(new RunnerImpl(this));
-    }
-
-    public void doRebuild(StaplerRequest req, StaplerResponse rsp) throws IOException {
-        throw HttpResponses.error(404, "Promotions may not be rebuilt directly");
     }
 
     protected class RunnerImpl extends AbstractRunner {
