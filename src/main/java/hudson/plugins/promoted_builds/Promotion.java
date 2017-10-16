@@ -395,12 +395,15 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         protected void post2(BuildListener listener) throws Exception {
+            if (getTarget() == null) {
+                listener.error("No Promotion target, cannot save target or update status");
+                return;
+            }
+
             if(getResult()== Result.SUCCESS)
                 getStatus().onSuccessfulPromotion(Promotion.this);
             // persist the updated build record
-            if (getTarget() != null) {
-                getTarget().save();
-            }
+            getTarget().save();
 
             if (getResult() == Result.SUCCESS) {
                 // we should evaluate any other pending promotions in case
