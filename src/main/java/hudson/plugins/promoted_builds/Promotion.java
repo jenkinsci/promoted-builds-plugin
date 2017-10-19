@@ -55,6 +55,9 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.HttpResponses;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * Records a promotion process.
@@ -84,7 +87,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     @Exported
     public AbstractBuild<?,?> getTarget() {
         PromotionTargetAction pta = getAction(PromotionTargetAction.class);
-        return pta.resolve(this);
+        return pta == null ? null : pta.resolve(this);
     }
 
     @Override public AbstractBuild<?,?> getRootBuild() {
@@ -285,8 +288,14 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     	return definitions;
     }
 
+    public void doRebuild(StaplerRequest req, StaplerResponse rsp) throws IOException {
+        throw HttpResponses.error(404, "Promotions may not be rebuilt directly");
+    }
+
     public void run() {
-        getStatus().addPromotionAttempt(this);
+        if (getTarget() != null) {
+            getStatus().addPromotionAttempt(this);
+        }
         run(new RunnerImpl(this));
     }
 
@@ -299,6 +308,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
+            if (getTarget() == null) {
+                throw new IOException("No Promotion target, cannot retrieve workspace");
+            }
             String customWorkspace = Promotion.this.getProject().getCustomWorkspace();
             if (customWorkspace != null) {
                 final FilePath rootPath = n.getRootPath();
@@ -383,6 +395,11 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         protected void post2(BuildListener listener) throws Exception {
+            if (getTarget() == null) {
+                listener.error("No Promotion target, cannot save target or update status");
+                return;
+            }
+
             if(getResult()== Result.SUCCESS)
                 getStatus().onSuccessfulPromotion(Promotion.this);
             // persist the updated build record
