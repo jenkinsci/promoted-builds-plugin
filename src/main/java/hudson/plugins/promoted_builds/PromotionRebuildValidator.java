@@ -35,7 +35,7 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
  *
  * @see Status
  */
-@Extension
+@Extension(optional=true)
 @Restricted(NoExternalUse.class)
 public class PromotionRebuildValidator extends RebuildValidator {
 
