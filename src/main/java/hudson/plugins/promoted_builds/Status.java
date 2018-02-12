@@ -12,6 +12,7 @@ import hudson.model.Result;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.util.Iterators;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.StaplerRequest;
@@ -398,7 +399,15 @@ public final class Status {
                     JSONArray a = JSONArray.fromObject(formData.get("parameter"));
 
                     for (Object o : a) {
-                        JSONObject jo = (JSONObject) o;
+                        final JSONObject jo;
+                        if (o instanceof JSONObject) {
+                            jo = (JSONObject) o;
+                        } else if (o instanceof JSONNull) {
+                            continue; // ignore nulls
+                        } else {
+                            throw new IllegalArgumentException("Array type is not supported " + o);
+                        }
+
                         String name = jo.getString("name");
 
                         ParameterDefinition d = manualCondition.getParameterDefinition(name);
