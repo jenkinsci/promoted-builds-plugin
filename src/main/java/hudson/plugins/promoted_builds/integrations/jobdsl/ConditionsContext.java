@@ -11,6 +11,8 @@ import javaposse.jobdsl.dsl.helpers.BuildParametersContext;
 
 import javaposse.jobdsl.plugin.DslEnvironment;
 
+import javax.annotation.CheckForNull;
+
 import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 
 public class ConditionsContext implements Context {
@@ -56,17 +58,17 @@ public class ConditionsContext implements Context {
 		this.dslEnvironment = dslEnvironment;
 	}
 
-	public void selfPromotion(Boolean evenIfUnstable) {
+	public void selfPromotion(@CheckForNull Boolean evenIfUnstable) {
 		isSelfPromotion = true;
-		if (evenIfUnstable) {
-			this.evenIfUnstable = evenIfUnstable;
+		if (evenIfUnstable != null && evenIfUnstable) {
+			this.evenIfUnstable = true;
 		}
 	}
 
-	public void parameterizedSelfPromotion(Boolean evenIfUnstable, String parameterName, String parameterValue) {
+	public void parameterizedSelfPromotion(@CheckForNull Boolean evenIfUnstable, String parameterName, String parameterValue) {
 		isParameterizedSelfPromotion = true;
-		if (evenIfUnstable) {
-			this.isParameterizedSelfPromotion = evenIfUnstable;
+		if (evenIfUnstable != null && evenIfUnstable) {
+			this.isParameterizedSelfPromotion = true;
 		}
 		this.parameterName = parameterName;
 		this.parameterValue = parameterValue;
@@ -94,10 +96,10 @@ public class ConditionsContext implements Context {
 		params.putAll(parametersContext.getBuildParameterNodes());
 	}
 
-	public void downstream(Boolean evenIfUnstable, String jobs) {
+	public void downstream(@CheckForNull Boolean evenIfUnstable, String jobs) {
 		isDownstreamPass = true;
-		if (evenIfUnstable) {
-			this.evenIfUnstableDownstream = evenIfUnstable;
+		if (evenIfUnstable != null && evenIfUnstable) {
+			this.evenIfUnstableDownstream = true;
 		}
 		this.jobs = jobs;
 	}
