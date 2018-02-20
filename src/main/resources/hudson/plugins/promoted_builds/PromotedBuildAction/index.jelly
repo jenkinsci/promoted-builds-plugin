@@ -50,7 +50,7 @@
             <div>
               <!-- JENKINS-20492: show re-execute event when manually approved -->
               <j:choose>
-                <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
+                <j:when test="${it.getPromotionProcess(p.name)!=null and p.canBuild()}">
                   <form style="float:right" method="post" action="${p.name}/build">
                     <f:submit value="${%Re-execute promotion}"/>
                   </form>
@@ -96,7 +96,7 @@
               <a href="../../promotion/process/${p.name}" class="model-link">${p.name}</a>
             </h2>
             <j:choose>
-              <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote()}">
+              <j:when test="${it.getPromotionProcess(p.name)!=null and it.canPromote(p.name)}">
                 <form style="float:right" method="post" action="forcePromotion?name=${p.name}">
                   <f:submit value="${%Force promotion}"/>
                 </form>

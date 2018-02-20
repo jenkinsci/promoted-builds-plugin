@@ -362,6 +362,22 @@ public final class Status {
         ManualCondition manualCondition=(ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());
     	return manualCondition != null;
     }
+
+    public boolean canBuild() {
+        PromotionProcess process = getProcess();
+        if (process == null) {
+            return false;
+        }
+
+        AbstractBuild<?, ?> target = getTarget();
+        if (target == null) {
+            return false;
+        }
+
+        ManualCondition manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());
+        return PromotionPermissionHelper.hasPermission(target.getProject(), manualCondition);
+    }
+
     /**
      * Schedules a new build.
      * @param req Request
@@ -382,10 +398,8 @@ public final class Status {
         }
         
         ManualCondition manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());     
-        if(!target.hasPermission(Promotion.PROMOTE)) {
-            if (manualCondition == null || (!manualCondition.getUsersAsSet().isEmpty() && !manualCondition.isInUsersList()
-                    && !manualCondition.isInGroupList()))
-                return;
+        if (!PromotionPermissionHelper.hasPermission(target.getProject(), manualCondition)) {
+            return;
         }
         
         JSONObject formData = req.getSubmittedForm();

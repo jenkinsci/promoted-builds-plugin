@@ -1,10 +1,12 @@
 package hudson.plugins.promoted_builds;
 
+import hudson.RestrictedSince;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildBadgeAction;
 import hudson.model.Cause.UserCause;
+import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.util.CopyOnWriteList;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
@@ -17,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 
@@ -134,8 +138,24 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         return !statuses.isEmpty();
     }
 
+    /**
+     * @deprecated For internal code use {@link #canPromote(String)} with the name of the process that will be promoted instead.
+     */
+    @Deprecated
+    @Restricted(NoExternalUse.class)
+    @RestrictedSince("3.0")
     public boolean canPromote() {
         return this.getProject().hasPermission(Promotion.PROMOTE);
+    }
+
+    @Restricted(NoExternalUse.class)
+    public boolean canPromote(String processName) {
+        PromotionProcess process = getPromotionProcess(processName);
+        ManualCondition manualCondition = null;
+        if (process != null) {
+            manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());
+        }
+        return PromotionPermissionHelper.hasPermission(getProject(), manualCondition);
     }
 
     /**
@@ -210,8 +230,6 @@ public final class PromotedBuildAction implements BuildBadgeAction {
 //            return;
 //        }
 
-        this.getProject().checkPermission(Promotion.PROMOTE);
-
         JobPropertyImpl pp = getProject().getProperty(JobPropertyImpl.class);
         if(pp==null)
             throw new IllegalStateException("This project doesn't have any promotion criteria set");
@@ -219,6 +237,9 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         PromotionProcess p = pp.getItem(name);
         if(p==null)
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
+
+        ManualCondition manualCondition = (ManualCondition) p.getPromotionCondition(ManualCondition.class.getName());
+        PromotionPermissionHelper.checkPermission(getProject(), manualCondition);
 
         p.promote(owner,new UserCause(),new ManualPromotionBadge());
 

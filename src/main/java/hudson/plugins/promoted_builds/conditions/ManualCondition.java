@@ -11,6 +11,7 @@ import hudson.model.SimpleParameterDefinition;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.User;
+import hudson.plugins.promoted_builds.PromotionPermissionHelper;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
@@ -128,7 +129,7 @@ public class ManualCondition extends PromotionCondition {
      * approved.
      */
     public boolean canApprove(PromotionProcess promotionProcess, AbstractBuild<?,?> build) {
-        if (!getUsersAsSet().isEmpty() && !isInUsersList() && !isInGroupList()) {
+        if (!PromotionPermissionHelper.hasPermission(build.getProject(), this)) {
             return false;
         }
         

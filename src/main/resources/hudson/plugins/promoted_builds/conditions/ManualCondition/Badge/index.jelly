@@ -1,6 +1,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
   <l:pane title="${%Manually Approved}" width="100"><tr><td>
+    <j:if test="${p.canBuild()}">
     <f:form method="post" action="${h.encode(p.name)}/build" name="build">
         <j:if test="${!p.last.parameterDefinitionsWithValue.isEmpty()}">
           <f:section title="${%Parameters}">
@@ -13,5 +14,6 @@
           <f:submit value="${%Re-execute promotion}" />
         </f:block>
     </f:form>
+    </j:if>
   </td></tr></l:pane>
 </j:jelly>
