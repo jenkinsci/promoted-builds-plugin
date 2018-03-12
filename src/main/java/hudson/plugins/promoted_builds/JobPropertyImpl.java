@@ -36,11 +36,17 @@ import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import hudson.model.listeners.ItemListener;
+import hudson.search.Search;
+import hudson.search.SearchIndex;
+import hudson.security.ACL;
+import hudson.security.Permission;
 import hudson.util.IOUtils;
+import java.util.Collection;
 import javax.annotation.CheckForNull;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.acegisecurity.AccessDeniedException;
 
 /**
  * Promotion processes defined for a project.
@@ -51,7 +57,7 @@ import net.sf.json.JSONObject;
  * </p>
  * @author Kohsuke Kawaguchi
  */
-public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> implements ItemGroup<PromotionProcess> {
+public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> implements ItemGroup<PromotionProcess>, Item {
     /**
      * These are loaded from the disk in a different way.
      */
@@ -401,6 +407,91 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     @Deprecated
     public Action getJobAction(AbstractProject<?,?> job) {
         return new PromotedProjectAction(job,this);
+    }
+
+    @Override
+    public ItemGroup<? extends Item> getParent() {
+        return owner.getParent();
+    }
+
+    @Override
+    public Collection<? extends Job> getAllJobs() {
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public String getRelativeNameFrom(ItemGroup ig) {
+        return null;
+    }
+
+    @Override
+    public String getRelativeNameFrom(Item item) {
+        return null;
+    }
+
+    @Override
+    public String getShortUrl() {
+        return null;
+    }
+
+    @Override
+    public String getAbsoluteUrl() {
+        return null;
+    }
+
+    @Override
+    public void onLoad(ItemGroup<? extends Item> ig, String string) throws IOException {
+    }
+
+    @Override
+    public void onCopiedFrom(Item item) {
+    }
+
+    @Override
+    public void onCreatedFromScratch() {
+    }
+
+    @Override
+    public void delete() throws IOException, InterruptedException {
+    }
+
+    @Override
+    public Search getSearch() {
+        return null;
+    }
+
+    @Override
+    public String getSearchName() {
+        return null;
+    }
+
+    @Override
+    public String getSearchUrl() {
+        return null;
+    }
+
+    @Override
+    public SearchIndex getSearchIndex() {
+        return null;
+    }
+
+    @Override
+    public ACL getACL() {
+        return null;
+    }
+
+    @Override
+    public void checkPermission(Permission prmsn) throws AccessDeniedException {
+    }
+
+    @Override
+    public boolean hasPermission(Permission prmsn) {
+        return true;
     }
 
     @Extension
