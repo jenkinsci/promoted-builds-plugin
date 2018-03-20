@@ -155,7 +155,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         if (process != null) {
             manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());
         }
-        return PromotionPermissionHelper.hasPermission(getProject(), manualCondition);
+        return PromotionPermissionHelper.hasPermission(getProject(), owner, manualCondition);
     }
 
     /**
@@ -239,7 +239,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
             throw new IllegalStateException("This project doesn't have the promotion criterion called "+name);
 
         ManualCondition manualCondition = (ManualCondition) p.getPromotionCondition(ManualCondition.class.getName());
-        PromotionPermissionHelper.checkPermission(getProject(), manualCondition);
+        PromotionPermissionHelper.checkPermission(getProject(), owner, manualCondition);
 
         p.promote(owner,new UserCause(),new ManualPromotionBadge());
 

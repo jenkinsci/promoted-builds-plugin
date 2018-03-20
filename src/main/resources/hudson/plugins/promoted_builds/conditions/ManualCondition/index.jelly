@@ -4,7 +4,7 @@
     <f:form method="post" action="promotionProcess/${h.encode(p.name)}/promotionCondition/hudson.plugins.promoted_builds.conditions.ManualCondition/approve" name="approve">
       <j:if test="${!it.usersAsSet.isEmpty()}">
         <f:entry title="${%Approvers}" description="${%List of users or groups that can approve this promotion}">
-          <f:textbox value="${it.users}" readonly="true"/>
+          <f:textbox value="${it.getUsersAsSet(pba.owner)}" readonly="true"/>
 	</f:entry>
       </j:if>
       <j:if test="${it.canApprove(p, pba.owner)}">
