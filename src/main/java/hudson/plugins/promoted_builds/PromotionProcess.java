@@ -57,6 +57,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.annotation.CheckForNull;
@@ -89,6 +90,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * Tells if this promotion should be hidden.
      */
     public String isVisible;
+
+    /**
+     * Trigger promotion when any criteria condition is met.
+     */
+    public boolean any_met_condition;
 
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
 
@@ -144,6 +150,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             assignedLabel = null;
         }
         isVisible = c.getString("isVisible");
+        any_met_condition = c.optBoolean("any_met_condition");
         save();
     }
 
@@ -372,11 +379,21 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
         for (PromotionCondition cond : conditions) {
             PromotionBadge b = cond.isMet(this, build);
-            if(b==null)
-                return null;
-            badges.add(b);
+            LOGGER.log(Level.INFO, "PromotionProcess.isMet(): any_met_condition={0}", this.any_met_condition);
+            if (this.any_met_condition) {
+                if (b!=null)
+                    badges.add(b);
+            } else {
+                if(b==null)
+                    return null;
+                badges.add(b);
+            }
         }
-        return new Status(this,badges);
+        if (badges.isEmpty()) {
+            return null;
+        } else {
+            return new Status(this,badges);
+        }
     }
 
     /**
