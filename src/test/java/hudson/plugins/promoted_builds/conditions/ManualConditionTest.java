@@ -302,10 +302,11 @@ public class ManualConditionTest {
             wc.login("promoter", "promoter");
             try {
                 wc.getPage(b, String.format("promotion/%s/build?json={}", pp.getName()));
+                fail();
             } catch (FailingHttpStatusCodeException e) {
                 assertThat(e.getStatusCode(), equalTo(404)); // Redirect after the build is broken.
             }
-            assertThat(pp.getBuildByNumber(2).getResult(), equalTo(Result.SUCCESS));
+            assertThat(waitForBuildByNumber(pp, 2).getResult(), equalTo(Result.SUCCESS));
         }
 
         {
@@ -314,10 +315,11 @@ public class ManualConditionTest {
             wc.login("non-promoter", "non-promoter");
             try {
                 wc.getPage(b, String.format("promotion/%s/build?json={}", pp.getName()));
+                fail();
             } catch (FailingHttpStatusCodeException e) {
                 assertThat(e.getStatusCode(), equalTo(404)); // Redirect after the build is broken.
             }
-            assertThat(pp.getBuildByNumber(3).getResult(), equalTo(Result.SUCCESS));
+            assertThat(waitForBuildByNumber(pp, 3).getResult(), equalTo(Result.SUCCESS));
         }
 
         {
@@ -325,13 +327,20 @@ public class ManualConditionTest {
             cond.setUsers("non-promoter");
             wc.login("promoter", "promoter");
             // Status#doBuild does a bare `return;` without scheduling the build in this case, which is why we use goTo with "" for the MIME type.
-            try {
-                wc.goTo(String.format("job/%s/%d/promotion/%s/build?json={}", p.getName(), b.getNumber(), pp.getName()), "");
-            } catch (FailingHttpStatusCodeException e) {
-                assertThat(e.getStatusCode(), equalTo(404)); // Redirect after the build is broken.
-            }
+            wc.goTo(String.format("job/%s/%d/promotion/%s/build?json={}", p.getName(), b.getNumber(), pp.getName()), "");
             assertThat(pp.getBuildByNumber(4), nullValue());
         }
+    }
+    
+    private Promotion waitForBuildByNumber(PromotionProcess pp, int n) throws InterruptedException {
+        for(int i = 0; i < 100; i++){
+            Promotion promotion = pp.getBuildByNumber(n);
+            if(promotion != null && promotion.getResult() != null){
+                return promotion;
+            }
+            Thread.sleep(50);
+        }
+        throw new AssertionError("Timeout to retrieve the buildByNumber: " + n);
     }
 
     private PromotionProcess addPromotionProcess(AbstractProject<?,?> owner, String name) throws Exception {
