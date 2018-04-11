@@ -398,6 +398,7 @@ public final class Status {
         }
         
         ManualCondition manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());     
+        // TODO: Use PromotionPermissionHelper.checkPermission instead, but consider issues with backwards compatibility.
         if (!PromotionPermissionHelper.hasPermission(target.getProject(), manualCondition)) {
             return;
         }

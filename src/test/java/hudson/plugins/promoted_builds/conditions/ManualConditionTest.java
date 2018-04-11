@@ -292,6 +292,7 @@ public class ManualConditionTest {
         {
             // Re-execute promotion as user without Promotion/Promote when no users are specified
             wc.login("non-promoter", "non-promoter");
+            // The build is not scheduled but we `return;` from the method in this case, which is why we use goTo with "" for the MIME type.
             wc.goTo(String.format("job/%s/%d/promotion/%s/build?json={}", p.getName(), b.getNumber(), pp.getName()), "");
             assertThat(pp.getBuildByNumber(2), nullValue());
         }
@@ -323,6 +324,7 @@ public class ManualConditionTest {
             // Re-execute promotion as unspecified user with Promotion/Promote
             cond.setUsers("non-promoter");
             wc.login("promoter", "promoter");
+            // The build is not scheduled but we `return;` from the method in this case, which is why we use goTo with "" for the MIME type.
             try {
                 wc.goTo(String.format("job/%s/%d/promotion/%s/build?json={}", p.getName(), b.getNumber(), pp.getName()), "");
             } catch (FailingHttpStatusCodeException e) {
