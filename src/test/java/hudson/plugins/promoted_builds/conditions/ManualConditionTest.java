@@ -330,7 +330,6 @@ public class ManualConditionTest {
             } catch (FailingHttpStatusCodeException e) {
                 fail();
             }
-            Thread.sleep(2000);
             assertThat(pp.getBuildByNumber(4), nullValue());
         }
     }
