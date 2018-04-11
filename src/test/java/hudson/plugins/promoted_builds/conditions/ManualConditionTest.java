@@ -325,11 +325,7 @@ public class ManualConditionTest {
             // Re-execute promotion as unspecified user with Promotion/Promote
             cond.setUsers("non-promoter");
             wc.login("promoter", "promoter");
-            try {
-                wc.goTo(String.format("job/%s/%d/promotion/%s/build?json={}", p.getName(), b.getNumber(), pp.getName()), "");
-            } catch (FailingHttpStatusCodeException e) {
-                fail();
-            }
+            wc.goTo(String.format("job/%s/%d/promotion/%s/build?json={}", p.getName(), b.getNumber(), pp.getName()), "");
             assertThat(pp.getBuildByNumber(4), nullValue());
         }
     }
