@@ -28,7 +28,7 @@ THE SOFTWARE.
 	xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
 	<f:entry title="${it.name}" description="${it.description}">
         <div name="parameter">
-            <a href="${rootURL}/${it.run.url}">${it.run}</a>
+            <a href="${rootURL}/${it.run.url}">${it.run.fullDisplayName}</a>
             <input type="hidden" name="name" value="${it.name}" />
             <input type="hidden" name="runId" value="${it.run.externalizableId}" />
         </div>
