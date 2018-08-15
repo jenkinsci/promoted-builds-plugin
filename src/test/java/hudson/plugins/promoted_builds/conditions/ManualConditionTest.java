@@ -2,14 +2,17 @@ package hudson.plugins.promoted_builds.conditions;
 
 import hudson.ExtensionList;
 import hudson.model.AbstractProject;
+import hudson.model.Cause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Item;
+import hudson.model.ParametersAction;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.Result;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
 import hudson.model.StringParameterDefinition;
+import hudson.model.StringParameterValue;
 import hudson.model.User;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotedBuildAction;
@@ -264,6 +267,25 @@ public class ManualConditionTest {
         }
 
         {
+            // Approvers specified in varaible, user is approver, but does not have Promotion/Promote
+            cond.setUsers("${approver}");
+            List<ParameterValue> paramsList = new ArrayList<ParameterValue>();
+            paramsList.add(new StringParameterValue("approver", "non-promoter"));
+            //FreeStyleBuild b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+            FreeStyleBuild b = j.assertBuildStatusSuccess(
+                    p.scheduleBuild2(
+                            0,
+                            new Cause.RemoteCause("test-host", ""),
+                            new ParametersAction(paramsList)));
+            SecurityContext previous = ACL.impersonate(User.get("non-promoter").impersonate());
+            j.assertBuildStatusSuccess(cond.approve(b, pp, Collections.EMPTY_LIST));
+            ACL.impersonate(previous.getAuthentication());
+            ManualApproval approval = b.getAction(ManualApproval.class);
+            assertThat("If users are specified in variable, then users in that list should be able to approve even without Promotion/Promote permissions",
+                    approval, notNullValue());
+        }
+
+        {
             // Approvers specified, user is not approver, but does have Promotion/Promote
             cond.setUsers("non-promoter");
             FreeStyleBuild b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
@@ -283,7 +305,14 @@ public class ManualConditionTest {
         PromotionProcess pp = addPromotionProcess(p, "foo");
         WebClient wc = j.createWebClient();
 
-        FreeStyleBuild b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        List<ParameterValue> paramsList = new ArrayList<ParameterValue>();
+        paramsList.add(new StringParameterValue("approver", "promoter"));
+        //FreeStyleBuild b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
+        FreeStyleBuild b = j.assertBuildStatusSuccess(
+                p.scheduleBuild2(
+                        0,
+                        new Cause.RemoteCause("test-host", ""),
+                        new ParametersAction(paramsList)));
         ManualCondition cond = new ManualCondition();
         pp.conditions.add(cond);
         j.assertBuildStatusSuccess(cond.approve(b, pp, Collections.EMPTY_LIST));
@@ -323,12 +352,25 @@ public class ManualConditionTest {
         }
 
         {
+            // Re-execute promotion as specified user in varaible without Promotion/Promote
+            cond.setUsers("${approver}");
+            wc.login("non-promoter", "non-promoter");
+            try {
+                wc.getPage(b, String.format("promotion/%s/build?json={}", pp.getName()));
+                fail();
+            } catch (FailingHttpStatusCodeException e) {
+                assertThat(e.getStatusCode(), equalTo(404)); // Redirect after the build is broken.
+            }
+            assertThat(waitForBuildByNumber(pp, 4).getResult(), equalTo(Result.SUCCESS));
+        }
+
+        {
             // Re-execute promotion as unspecified user with Promotion/Promote
             cond.setUsers("non-promoter");
             wc.login("promoter", "promoter");
             // Status#doBuild does a bare `return;` without scheduling the build in this case, which is why we use goTo with "" for the MIME type.
             wc.goTo(String.format("job/%s/%d/promotion/%s/build?json={}", p.getName(), b.getNumber(), pp.getName()), "");
-            assertThat(pp.getBuildByNumber(4), nullValue());
+            assertThat(pp.getBuildByNumber(5), nullValue());
         }
     }
     
