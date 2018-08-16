@@ -352,19 +352,6 @@ public class ManualConditionTest {
         }
 
         {
-            // Re-execute promotion as specified user in varaible without Promotion/Promote
-            cond.setUsers("${approver}");
-            wc.login("non-promoter", "non-promoter");
-            try {
-                wc.getPage(b, String.format("promotion/%s/build?json={}", pp.getName()));
-                fail();
-            } catch (FailingHttpStatusCodeException e) {
-                assertThat(e.getStatusCode(), equalTo(404)); // Redirect after the build is broken.
-            }
-            assertThat(waitForBuildByNumber(pp, 4).getResult(), equalTo(Result.SUCCESS));
-        }
-
-        {
             // Re-execute promotion as unspecified user with Promotion/Promote
             cond.setUsers("non-promoter");
             wc.login("promoter", "promoter");
