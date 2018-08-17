@@ -41,8 +41,8 @@
         </select>
       </f:entry>
 
-      <f:entry title="Any_Met">
-      <f:checkbox name="any_met_condition" title="${%Trigger promotion when any criteria condition is met}"
+      <f:entry title="Any Met">
+      <f:checkbox name="anyMetCondition" title="${%Trigger promotion when any criteria condition is met}"
                     checked="${instance.getAnyMetCondition()}"/>
       </f:entry>
 

@@ -94,7 +94,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     /**
      * Trigger promotion when any criteria condition is met.
      */
-    private boolean any_met_condition;
+    private boolean anyMetCondition;
 
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
 
@@ -150,7 +150,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             assignedLabel = null;
         }
         isVisible = c.getString("isVisible");
-        any_met_condition = c.optBoolean("any_met_condition");
+        anyMetCondition = c.optBoolean("anyMetCondition");
         save();
     }
 
@@ -221,10 +221,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     /**
-     * JENKINS-49488: Provide public getter for  any_met_condition
+     * JENKINS-49488: Provide public getter for anyMetCondition
      */
     public boolean getAnyMetCondition() {
-        return any_met_condition;
+        return anyMetCondition;
     }
 
     /**
@@ -386,12 +386,14 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
         for (PromotionCondition cond : conditions) {
             PromotionBadge b = cond.isMet(this, build);
-            if (this.any_met_condition) {
-                if (b!=null)
+            if (this.anyMetCondition) {
+                if (b!=null) {
                     badges.add(b);
+                }
             } else {
-                if(b==null)
+                if(b==null) {
                     return null;
+                }
                 badges.add(b);
             }
         }
