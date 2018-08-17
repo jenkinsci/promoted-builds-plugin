@@ -306,7 +306,7 @@ public class ManualConditionTest {
         WebClient wc = j.createWebClient();
 
         List<ParameterValue> paramsList = new ArrayList<ParameterValue>();
-        paramsList.add(new StringParameterValue("approver", "promoter"));
+        paramsList.add(new StringParameterValue("approver", "non-promoter"));
         //FreeStyleBuild b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         FreeStyleBuild b = j.assertBuildStatusSuccess(
                 p.scheduleBuild2(
@@ -349,6 +349,19 @@ public class ManualConditionTest {
                 assertThat(e.getStatusCode(), equalTo(404)); // Redirect after the build is broken.
             }
             assertThat(waitForBuildByNumber(pp, 3).getResult(), equalTo(Result.SUCCESS));
+        }
+
+        {
+            // Re-execute promotion as specified user in varaible without Promotion/Promote
+            cond.setUsers("${approver}");
+            wc.login("non-promoter", "non-promoter");
+            try {
+                wc.getPage(b, String.format("promotion/%s/build?json={}", pp.getName()));
+                fail();
+            } catch (FailingHttpStatusCodeException e) {
+                assertThat(e.getStatusCode(), equalTo(404)); // Redirect after the build is broken.
+            }
+            assertThat(waitForBuildByNumber(pp, 4).getResult(), equalTo(Result.SUCCESS));
         }
 
         {
