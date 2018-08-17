@@ -379,7 +379,6 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
         for (PromotionCondition cond : conditions) {
             PromotionBadge b = cond.isMet(this, build);
-            LOGGER.log(Level.INFO, "PromotionProcess.isMet(): any_met_condition={0}", this.any_met_condition);
             if (this.any_met_condition) {
                 if (b!=null)
                     badges.add(b);
