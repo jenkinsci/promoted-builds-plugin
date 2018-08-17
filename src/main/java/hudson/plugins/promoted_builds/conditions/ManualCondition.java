@@ -103,7 +103,7 @@ public class ManualCondition extends PromotionCondition {
     }
 
     public Set<String> getUsersAsSet(AbstractBuild<?,?> build) {
-        if (users == null || users.equals("") || build == null)
+        if (users == null || users.equals(""))
             return Collections.emptySet();
 
         Set<String> set = new HashSet<String>();
