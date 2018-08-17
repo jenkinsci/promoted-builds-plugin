@@ -94,7 +94,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     /**
      * Trigger promotion when any criteria condition is met.
      */
-    public boolean any_met_condition;
+    private boolean any_met_condition;
 
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
 
@@ -218,6 +218,13 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     public List<BuildStep> getBuildSteps() {
         return buildSteps;
+    }
+
+    /**
+     * JENKINS-49488: Provide public getter for  any_met_condition
+     */
+    public boolean getAnyMetCondition() {
+        return any_met_condition;
     }
 
     /**
