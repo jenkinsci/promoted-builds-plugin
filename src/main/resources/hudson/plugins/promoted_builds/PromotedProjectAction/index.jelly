@@ -19,9 +19,9 @@
 	          <h2>
 	            <img src="${resURL}/plugin/promoted-builds/icons/32x32/${c.getIcon()}.png"/> <a href="process/${c.name}" class="model-link">${c.name}</a>
 	          </h2>
-	
+
 	          <!-- history of this promotion process -->
-	          <l:pane title="${%Promotion History}">
+	          <l:pane id="${c.name}" title="${%Promotion History}">
 	            <j:forEach var="attempt" items="${it.getPromotionsSummary(c)}">
 	              <tr>
 	                <td class="history-entry">
