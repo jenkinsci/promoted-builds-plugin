@@ -27,7 +27,7 @@
 	                <td class="history-entry">
 	                  <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}" alt="${attempt.iconColor.description}"/>
 	                  <a href="../${attempt.target.number}/promotion/${c.name}/promotionBuild/${attempt.number}/" class="model-link">${c.name} #${attempt.number}</a>
-	                  promoted build <a href="../${attempt.target.number}/" class="model-link"> #${attempt.target.number}</a> on ${attempt.time}
+	                  promoted build <a href="../${attempt.target.number}/" class="model-link"> #${attempt.target.number}</a> on ${attempt.time} by ${attempt.userName}
 	                </td>
 	              </tr>
 	            </j:forEach>
