@@ -28,7 +28,7 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
         return super.getMavenBuild(((Promotion) build).getTarget());
     }
 
-    @Extension
+    @Extension(optional = true)
     public static final class DescriptorImpl extends RedeployPublisher.DescriptorImpl {
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
