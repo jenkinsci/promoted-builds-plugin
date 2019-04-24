@@ -166,8 +166,8 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         return e;
     }
-    
-    
+
+
     /**
      * Get a user name of the person, who triggered the promotion.
      * The method tries various sources like {@link UserIdCause} or {@link ManualCondition.Badge}.
@@ -189,7 +189,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             return nameFromUserIdCause;
         }
 
-        //fallback to badge lookup for compatibility 
+        //fallback to badge lookup for compatibility
         for (PromotionBadge badget : getStatus().getBadges()) {
             if (badget instanceof ManualCondition.Badge) {
                 final String nameFromBadge = ((ManualCondition.Badge) badget).getUserName();
@@ -200,14 +200,14 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
         return Jenkins.ANONYMOUS.getName();
     }
-    
+
 
     /**
      * Gets ID of the {@link User}, who triggered the promotion.
      * The method tries various sources like {@link UserIdCause} or {@link ManualCondition.Badge}.
      * @return ID of the user who triggered the promotion.
      *         If the search fails, returns ID of {@link User#getUnknown()}.
-     * @since 2.22 
+     * @since 2.22
      */
     @Nonnull
     public String getUserId() {
@@ -227,7 +227,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             return idFromUserIdCause;
         }
 
-        //fallback to badge lookup for compatibility 
+        //fallback to badge lookup for compatibility
         for (PromotionBadge badget : getStatus().getBadges()) {
             if (badget instanceof ManualCondition.Badge) {
                 final String idFromBadge = ((ManualCondition.Badge) badget).getUserId();
@@ -240,7 +240,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     }
 
     public List<ParameterValue> getParameterValues(){
-      List<ParameterValue> values=new ArrayList<ParameterValue>(); 
+      List<ParameterValue> values=new ArrayList<ParameterValue>();
       ParametersAction parametersAction=getParametersActions(this);
       if (parametersAction!=null){
         ManualCondition manualCondition=(ManualCondition) getProject().getPromotionCondition(ManualCondition.class.getName());
@@ -253,8 +253,8 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
         return values;
       }
-      
-      //fallback to badge lookup for compatibility 
+
+      //fallback to badge lookup for compatibility
       for (PromotionBadge badget:getStatus().getBadges()){
         if (badget instanceof ManualCondition.Badge){
           return ((ManualCondition.Badge) badget).getParameterValues();
@@ -262,7 +262,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
       }
       return Collections.emptyList();
     }
-    
+
     /**
      * Gets parameter definitions from the {@link ManualCondition}.
      * @return List of parameter definitions to be presented.
@@ -275,7 +275,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     	if (manualCondition == null) {
             return definitions;
         }
-        
+
         for (ParameterValue pvalue:getParameterValues()){
     		ParameterDefinition pdef=manualCondition.getParameterDefinition(pvalue.getName());
                 if (pdef == null) {
@@ -301,11 +301,11 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
     protected class RunnerImpl extends AbstractRunner {
         final Promotion promotionRun;
-        
+
         RunnerImpl(final Promotion promotionRun) {
             this.promotionRun = promotionRun;
         }
-        
+
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
             if (getTarget() == null) {
@@ -321,7 +321,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                 return Lease.createDummyLease(
                         rootPath.child(getEnvironment(listener).expand(customWorkspace)));
             }
-            
+
             TopLevelItem item = (TopLevelItem)getTarget().getProject();
             FilePath workspace = n.getWorkspaceFor(item);
             if (workspace == null) {
@@ -360,10 +360,11 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
             if(!preBuild(listener,project.getBuildSteps()))
                 return Result.FAILURE;
-            
+
             try {
+              List<BuildWrapper> wrappers = new ArrayList<BuildWrapper>(project.getBuildWrappers().values());
             	List<ParameterValue> params=getParameterValues();
-                
+
             	if (params!=null){
         	    	for(ParameterValue value : params) {
         	    		BuildWrapper wrapper=value.createBuildWrapper(Promotion.this);
@@ -375,20 +376,27 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         	    		}
         	    	}
             	}
-	
+
+              for( BuildWrapper w : wrappers ) {
+                  Environment e = w.setUp(Promotion.this, launcher, listener);
+                  if(e == null)
+                    return Result.FAILURE;
+                  buildEnvironments.add(e);
+              }
+
 	            if(!build(listener,project.getBuildSteps(),target))
 	                return Result.FAILURE;
-	
+
 	            return null;
             } finally {
             	boolean failed = false;
-            	
+
             	for(int i = buildEnvironments.size()-1; i >= 0; i--) {
             		if (!buildEnvironments.get(i).tearDown(Promotion.this,listener)) {
                         failed=true;
                     }
             	}
-            	
+
             	if(failed)
             		return Result.FAILURE;
             }
@@ -458,7 +466,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             }
             return true;
         }
-        
+
     }
 
     public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
@@ -480,9 +488,9 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         final Promotion other = (Promotion) obj;
         return this.getId().equals(other.getId());
     }
-    
-    
-    
+
+
+
     /**
      * Factory method for creating {@link ParametersAction}
      * @param parameters
@@ -511,7 +519,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     }
 
     private static final Logger LOGGER = Logger.getLogger(Promotion.class.getName());
-    
+
     /**
      * Action, which stores promotion parameters.
      * This class allows defining custom parameters filtering logic, which is
@@ -520,12 +528,12 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      */
     @Restricted(NoExternalUse.class)
     public static class PromotionParametersAction extends ParametersAction {
-        
+
         private List<ParameterValue> unfilteredParameters;
-        
+
         private PromotionParametersAction(List<ParameterValue> params) {
             // Pass the parameters upstairs
-            super(params);   
+            super(params);
             unfilteredParameters = params;
         }
 
@@ -533,13 +541,13 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         public List<ParameterValue> getParameters() {
             return Collections.unmodifiableList(filter(unfilteredParameters));
         }
-        
+
         private List<ParameterValue> filter(List<ParameterValue> params) {
             // buildToBePromoted::getParameters() invokes the secured method, hence all
             // parameters from the promoted build are safe.
             return params;
         }
-        
+
         public static PromotionParametersAction buildFor(
                 @Nonnull AbstractBuild<?, ?> buildToBePromoted,
                 @CheckForNull List<ParameterValue> promotionParams) {
