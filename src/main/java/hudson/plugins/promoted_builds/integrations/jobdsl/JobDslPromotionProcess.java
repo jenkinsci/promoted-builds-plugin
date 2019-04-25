@@ -35,6 +35,8 @@ public final class JobDslPromotionProcess {
     private List<PromotionCondition> conditions = new ArrayList<PromotionCondition>();
 
     private List<Node> buildSteps = new ArrayList<Node>();
+    
+    private List<Node> buildWrappers = new ArrayList<Node>();
 
     public String getName() {
         return name;
@@ -74,6 +76,14 @@ public final class JobDslPromotionProcess {
 
     public void setBuildSteps(List<Node> buildSteps) {
         this.buildSteps = buildSteps;
+    }
+    
+    public void setBuildWrappers(List<Node> buildWrappers) {
+        this.buildWrappers = buildWrappers;
+    }
+
+    public List<Node> getBuildWrappers() {
+        return buildWrappers;
     }
 
 }

@@ -142,6 +142,9 @@ freeStyleJob(String jobname) {
               textParam(String parameterName, String defaultValue, String description)
           }
         }
+        wrappers {
+          /* build wrappers, e.g. credentialsBinding */
+        }
         actions {
           shell(String command)
         }
@@ -151,7 +154,7 @@ freeStyleJob(String jobname) {
 }
 ```
 
-See [StepContext](https://jenkinsci.github.io/job-dsl-plugin/#path/job-steps) in the API Viewer for full documentation about the possible actions.
+See [WrapperContext](https://jenkinsci.github.io/job-dsl-plugin/#path/job-wrappers) and [StepContext](https://jenkinsci.github.io/job-dsl-plugin/#path/job-steps) in the API Viewer for full documentation about the possible wrappers and actions.
 
 ### Example
 
@@ -163,6 +166,9 @@ freeStyleJob('test-job') {
         name('Development')
         conditions {
           manual('testuser')
+        }
+        wrappers {
+          timestamps()
         }
         actions {
           shell('echo hello;')

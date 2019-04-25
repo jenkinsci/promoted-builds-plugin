@@ -13,7 +13,7 @@ import java.util.List;
 
 import javaposse.jobdsl.dsl.Context;
 import javaposse.jobdsl.dsl.helpers.step.StepContext;
-
+import javaposse.jobdsl.dsl.helpers.wrapper.WrapperContext;
 import javaposse.jobdsl.plugin.DslEnvironment;
 
 import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
@@ -24,6 +24,8 @@ class PromotionContext implements Context {
     private List<PromotionCondition> conditions = new ArrayList<PromotionCondition>();
     
     private List<Node> actions = new ArrayList<Node>();
+    
+    private List<Node> wrappers = new ArrayList<Node>();
 
     private String icon;
 
@@ -83,6 +85,12 @@ class PromotionContext implements Context {
         executeInContext(actionsClosure, stepContext);
         actions.addAll(stepContext.getStepNodes());
     }
+    
+    public void wrappers(Closure<?> wrappersClosure) {
+        WrapperContext wrapperContext = dslEnvironment.createContext(WrapperContext.class);
+        executeInContext(wrappersClosure, wrapperContext);
+        wrappers.addAll(wrapperContext.getWrapperNodes());
+    }
 
     public List<PromotionCondition> getConditions() {
         return conditions;
@@ -102,6 +110,10 @@ class PromotionContext implements Context {
 
     public String getName() {
         return name;
+    }
+    
+    public List<Node> getWrappers() {
+        return wrappers;
     }
 
     
