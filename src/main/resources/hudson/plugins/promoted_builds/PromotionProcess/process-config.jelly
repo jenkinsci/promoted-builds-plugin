@@ -41,6 +41,11 @@
         </select>
       </f:entry>
 
+      <f:entry title="Any Met">
+      <f:checkbox name="anyMetCondition" title="${%Trigger promotion when any criteria condition is met}"
+                    checked="${instance.getAnyMetCondition()}"/>
+      </f:entry>
+
       <f:optionalBlock name="hasAssignedLabel" title="${%Restrict where this promotion process can be run}"
                        checked="${instance.assignedLabelString!=null}" inline="true">
         <f:entry title="${%Label Expression}"
