@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
@@ -43,6 +44,10 @@ public class JobDslPromotionProcessConverterTest  {
         buildSteps.add(node2);
         pp.setBuildSteps(buildSteps);
         pp.setConditions(conditions);
+        List<Node> buildWrappers = new ArrayList<Node>();
+        Node bwNode = new Node(null, "hudson.test.buildwrapper.ExampleWrapper");
+        buildWrappers.add(bwNode);
+        pp.setBuildWrappers(buildWrappers);
         // When
         XSTREAM.registerConverter(new JobDslPromotionProcessConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
         String xml = XSTREAM.toXML(pp);
@@ -50,5 +55,7 @@ public class JobDslPromotionProcessConverterTest  {
         assertNotNull(xml);
         System.out.println(xml);
         assertTrue(StringUtils.contains(xml, "hudson.plugins.promoted__builds.PromotionProcess"));
+        assertTrue(Pattern.compile("<buildWrappers>\\s+<hudson\\.test\\.buildwrapper\\.ExampleWrapper/>\\s+</buildWrappers>")
+                    .matcher(xml).find());
     }
 }

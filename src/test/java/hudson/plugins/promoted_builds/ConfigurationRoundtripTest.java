@@ -26,6 +26,11 @@ package hudson.plugins.promoted_builds;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import hudson.tasks.JavadocArchiver;
+
+import java.util.ArrayList;
+
+import org.jenkinsci.plugins.configfiles.buildwrapper.ConfigFileBuildWrapper;
+import org.jenkinsci.plugins.configfiles.buildwrapper.ManagedFile;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -60,6 +65,7 @@ public class ConfigurationRoundtripTest {
         assertEquals(1,pp.getItems().size());
         proc.conditions.add(new DownstreamPassCondition(down.getName()));
         proc.getBuildSteps().add(new JavadocArchiver("somedir",true));
+        proc.getBuildWrappersList().add(new ConfigFileBuildWrapper(new ArrayList<ManagedFile>()));
         proc.icon = "star-blue";
 
         // round trip
@@ -77,6 +83,8 @@ public class ConfigurationRoundtripTest {
         JavadocArchiver ja = (JavadocArchiver)proc.getBuildSteps().get(0);
         assertEquals("somedir",ja.getJavadocDir());
         assertTrue(ja.isKeepAll());
+        ConfigFileBuildWrapper buildWrapper = (ConfigFileBuildWrapper) proc.getBuildWrappersList().get(0);
+        assertNotNull(buildWrapper);
         assertEquals("star-blue", proc.icon);
     }
 
