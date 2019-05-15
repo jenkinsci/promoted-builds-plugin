@@ -11,6 +11,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.ParameterValue;
+import hudson.model.BuildableItemWithBuildWrappers;
 import hudson.model.Cause;
 import hudson.model.Cause.UserCause;
 import hudson.model.DependencyGraph;
@@ -39,6 +40,8 @@ import hudson.security.ACL;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.tasks.BuildWrapper;
+import hudson.tasks.BuildWrappers;
 import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import hudson.util.FormValidation;
@@ -55,8 +58,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.annotation.CheckForNull;
@@ -67,7 +72,8 @@ import javax.annotation.Nonnull;
  *
  * @author Kohsuke Kawaguchi
  */
-public final class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements Saveable, Describable<PromotionProcess> {
+ // BuildableItem, LazyBuildMixIn.LazyLoadingJob<P,R>, ParameterizedJobMixIn.ParameterizedJob<P, R>
+public final class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements Saveable, Describable<PromotionProcess>, BuildableItemWithBuildWrappers {
 
     /**
      * {@link PromotionCondition}s. All have to be met for a build to be promoted.
@@ -91,6 +97,10 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public String isVisible;
 
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
+
+    private volatile DescribableList<BuildWrapper, Descriptor<BuildWrapper>> buildWrappers;
+    private static final AtomicReferenceFieldUpdater<PromotionProcess,DescribableList> buildWrappersSetter
+            = AtomicReferenceFieldUpdater.newUpdater(PromotionProcess.class,DescribableList.class,"buildWrappers");
 
     /*package*/ PromotionProcess(JobPropertyImpl property, String name) {
         super(property, name);
@@ -137,6 +147,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
         buildSteps = (List)Descriptor.newInstancesFromHeteroList(
                 req, c, "buildStep", (List) PromotionProcess.getAll());
+        getBuildWrappersList().rebuild(req, c, BuildWrappers.getFor(this));
         icon = c.getString("icon");
         if (c.optBoolean("hasAssignedLabel")) {
             assignedLabel = Util.fixEmptyAndTrim(c.optString("assignedLabelString"));
@@ -205,6 +216,21 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return new DescribableList<Publisher,Descriptor<Publisher>>(this);
     }
 
+    public AbstractProject<?,?> asProject() {
+        return this;
+    }
+
+    public Map<Descriptor<BuildWrapper>,BuildWrapper> getBuildWrappers() {
+      return getBuildWrappersList().toMap();
+    }
+
+    public DescribableList<BuildWrapper,Descriptor<BuildWrapper>> getBuildWrappersList() {
+        if(buildWrappers == null) {
+            buildWrappersSetter.compareAndSet(this,null,new DescribableList<BuildWrapper,Descriptor<BuildWrapper>>(this));
+        }
+        return buildWrappers;
+    }
+
     protected Class<Promotion> getBuildClass() {
         return Promotion.class;
     }
@@ -259,7 +285,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * Get the icon name, without the extension. It will always return a non null
      * and non empty string, as <code>"star-gold"</code> is used for compatibility
      * for older promotions configurations.
-     * 
+     *
      * @return the icon name
      */
     public String getIcon() {
@@ -269,20 +295,20 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public String getIsVisible(){
     	return isVisible;
     }
-    
+
     public boolean isVisible(){
     	if (isVisible == null) return true;
-    	
+
     	AbstractProject<?, ?> job = getOwner();
-    	
+
     	if (job == null) return true;
-    	
+
     	String expandedIsVisible = isVisible;
     	EnvVars environment = getDefaultParameterValuesAsEnvVars(job);
     	if (environment != null){
     		expandedIsVisible = environment.expand(expandedIsVisible);
     	}
-   	
+
     	if (expandedIsVisible == null){
     		return true;
     	}
@@ -306,12 +332,12 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 			}
 			EnvVars.resolve(envVars);
 		}
-		
+
 		return envVars;
     }
     /**
      * Handle compatibility with pre-1.8 configs.
-     * 
+     *
      * @param sIcon
      *      the name of the icon used by this promotion; if null or empty,
      *      we return the gold icon for compatibility with previous releases
@@ -361,8 +387,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     /**
      * Checks if all the conditions to promote a build is met.
-     * 
-     * @param build Build to be checked 
+     *
+     * @param build Build to be checked
      * @return
      *      {@code null} if promotion conditions are not met.
      *      otherwise returns a list of badges that record how the promotion happened.
@@ -394,7 +420,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @param build Build to be promoted
      * @return
      *      {@code null} if the build was not promoted, otherwise Future that kicks in when the build is completed.
-     * @throws IOException 
+     * @throws IOException
      */
     @CheckForNull
     public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build) throws IOException {
@@ -412,7 +438,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
 		return considerPromotion2(build, params);
 	}
-	
+
     @CheckForNull
     public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build, List<ParameterValue> params) throws IOException {
         if (!isActive())
@@ -447,7 +473,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public void promote(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
         promote2(build,cause,qualification);
     }
-    
+
     /**
      * Promote the given build by using the given qualification.
      *
@@ -460,7 +486,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
     	return promote2(build, cause, qualification, null);
     }
-    
+
     /**
      * Promote the given build by using the given qualification.
      *
@@ -518,7 +544,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @return Future result or {@code null} if the promotion cannot be scheduled
      */
     @CheckForNull
-    public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build, 
+    public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build,
             Cause cause, @CheckForNull List<ParameterValue> params) {
         List<Action> actions = new ArrayList<Action>();
         actions.add(Promotion.PromotionParametersAction.buildFor(build, params));
@@ -706,6 +732,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         // exposed for Jelly
         public List<Descriptor<? extends BuildStep>> getApplicableBuildSteps() {
             return PromotionProcess.getAll();
+        }
+
+        // exposed for Jelly
+        public List<Descriptor<BuildWrapper>> getApplicableBuildWrappers(AbstractProject<?,?> project) {
+            return project == null ? new ArrayList<Descriptor<BuildWrapper>>(BuildWrapper.all()) : BuildWrappers.getFor(project);
         }
 
         @SuppressFBWarnings(value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification = "exposed for Jelly")

@@ -1,5 +1,8 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import com.google.common.io.Files;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -9,6 +12,7 @@ import hudson.model.queue.QueueTaskFuture;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.regex.Pattern;
 
 import javaposse.jobdsl.plugin.RemovedJobAction;
 import javaposse.jobdsl.plugin.ExecuteDslScripts;
@@ -66,6 +70,28 @@ public class PromotionsDslContextExtensionTest {
         File config = new File(item.getRootDir(), "promotions/Development/config.xml");
         String content = Files.toString(config, Charset.forName("UTF-8"));
         assert content.contains("<selector class=\"hudson.plugins.copyartifact.SpecificBuildSelector\">");
+    }
+    
+    @Test
+    public void testShouldGenerateTheJobWithBuildWrappers() throws Exception {
+        // Given
+        String dsl = FileUtils.readFileToString(new File("src/test/resources/buildwrapper-example-dsl.groovy"));
+        System.out.println(dsl);
+        FreeStyleProject seedJob = j.createFreeStyleProject();
+        seedJob.getBuildersList().add(
+                new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
+        // When
+        QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
+        // Then (unstable b/c we aren't including the Timestamper dependency)
+        j.assertBuildStatus(Result.UNSTABLE, scheduleBuild2.get());
+        
+        TopLevelItem item = j.jenkins.getItem("build-wrapper-test");
+        assertNotNull(item);
+        File config = new File(item.getRootDir(), "promotions/build-wrapper-promotion/config.xml");
+        String content = Files.toString(config, Charset.forName("UTF-8"));
+       
+        assertTrue(Pattern.compile("<buildWrappers>\\s+<hudson\\.plugins\\.timestamper\\.TimestamperBuildWrapper/>\\s+</buildWrappers>")
+                .matcher(content).find());
     }
 
 }

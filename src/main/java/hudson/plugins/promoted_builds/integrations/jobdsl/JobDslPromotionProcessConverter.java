@@ -1,24 +1,23 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
+import javax.annotation.CheckForNull;
+
+import org.apache.commons.lang.ObjectUtils;
+
 import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.converters.reflection.AbstractReflectionConverter;
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
 
 import groovy.util.Node;
 import hudson.PluginManager;
 import hudson.PluginWrapper;
-import javax.annotation.CheckForNull;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * XStream Converter for the PromotionProcess for the Job DSL Plugin
@@ -75,19 +74,28 @@ public class JobDslPromotionProcessConverter extends ReflectionConverter {
             }
             if (promotionProcess.getBuildSteps() != null) {
                 writer.startNode("buildSteps");
-                for (Node node : promotionProcess.getBuildSteps()) {
-                    writer.startNode(node.name().toString());
-                    if (node.value() instanceof Collection) {
-                        for (Object subNode : (Collection) node.value()) {
-                            convertNode((Node) subNode, writer);
-                        }
-                    } else {
-                        writer.setValue(node.value().toString());
-                    }
-                    writer.endNode();
-                }
+                writeNodes(writer, promotionProcess.getBuildSteps());
                 writer.endNode();
             }
+            if (promotionProcess.getBuildWrappers() != null) {
+                writer.startNode("buildWrappers");
+                writeNodes(writer, promotionProcess.getBuildWrappers());
+                writer.endNode();
+            }
+        }
+    }
+
+    private void writeNodes(HierarchicalStreamWriter writer, List<Node> nodes) {
+        for (Node node : nodes) {
+            writer.startNode(node.name().toString());
+            if (node.value() instanceof Collection) {
+                for (Object subNode : (Collection) node.value()) {
+                    convertNode((Node) subNode, writer);
+                }
+            } else {
+                writer.setValue(node.value().toString());
+            }
+            writer.endNode();
         }
     }
 

@@ -54,6 +54,7 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
             jobDslPromotionProcess.setAssignedLabel(promotionContext.getRestrict());
             jobDslPromotionProcess.setBuildSteps(promotionContext.getActions());
             jobDslPromotionProcess.setConditions(promotionContext.getConditions());
+            jobDslPromotionProcess.setBuildWrappers(promotionContext.getWrappers());
             promotionProcesses.put(processName,jobDslPromotionProcess);
         }
         dslEnvironment.put("promotionProcesses", promotionProcesses);

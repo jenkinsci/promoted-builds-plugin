@@ -163,6 +163,7 @@ public class PromotionProcessTest {
                 assertEquals("foo", p.getName());
                 assertEquals("star-gold", p.getIcon());
                 assertEquals(1, p.conditions.size());
+                assertEquals(0, p.getBuildWrappers().size());
                 assertNotNull(p.conditions.get(SelfPromotionCondition.class));
                 System.out.println(Items.XSTREAM2.toXML(p));
                 return null;

@@ -56,6 +56,17 @@
           </table>
         </f:nested>
       </f:section>
+ 
+      <j:set var="wrappers" value="${descriptor.getApplicableBuildWrappers(it)}" />
+      <j:if test="${!empty(wrappers)}">
+        <f:section title="Promotion environment">
+          <f:nested>
+            <f:descriptorList
+                  descriptors="${wrappers}"
+                  instances="${instance.buildWrappers}" />
+          </f:nested>
+        </f:section>
+      </j:if>
       <f:section title="Actions">
         <f:nested>
           <f:hetero-list  name="buildStep" targetType="${descriptor.promotionProcessType}"
