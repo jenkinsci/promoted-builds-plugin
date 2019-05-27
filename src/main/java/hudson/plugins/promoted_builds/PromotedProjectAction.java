@@ -1,10 +1,7 @@
 package hudson.plugins.promoted_builds;
 
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Api;
-import hudson.model.PermalinkProjectAction;
-import hudson.model.ProminentProjectAction;
+import hudson.model.*;
+
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -64,6 +61,7 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
 
     public AbstractBuild<?,?> getLatest(PromotionProcess p) {
     	List<Promotion> list = getPromotions( p );
+    	Collections.sort(list);
         return list.size() > 0 ? list.get(list.size() - 1) : null;
     }
 
@@ -104,7 +102,9 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
             if(a!=null && a.contains(promotionProcess))
             	list.addAll( a.getPromotionBuilds(promotionProcess) );
         }
-        Collections.sort(list);
+
+        Collections.sort(list, Collections.<Promotion>reverseOrder());
+
         return list;
     }
     
