@@ -25,15 +25,22 @@ import org.jvnet.hudson.test.JenkinsRule;
 public class PromotionsDslContextExtensionTest {
 
     @Rule
-    public JenkinsRule j = new JenkinsRule();
+    public JenkinsRule j = new JenkinsRule(); 
+
+    private ExecuteDslScripts createScript(String dsl) {
+        ExecuteDslScripts script = new ExecuteDslScripts();
+        script.setScriptText(dsl);
+        script.setRemovedJobAction(RemovedJobAction.DELETE);
+        script.setIgnoreMissingFiles(false);
+        return script;
+    }
 
     @Test
     public void testShouldGenerateTheDefindedJob() throws Exception {
         // Given
         String dsl = FileUtils.readFileToString(new File("src/test/resources/example-dsl.groovy"));
         FreeStyleProject seedJob = j.createFreeStyleProject();
-        seedJob.getBuildersList().add(
-                new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
+        seedJob.getBuildersList().add(createScript(dsl));
         // When        
         QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
         // Then
@@ -46,8 +53,7 @@ public class PromotionsDslContextExtensionTest {
         // Given
         String dsl = FileUtils.readFileToString(new File("src/test/resources/complex-example-dsl.groovy"));
         FreeStyleProject seedJob = j.createFreeStyleProject();
-        seedJob.getBuildersList().add(
-                new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
+        seedJob.getBuildersList().add(createScript(dsl));
         // When        
         QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
         // Then
@@ -59,8 +65,7 @@ public class PromotionsDslContextExtensionTest {
         // Given
         String dsl = FileUtils.readFileToString(new File("src/test/resources/copyartifacts-example-dsl.groovy"));
         FreeStyleProject seedJob = j.createFreeStyleProject();
-        seedJob.getBuildersList().add(
-                new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
+        seedJob.getBuildersList().add(createScript(dsl));
         // When
         QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
         // Then (unstable b/c we aren't including the CopyArtifacts dependency)
@@ -78,8 +83,7 @@ public class PromotionsDslContextExtensionTest {
         String dsl = FileUtils.readFileToString(new File("src/test/resources/buildwrapper-example-dsl.groovy"));
         System.out.println(dsl);
         FreeStyleProject seedJob = j.createFreeStyleProject();
-        seedJob.getBuildersList().add(
-                new ExecuteDslScripts(new ExecuteDslScripts.ScriptLocation(Boolean.TRUE.toString(), null, dsl), false, RemovedJobAction.DELETE));
+        seedJob.getBuildersList().add(createScript(dsl));
         // When
         QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
         // Then (unstable b/c we aren't including the Timestamper dependency)

@@ -58,7 +58,7 @@ public class RemoteApiTest {
         PromotionProcess proc = promotion.addProcess("promo");
         proc.conditions.add(new SelfPromotionCondition(true));
         JenkinsRule.WebClient wc = r.createWebClient();
-        String xml = wc.goToXml("job/p/promotion/process/promo/config.xml").getContent();
+        String xml = wc.goToXml("job/p/promotion/process/promo/config.xml").asText();
         assertTrue(xml, xml.contains("SelfPromotionCondition"));
         assertTrue(xml, xml.contains("<evenIfUnstable>true</evenIfUnstable>"));
         WebRequest req = new WebRequest(wc.createCrumbedUrl("job/p/promotion/process/promo/config.xml"), HttpMethod.POST);

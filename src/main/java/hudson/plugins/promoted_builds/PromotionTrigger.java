@@ -4,14 +4,12 @@ import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
-import hudson.model.Job;
 import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.ListBoxModel.Option;
-import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -81,7 +79,7 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
                 if(p==null) {
                     AbstractProject nearest = AbstractProject.findNearest(value, project.getParent());
                     return FormValidation.error( nearest != null 
-                            ? hudson.tasks.Messages.BuildTrigger_NoSuchProject(value, nearest.getRelativeNameFrom(project))
+                            ? Messages.BuildTrigger_NoSuchProject(value, nearest.getRelativeNameFrom(project))
                             : Messages.Shared_noSuchProject(value));
                 }
             }
