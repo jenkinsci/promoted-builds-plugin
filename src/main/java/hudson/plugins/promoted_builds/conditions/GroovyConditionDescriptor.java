@@ -24,13 +24,7 @@ public final class GroovyConditionDescriptor extends PromotionConditionDescripto
 
     @Override
     public boolean isApplicable(final AbstractProject<?, ?> item) {
-        // TODO switch to Jenkins.getActiveInstance() once bumped to 1.590
-        final Jenkins jenkins = Jenkins.getInstance();
-        if (jenkins == null) {
-            // Jenkins not started or shut down
-            return false;
-        }
-        final PluginManager pluginManager = jenkins.getPluginManager();
+        final PluginManager pluginManager = Jenkins.get().getPluginManager();
         if (pluginManager == null) {
             LOGGER.log(Level.WARNING, "No PluginManager");
             return false;

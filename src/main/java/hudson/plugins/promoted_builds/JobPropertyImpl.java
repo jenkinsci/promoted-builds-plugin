@@ -294,7 +294,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     /** @see ItemGroupMixIn#createProjectFromXML */
     public PromotionProcess createProcessFromXml(final String name, InputStream xml) throws IOException {
         owner.checkPermission(Item.CONFIGURE); // CREATE is ItemGroup-scoped and owner is not an ItemGroup
-        Jenkins.getInstance().getProjectNamingStrategy().checkName(name);
+        Jenkins.get().getProjectNamingStrategy().checkName(name);
         if (getItem(name) != null) {
             throw new IllegalArgumentException(owner.getDisplayName() + " already contains an item '" + name + "'");
         }

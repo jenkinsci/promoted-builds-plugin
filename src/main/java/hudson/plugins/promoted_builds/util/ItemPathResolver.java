@@ -63,7 +63,7 @@ public class ItemPathResolver {
      * @return True if the legacy resolution engine is enabled
      */
     public static boolean isEnableLegacyResolutionAgainstRoot() {
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getInstanceOrNull();
         if (jenkins != null) {
             ExtensionList<ResolverManager> extensions = jenkins.getExtensionList(ResolverManager.class);
             for (ResolverManager manager : extensions) {
@@ -111,7 +111,7 @@ public class ItemPathResolver {
     @Restricted(NoExternalUse.class)
     public static <T extends Item> T getByPath(@Nonnull String path, 
             @CheckForNull Item baseItem, @Nonnull Class<T> type) {
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getInstanceOrNull();
         if (jenkins == null) {
             return null;
         }

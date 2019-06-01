@@ -129,10 +129,7 @@ public class JobDslPromotionProcessConverter extends ReflectionConverter {
             return this.classOwnership;
         }
         if (pm == null) {
-            Jenkins j = Jenkins.getInstance();
-            if (j != null) {
-                pm = j.getPluginManager();
-            }
+            pm = Jenkins.get().getPluginManager();
         }
         if (pm == null) {
             return null;
