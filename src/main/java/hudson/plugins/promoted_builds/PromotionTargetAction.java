@@ -24,6 +24,9 @@ public class PromotionTargetAction extends InvisibleAction {
     @CheckForNull
     public AbstractBuild<?,?> resolve() {
         AbstractProject<?,?> job = Jenkins.get().getItemByFullName(jobName, AbstractProject.class);
+        if (job == null) {
+            return null;
+        }
         return job.getBuildByNumber(number);
     }
 

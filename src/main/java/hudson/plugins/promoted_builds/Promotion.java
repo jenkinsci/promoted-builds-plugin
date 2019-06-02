@@ -210,11 +210,11 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      */
     @Nonnull
     public String getUserId() {
-        // Deprecated, but we still want to support it in order to maintain the compatiibility
+        // Deprecated, but we still want to support it in order to maintain the compatibility
         // We try to convert the cause to the user ID by using a search by the full name, not reliable
         final UserCause userCause = getCause(UserCause.class);
         final String nameFromUserCause = userCause != null ? userCause.getUserName(): null;
-        final User user = nameFromUserCause != null ? User.get(nameFromUserCause, false, null) : null;
+        final User user = nameFromUserCause != null ? User.get(nameFromUserCause, false, Collections.emptyMap()) : null;
         if (user != null) {
             return user.getId();
         }

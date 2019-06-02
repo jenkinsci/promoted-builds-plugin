@@ -1,5 +1,6 @@
 package hudson.plugins.promoted_builds.tasks;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.maven.MavenModuleSetBuild;
 import hudson.maven.RedeployPublisher;
@@ -35,6 +36,7 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
             return jobType== PromotionProcess.class;
         }
 
+        @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
         @Override
         public RedeployPublisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return req.bindJSON(RedeployBatchTaskPublisher.class,formData);
