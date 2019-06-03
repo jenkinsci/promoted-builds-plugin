@@ -2,6 +2,7 @@ package hudson.plugins.promoted_builds;
 
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import org.kohsuke.stapler.export.ExportedBean;
 
 /**
@@ -23,7 +24,7 @@ public abstract class PromotionBadge {
      * @param env
      *      Environment variables should be added to this map.
      */
-    public void buildEnvVars(AbstractBuild<?,?> build, EnvVars env) {
+    public void buildEnvVars(Run<?,?> build, EnvVars env) {
         // by default don't contribute any variables
     }
 }

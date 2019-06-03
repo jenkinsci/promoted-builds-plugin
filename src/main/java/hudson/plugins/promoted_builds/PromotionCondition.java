@@ -2,10 +2,8 @@ package hudson.plugins.promoted_builds;
 
 import hudson.DescriptorExtensionList;
 import hudson.ExtensionPoint;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Describable;
-import hudson.model.Hudson;
+import hudson.model.*;
+import hudson.model.listeners.RunListener;
 import hudson.plugins.promoted_builds.util.JenkinsHelper;
 
 import java.util.ArrayList;
@@ -31,7 +29,10 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
      * @deprecated
      */
     @CheckForNull
-    public PromotionBadge isMet(AbstractBuild<?,?> build) {
+    public PromotionBadge isMet(Run<?,?> build, RunListener listener) {
+        if(build instanceof AbstractBuild){
+            return isMet((AbstractBuild)build,(RunListener)listener);
+        }
         return null;
     }
 
@@ -47,9 +48,12 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
      *      we know how a build was promoted.
      *      Null if otherwise, meaning it shouldn't be promoted.
      */
-    public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?,?> build) {
+    public PromotionBadge isMet(PromotionProcess promotionProcess, Run<?,?> build) {
         // just call the deprecated version to support legacy conditions
-        return isMet(build);
+        if(build instanceof AbstractBuild){
+            return isMet((PromotionProcess) promotionProcess,(AbstractBuild)build);
+        }
+        return isMet(promotionProcess,build);
     }
 
     public PromotionConditionDescriptor getDescriptor() {
@@ -64,7 +68,7 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
     }
 
     /**
-     * Returns a subset of {@link PromotionConditionDescriptor}s that applys to the given project.
+     * Returns a subset of {@link PromotionConditionDescriptor}s that applies to the given project.
      */
     public static List<PromotionConditionDescriptor> getApplicableTriggers(AbstractProject<?,?> p) {
         List<PromotionConditionDescriptor> r = new ArrayList<PromotionConditionDescriptor>();

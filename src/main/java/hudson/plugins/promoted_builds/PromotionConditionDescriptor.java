@@ -2,6 +2,7 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
+import hudson.model.Job;
 
 /**
  * {@link Descriptor} for {@link PromotionCondition}.
@@ -25,5 +26,5 @@ public abstract class PromotionConditionDescriptor extends Descriptor<PromotionC
      * @return
      *      true to allow user to configure this promotion condition for the given project.
      */
-    public abstract boolean isApplicable(AbstractProject<?,?> item);
+    public abstract boolean isApplicable(Job<?,?> item);
 }
