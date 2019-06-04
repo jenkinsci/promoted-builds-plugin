@@ -7,16 +7,18 @@ import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
-import hudson.model.SimpleParameterDefinition;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.User;
-import hudson.plugins.promoted_builds.PromotionPermissionHelper;
+import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
-import hudson.plugins.promoted_builds.Promotion;
+import hudson.plugins.promoted_builds.PromotionPermissionHelper;
 import hudson.plugins.promoted_builds.PromotionProcess;
+import hudson.plugins.promoted_builds.PromotionRun;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -283,16 +285,19 @@ public class ManualCondition extends PromotionCondition {
             return values != null ? values : Collections.<ParameterValue>emptyList();
         }
 
+        //TODO, TBD: Refactor API to PromotionRun ?
         @Override
-        public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
-            if (!(build instanceof Promotion)) {
-                throw new IllegalStateException ("Wrong build type. Expected a Promotion, but got "+build.getClass());
+        public void buildEnvVars(Run<?, ?> run, EnvVars env, TaskListener listener) {
+            // TODO: Refactor to support Pipeline Promotion types
+            if (!(run instanceof PromotionRun)) {
+                throw new IllegalStateException ("Wrong build type. Expected a PromotionRun, but got "+run.getClass());
             }
-            
-            List<ParameterValue> params = ((Promotion) build).getParameterValues();
+
+            PromotionRun promotion = (PromotionRun)run;
+            List<ParameterValue> params = ((PromotionRun) run).getParameterValues();
             if (params != null) {
                 for (ParameterValue value : params) {
-                    value.buildEnvVars(build, env);
+                    value.buildEnvironment(promotion.getPromotionRun(), env);
                 }
             }
         }
