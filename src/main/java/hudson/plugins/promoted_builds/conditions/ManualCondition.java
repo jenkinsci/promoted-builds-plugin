@@ -2,21 +2,8 @@ package hudson.plugins.promoted_builds.conditions;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Descriptor;
-import hudson.model.Hudson;
-import hudson.model.InvisibleAction;
-import hudson.model.SimpleParameterDefinition;
-import hudson.model.ParameterDefinition;
-import hudson.model.ParameterValue;
-import hudson.model.User;
-import hudson.plugins.promoted_builds.PromotionPermissionHelper;
-import hudson.plugins.promoted_builds.PromotionBadge;
-import hudson.plugins.promoted_builds.PromotionCondition;
-import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
-import hudson.plugins.promoted_builds.Promotion;
-import hudson.plugins.promoted_builds.PromotionProcess;
+import hudson.model.*;
+import hudson.plugins.promoted_builds.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,10 +22,10 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import javax.servlet.ServletException;
-
+import hudson.model.ParameterValue;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-
+import hudson.plugins.promoted_builds.PromotionPermissionHelper;
 import org.acegisecurity.GrantedAuthority;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.StaplerRequest;
@@ -51,7 +38,7 @@ import org.kohsuke.stapler.export.Exported;
  * @author Kohsuke Kawaguchi
  * @author Peter Hayes
  */
-public class ManualCondition extends PromotionCondition {
+public class ManualCondition extends PromotionCondition{
     private String users;
     private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
     
@@ -284,15 +271,15 @@ public class ManualCondition extends PromotionCondition {
         }
 
         @Override
-        public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
-            if (!(build instanceof Promotion)) {
-                throw new IllegalStateException ("Wrong build type. Expected a Promotion, but got "+build.getClass());
+        public void buildEnvVars(@Nonnull Run<?, ?> run, EnvVars env, TaskListener listener) {
+            if (!(run instanceof PromotionPipeline)) {
+                throw new IllegalStateException ("Wrong build type. Expected a Promotion, but got "+run.getClass());
             }
-            
-            List<ParameterValue> params = ((Promotion) build).getParameterValues();
+            PromotionPipeline promotion = (PromotionPipeline) run;
+            List<ParameterValue> params = ((PromotionPipeline) run).getParameterValues();
             if (params != null) {
                 for (ParameterValue value : params) {
-                    value.buildEnvVars(build, env);
+                    value.buildEnvironment(promotion.getPromotionRun(),env);
                 }
             }
         }

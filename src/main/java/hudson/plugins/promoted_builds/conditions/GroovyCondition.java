@@ -5,6 +5,8 @@ import hudson.EnvVars;
 import hudson.PluginManager;
 import hudson.Util;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionProcess;
@@ -130,8 +132,8 @@ public class GroovyCondition extends PromotionCondition {
         }
 
         @Override
-        public void buildEnvVars(final AbstractBuild<?, ?> build, final EnvVars env) {
-            super.buildEnvVars(build, env);
+        public void buildEnvVars(final Run<?, ?> run, final EnvVars env, TaskListener listener) {
+
             for (final Map.Entry<String, String> entry :
                     variables.entrySet()) {
                 env.put(entry.getKey(), entry.getValue());

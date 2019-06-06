@@ -3,12 +3,8 @@ package hudson.plugins.promoted_builds;
 import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
+import hudson.model.*;
 import hudson.model.Cause.UserCause;
-import hudson.model.ParameterDefinition;
-import hudson.model.ParameterValue;
-import hudson.model.Result;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.util.Iterators;
 import net.sf.json.JSONArray;
@@ -150,14 +146,25 @@ public final class Status {
     /**
      * Called by {@link Promotion} to allow status to contribute environment variables.
      *
-     * @param build
-     *      The calling build. Never null.
+     * @param run
+     *      The calling run. Never null.
      * @param env
      *      Environment variables should be added to this map.
      */
+    public void buildEnvVars(@Nonnull Run<?,?> run, EnvVars env, TaskListener listener) {
+        for (PromotionBadge badge : badges) {
+            badge.buildEnvVars(run, env, listener);
+        }
+    }
+
+    /**
+     * @deprecated use{@link #buildEnvVars(Run, EnvVars, TaskListener)}
+     *
+     */
+    @Deprecated
     public void buildEnvVars(AbstractBuild<?,?> build, EnvVars env) {
         for (PromotionBadge badge : badges) {
-            badge.buildEnvVars(build, env);
+            badge.buildEnvVars(build, env, TaskListener.NULL);
         }
     }
 

@@ -60,11 +60,11 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 /**
- * Records a promotion process.
+ * Records a promotion process for {@link AbstractProject}s
  *
  * @author Kohsuke Kawaguchi
  */
-public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
+public class Promotion extends AbstractBuild<PromotionProcess,Promotion> implements PromotionPipeline{
 
     public Promotion(PromotionProcess job) throws IOException {
         super(job);
@@ -113,7 +113,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         // Augment environment with target build's information
         String rootUrl = JenkinsHelper.getInstance().getRootUrl();
-        AbstractBuild<?, ?> target = getTarget();
+        Run<?, ?> target = getTarget();
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
         e.put("PROMOTED_JOB_NAME", target.getParent().getName());
@@ -155,14 +155,14 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         e.put("PROMOTED_USER_NAME", getUserName());
         e.put("PROMOTED_USER_ID", getUserId());
         EnvVars envScm = new EnvVars();
-        target.getProject().getScm().buildEnvVars( target, envScm );
+        target.getProject().getScm().buildEnvVars( target, envScm);
         for ( Entry<String, String> entry : envScm.entrySet() )
         {
             e.put( "PROMOTED_" + entry.getKey(), entry.getValue() );
         }
 
         // Allow the promotion status to contribute to build environment
-        getStatus().buildEnvVars(this, e);
+        getStatus().buildEnvVars(this,e,listener);
 
         return e;
     }
@@ -237,6 +237,17 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             }
         }
         return User.getUnknown().getId();
+    }
+    @Nonnull
+    @Override
+    public Run<?,?> getPromotedRun(){
+        return getTarget();
+    }
+
+    @Nonnull
+    @Override
+    public Run<?,?> getPromotionRun(){
+        return this;
     }
 
     public List<ParameterValue> getParameterValues(){
