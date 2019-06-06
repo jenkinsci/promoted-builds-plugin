@@ -187,3 +187,10 @@ freeStyleJob('test-job') {
 
 [1]: https://wiki.jenkins-ci.org/display/JENKINS/Copy+Artifact+Plugin
 [2]: https://github.com/jenkinsci/promoted-builds-plugin/blob/master/src/main/java/hudson/plugins/promoted_builds/Promotion.java
+
+## Undergoing project based on this Plugin
+
+* `Artifact Promotion Plugin For Jenkins Pipeline` - Under GSoC 2019.
+   Join with the Project through the following Chat Links:
+    * [promoted-builds-plugin](https://gitter.im/jenkinsci/promoted-builds-plugin)
+    * [project-artifact-promotion-plugin-for-pipeline](https://gitter.im/jenkinsci/gsoc-project-artifact-promotion-plugin-for-pipeline)
