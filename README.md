@@ -191,6 +191,5 @@ freeStyleJob('test-job') {
 ## Undergoing project based on this Plugin
 
 * `Artifact Promotion Plugin For Jenkins Pipeline` - Under GSoC 2019.
-   Join with the Project through the following Chat Links:
+   Join with the Project through the following Chat Link:
     * [promoted-builds-plugin](https://gitter.im/jenkinsci/promoted-builds-plugin)
-    * [project-artifact-promotion-plugin-for-pipeline](https://gitter.im/jenkinsci/gsoc-project-artifact-promotion-plugin-for-pipeline)
