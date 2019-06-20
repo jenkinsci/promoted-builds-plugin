@@ -185,12 +185,6 @@ freeStyleJob('test-job') {
 }
 ```
 
-## Contributing
-
-* Making new releases is covered in [the "Hosting Plugins" wiki page](https://wiki.jenkins-ci.org/display/JENKINS/Hosting+Plugins).
-* If you want to send pull requests or work on some fixes, check [this document](http://jenkins-ci.org/pull-request-greeting).
-* There are a lot a issues and features that need attention, the JIRA bug tracker is listed on [the wiki page](https://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin).
-
 [1]: https://wiki.jenkins-ci.org/display/JENKINS/Copy+Artifact+Plugin
 [2]: https://github.com/jenkinsci/promoted-builds-plugin/blob/master/src/main/java/hudson/plugins/promoted_builds/Promotion.java
 
