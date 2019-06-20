@@ -23,6 +23,7 @@ import hudson.model.TopLevelItem;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
+import hudson.plugins.promoted_builds.pipeline.PromotionRun;
 import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;

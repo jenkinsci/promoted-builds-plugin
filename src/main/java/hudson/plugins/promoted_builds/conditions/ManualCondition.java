@@ -2,23 +2,14 @@ package hudson.plugins.promoted_builds.conditions;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Descriptor;
-import hudson.model.Hudson;
-import hudson.model.InvisibleAction;
-import hudson.model.ParameterDefinition;
-import hudson.model.ParameterValue;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.model.User;
+import hudson.model.*;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionPermissionHelper;
 import hudson.plugins.promoted_builds.PromotionProcess;
-import hudson.plugins.promoted_builds.PromotionRun;
+import hudson.plugins.promoted_builds.pipeline.PromotionRun;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +29,7 @@ import javax.annotation.Nonnull;
 
 import javax.servlet.ServletException;
 
+import hudson.plugins.promoted_builds.pipeline.PromotionRun;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -305,6 +297,13 @@ public class ManualCondition extends PromotionCondition {
 
     @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
+        public boolean isApplicable(@Nonnull Job<?,?> item, @Nonnull TaskListener listener) {
+            if(item instanceof AbstractProject){
+                return isApplicable((AbstractProject)item, TaskListener.NULL);
+            }
+            return true;
+        }
+
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }

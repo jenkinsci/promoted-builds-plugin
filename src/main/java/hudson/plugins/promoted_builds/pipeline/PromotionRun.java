@@ -1,10 +1,11 @@
-package hudson.plugins.promoted_builds;
+package hudson.plugins.promoted_builds.pipeline;
 
 // TODO: implementation for Pipeline
 // TODO: add generics?
 
 import hudson.model.ParameterValue;
 import hudson.model.Run;
+import hudson.plugins.promoted_builds.Promotion;
 
 import javax.annotation.Nonnull;
 import java.util.List;
