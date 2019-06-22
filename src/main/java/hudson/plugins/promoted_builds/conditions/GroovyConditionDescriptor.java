@@ -7,11 +7,9 @@ import hudson.model.AbstractProject;
 import hudson.model.Job;
 import hudson.model.TaskListener;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
-import javafx.concurrent.Task;
 import jenkins.model.Jenkins;
 
 import javax.annotation.Nonnull;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
