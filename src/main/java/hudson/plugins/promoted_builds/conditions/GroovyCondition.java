@@ -64,18 +64,8 @@ public class GroovyCondition extends PromotionCondition {
 
     @Override
     public PromotionBadge isMet(final PromotionProcess promotionProcess, final AbstractBuild<?, ?> build) {
-        // TODO switch to Jenkins.getActiveInstance() once bumped to 1.590
-        final Jenkins jenkins = Jenkins.getInstance();
-        if (jenkins == null) {
-            // Jenkins not started or shut down
-            LOGGER.log(Level.WARNING, "Missing Jenkins instance");
-            return null;
-        }
+        final Jenkins jenkins = Jenkins.get();
         final PluginManager pluginManager = jenkins.getPluginManager();
-        if (pluginManager == null) {
-            LOGGER.log(Level.WARNING, "Unable to retrieve PluginManager");
-            return null;
-        }
         final ClassLoader classLoader = pluginManager.uberClassLoader;
         final Binding binding = new Binding();
         binding.setVariable("promotionProcess", promotionProcess);

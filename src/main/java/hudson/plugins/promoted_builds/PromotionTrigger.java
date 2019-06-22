@@ -4,8 +4,6 @@ import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
-import hudson.model.Job;
-import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
@@ -77,11 +75,11 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
             project.checkPermission(Item.CONFIGURE);
 
             if (StringUtils.isNotBlank(value)) {
-                AbstractProject p = JenkinsHelper.getInstance().getItem(value,project,AbstractProject.class);
+                AbstractProject p = Jenkins.get().getItem(value,project,AbstractProject.class);
                 if(p==null) {
                     AbstractProject nearest = AbstractProject.findNearest(value, project.getParent());
                     return FormValidation.error( nearest != null 
-                            ? hudson.tasks.Messages.BuildTrigger_NoSuchProject(value, nearest.getRelativeNameFrom(project))
+                            ? Messages.BuildTrigger_NoSuchProject(value, nearest.getRelativeNameFrom(project))
                             : Messages.Shared_noSuchProject(value));
                 }
             }
@@ -91,7 +89,7 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
 
         public AutoCompletionCandidates doAutoCompleteJobName(@QueryParameter String value) {
             AutoCompletionCandidates candidates = new AutoCompletionCandidates();
-            List<AbstractProject> jobs = JenkinsHelper.getInstance().getItems(AbstractProject.class);
+            List<AbstractProject> jobs = Jenkins.get().getItems(AbstractProject.class);
             for (AbstractProject job: jobs) {
                 if (job.getFullName().startsWith(value)) {
                     if (job.hasPermission(Item.READ)) {
@@ -116,7 +114,7 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
 
             AbstractProject<?,?> j = null;
             if (jobName!=null)
-                j = JenkinsHelper.getInstance().getItem(jobName,defaultJob,AbstractProject.class);
+                j = Jenkins.get().getItem(jobName,defaultJob,AbstractProject.class);
 
             ListBoxModel r = new ListBoxModel();
             if (j!=null) {

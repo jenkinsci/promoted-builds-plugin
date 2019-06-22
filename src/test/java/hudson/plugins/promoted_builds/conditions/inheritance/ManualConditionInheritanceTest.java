@@ -61,7 +61,7 @@ public class ManualConditionInheritanceTest {
     public void testManualPromotionProcess() throws Exception {
         InheritanceProjectsPair inheritanceProjectsPair = j.createInheritanceProjectDerivedWithBase();
 
-        ExtensionList<Descriptor> list=Jenkins.getInstance().getExtensionList(Descriptor.class);
+        ExtensionList<Descriptor> list=Jenkins.get().getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(inheritanceProjectsPair.getBase());
         inheritanceProjectsPair.getBase().addProperty(base);
@@ -106,7 +106,7 @@ public class ManualConditionInheritanceTest {
     public void testManualPromotionProcessViaWebClient() throws Exception {
         InheritanceProjectsPair inheritanceProjectsPair = j.createInheritanceProjectDerivedWithBase();
 
-        ExtensionList<Descriptor> list=Jenkins.getInstance().getExtensionList(Descriptor.class);
+        ExtensionList<Descriptor> list=Jenkins.get().getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(inheritanceProjectsPair.getBase());
         inheritanceProjectsPair.getDerived().addProperty(base);

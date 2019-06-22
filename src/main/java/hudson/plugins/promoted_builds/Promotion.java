@@ -23,7 +23,6 @@ import hudson.model.TopLevelItem;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
-import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import hudson.security.Permission;
 import hudson.security.PermissionGroup;
 import hudson.security.PermissionScope;
@@ -112,7 +111,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         EnvVars e = super.getEnvironment(listener);
 
         // Augment environment with target build's information
-        String rootUrl = JenkinsHelper.getInstance().getRootUrl();
+        String rootUrl = Jenkins.get().getRootUrl();
         AbstractBuild<?, ?> target = getTarget();
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
@@ -211,11 +210,11 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      */
     @Nonnull
     public String getUserId() {
-        // Deprecated, but we still want to support it in order to maintain the compatiibility
+        // Deprecated, but we still want to support it in order to maintain the compatibility
         // We try to convert the cause to the user ID by using a search by the full name, not reliable
         final UserCause userCause = getCause(UserCause.class);
         final String nameFromUserCause = userCause != null ? userCause.getUserName(): null;
-        final User user = nameFromUserCause != null ? User.get(nameFromUserCause, false, null) : null;
+        final User user = nameFromUserCause != null ? User.get(nameFromUserCause, false, Collections.emptyMap()) : null;
         if (user != null) {
             return user.getId();
         }
@@ -422,7 +421,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                 }
 
                 // tickle PromotionTriggers
-                for (AbstractProject<?,?> p : JenkinsHelper.getInstance().getAllItems(AbstractProject.class)) {
+                for (AbstractProject<?,?> p : Jenkins.get().getAllItems(AbstractProject.class)) {
                     PromotionTrigger pt = p.getTrigger(PromotionTrigger.class);
                     if (pt!=null)
                         pt.consider(Promotion.this);

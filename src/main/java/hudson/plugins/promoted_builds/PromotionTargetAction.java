@@ -3,7 +3,8 @@ package hudson.plugins.promoted_builds;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.InvisibleAction;
-import hudson.plugins.promoted_builds.util.JenkinsHelper;
+import jenkins.model.Jenkins;
+
 import javax.annotation.CheckForNull;
 
 /**
@@ -22,9 +23,11 @@ public class PromotionTargetAction extends InvisibleAction {
 
     @CheckForNull
     public AbstractBuild<?,?> resolve() {
-        AbstractProject<?,?> j = JenkinsHelper.getInstance().getItemByFullName(jobName, AbstractProject.class);
-        if (j==null)    return null;
-        return j.getBuildByNumber(number);
+        AbstractProject<?,?> job = Jenkins.get().getItemByFullName(jobName, AbstractProject.class);
+        if (job == null) {
+            return null;
+        }
+        return job.getBuildByNumber(number);
     }
 
     @CheckForNull

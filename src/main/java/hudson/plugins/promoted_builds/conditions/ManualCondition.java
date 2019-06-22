@@ -261,7 +261,7 @@ public class ManualCondition extends PromotionCondition {
             if (authenticationName == null)
                 return MISSING_USER_ID_DISPLAY_STRING;
 
-            User u = User.get(authenticationName, false, null);
+            User u = User.get(authenticationName, false, Collections.emptyMap());
             return u != null ? u.getDisplayName() : authenticationName;
         }
 
