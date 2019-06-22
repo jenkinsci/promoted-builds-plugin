@@ -25,10 +25,6 @@ public final class GroovyConditionDescriptor extends PromotionConditionDescripto
     @Override
     public boolean isApplicable(final AbstractProject<?, ?> item) {
         final PluginManager pluginManager = Jenkins.get().getPluginManager();
-        if (pluginManager == null) {
-            LOGGER.log(Level.WARNING, "No PluginManager");
-            return false;
-        }
         final PluginWrapper plugin = pluginManager.getPlugin("script-security");
         return plugin != null && plugin.isActive();
     }

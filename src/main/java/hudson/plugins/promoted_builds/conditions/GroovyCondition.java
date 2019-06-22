@@ -66,10 +66,6 @@ public class GroovyCondition extends PromotionCondition {
     public PromotionBadge isMet(final PromotionProcess promotionProcess, final AbstractBuild<?, ?> build) {
         final Jenkins jenkins = Jenkins.get();
         final PluginManager pluginManager = jenkins.getPluginManager();
-        if (pluginManager == null) {
-            LOGGER.log(Level.WARNING, "Unable to retrieve PluginManager");
-            return null;
-        }
         final ClassLoader classLoader = pluginManager.uberClassLoader;
         final Binding binding = new Binding();
         binding.setVariable("promotionProcess", promotionProcess);

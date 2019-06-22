@@ -61,7 +61,7 @@ public class PromotionTest {
         assertSame(pb.getTarget(), b);
 
         JenkinsRule.WebClient wc = r.createWebClient();
-        wc.getPage(pb.getUrl()); // spot-check that promotion itself is accessible
+        wc.goTo(pb.getUrl()); // spot-check that promotion itself is accessible
 
         try {
             HtmlPage page = wc.getPage(wc.addCrumb(new WebRequest(new URL(r.getURL(), pb.getUrl() + "/rebuild")
