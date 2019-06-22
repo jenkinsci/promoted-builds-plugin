@@ -24,6 +24,9 @@
 package hudson.plugins.promoted_builds;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.HttpMethod;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
@@ -31,6 +34,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.jvnet.hudson.test.JenkinsRule;
+
+import java.net.URL;
 
 public class PromotionTest {
 
@@ -55,12 +60,17 @@ public class PromotionTest {
         Promotion pb = promo1.getBuilds().getLastBuild();
         assertSame(pb.getTarget(), b);
 
+        JenkinsRule.WebClient wc = r.createWebClient();
+        wc.getPage(pb.getUrl()); // spot-check that promotion itself is accessible
+
         try {
-            r.createWebClient().goTo("job/"+p.getName()+"/1/promotion/"+promo1.getName()+"/promotionBuild/"+pb.getNumber()+"/rebuild");
+            HtmlPage page = wc.getPage(wc.addCrumb(new WebRequest(new URL(r.getURL(), pb.getUrl() + "/rebuild")
+                    , HttpMethod.POST)));
             fail("rebuilding a promotion directly should fail");
         } catch (FailingHttpStatusCodeException x) {
             assertEquals("wrong status code", 404, x.getStatusCode());
-            assertNotEquals("unexpected content", -1, x.getResponse().getContentAsString().indexOf("Promotions may not be rebuilt directly"));
+            //TODO(oleg_nenashev): Another error will be returned since 2.107. As long as URL is rejected, we do not really care much
+            // assertNotEquals("unexpected content", -1, x.getResponse().getContentAsString().indexOf("Promotions may not be rebuilt directly"));
         }
     }
 
