@@ -7,19 +7,9 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Util;
 import hudson.console.HyperlinkNote;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.AutoCompletionCandidates;
-import hudson.model.Cause;
+import hudson.model.*;
 import hudson.model.Cause.UpstreamCause;
-import hudson.model.Fingerprint;
 import hudson.model.Fingerprint.BuildPtr;
-import hudson.model.InvisibleAction;
-import hudson.model.Item;
-import hudson.model.ItemGroup;
-import hudson.model.Result;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotionBadge;
@@ -45,6 +35,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 import org.kohsuke.stapler.export.Exported;
 
@@ -204,6 +195,13 @@ public class DownstreamPassCondition extends PromotionCondition {
 
     @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
+        public boolean isApplicable(@Nonnull Job<?,?> item, @Nonnull TaskListener listener) {
+            if(item instanceof AbstractProject){
+                return isApplicable((AbstractProject)item, TaskListener.NULL);
+            }
+            return true;
+        }
+
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }
