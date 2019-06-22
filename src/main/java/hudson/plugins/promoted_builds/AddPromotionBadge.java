@@ -5,9 +5,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Recorder;
+import hudson.tasks.*;
 import jenkins.tasks.SimpleBuildStep;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -15,7 +13,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.io.IOException;
 import java.io.PrintStream;
 
-public class AddPromotionBadge extends Recorder implements SimpleBuildStep, Describable{
+public class AddPromotionBadge extends Recorder implements SimpleBuildStep {
 
     private String boxName = "Promotion Badges";
     private boolean gold;
@@ -98,7 +96,7 @@ public class AddPromotionBadge extends Recorder implements SimpleBuildStep, Desc
     }
 
 
-    public static final class DescriptorImpl extends BuildStepDescriptor<AddPromotionBadge>{
+    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher>{
 
         private DescriptorImpl(){
             super(AddPromotionBadge.class);
