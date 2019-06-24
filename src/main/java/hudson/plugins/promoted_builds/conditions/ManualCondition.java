@@ -2,15 +2,7 @@ package hudson.plugins.promoted_builds.conditions;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Descriptor;
-import hudson.model.Hudson;
-import hudson.model.InvisibleAction;
-import hudson.model.SimpleParameterDefinition;
-import hudson.model.ParameterDefinition;
-import hudson.model.ParameterValue;
-import hudson.model.User;
+import hudson.model.*;
 import hudson.plugins.promoted_builds.PromotionPermissionHelper;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
@@ -36,6 +28,7 @@ import javax.annotation.Nonnull;
 
 import javax.servlet.ServletException;
 
+import hudson.plugins.promoted_builds.pipeline.PromotionRun;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -44,6 +37,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
+
 
 /**
  * {@link PromotionCondition} that requires manual promotion.
@@ -283,16 +277,19 @@ public class ManualCondition extends PromotionCondition {
             return values != null ? values : Collections.<ParameterValue>emptyList();
         }
 
+        //TODO, TBD: Refactor API to PromotionRun ?
         @Override
-        public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
-            if (!(build instanceof Promotion)) {
-                throw new IllegalStateException ("Wrong build type. Expected a Promotion, but got "+build.getClass());
+        public void buildEnvVars(Run<?, ?> run, EnvVars env, TaskListener listener) {
+            // TODO: Refactor to support Pipeline Promotion types
+            if (!(run instanceof PromotionRun)) {
+                throw new IllegalStateException ("Wrong build type. Expected a PromotionRun, but got "+run.getClass());
             }
-            
-            List<ParameterValue> params = ((Promotion) build).getParameterValues();
+
+            PromotionRun promotion = (PromotionRun)run;
+            List<ParameterValue> params = ((PromotionRun) run).getParameterValues();
             if (params != null) {
                 for (ParameterValue value : params) {
-                    value.buildEnvVars(build, env);
+                    value.buildEnvironment(promotion.getPromotionRun(), env);
                 }
             }
         }
@@ -300,6 +297,14 @@ public class ManualCondition extends PromotionCondition {
 
     @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
+        public boolean isApplicable(@Nonnull Job<?,?> item, @Nonnull TaskListener listener) {
+            if(item instanceof AbstractProject){
+                return isApplicable((AbstractProject)item);
+            }
+            return true;
+        }
+
+        @Deprecated
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }

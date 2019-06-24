@@ -24,10 +24,7 @@
 package hudson.plugins.promoted_builds.conditions;
 
 import hudson.Extension;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Result;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotionBadge;
@@ -36,6 +33,7 @@ import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
@@ -101,6 +99,14 @@ public class SelfPromotionCondition extends PromotionCondition {
 
     @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
+        public boolean isApplicable(@Nonnull Job<?, ?> item, @Nonnull TaskListener listener) {
+            if(item instanceof AbstractProject){
+                return isApplicable((AbstractProject)item);
+            }
+            return true;
+        }
+
+        @Deprecated
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }

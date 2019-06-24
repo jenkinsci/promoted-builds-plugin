@@ -3,6 +3,8 @@ package hudson.plugins.promoted_builds.conditions;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Job;
+import hudson.model.TaskListener;
 import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
@@ -19,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.kohsuke.stapler.export.Exported;
+
+import javax.annotation.Nonnull;
 
 /**
  * {@link PromotionCondition} that tests if 1 or more upstream promotions have
@@ -87,6 +91,14 @@ public class UpstreamPromotionCondition extends PromotionCondition {
 
     @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
+        public boolean isApplicable(@Nonnull Job<?, ?> item, @Nonnull TaskListener listener) {
+            if(item instanceof AbstractProject){
+                isApplicable((AbstractProject)item);
+            }
+            return true;
+        }
+
+        @Deprecated
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }

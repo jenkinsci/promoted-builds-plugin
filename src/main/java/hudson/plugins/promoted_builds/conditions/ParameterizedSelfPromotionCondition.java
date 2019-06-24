@@ -5,15 +5,15 @@
 package hudson.plugins.promoted_builds.conditions;
 
 import hudson.Extension;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Result;
+import hudson.model.*;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import java.util.Map;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.annotation.Nonnull;
 
 /**
  * {@link PromotionCondition} that promotes a build as soon as it's done if a
@@ -59,6 +59,14 @@ public class ParameterizedSelfPromotionCondition extends SelfPromotionCondition 
 
     @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
+        public boolean isApplicable(@Nonnull Job<?,?> item, @Nonnull TaskListener listener) {
+            if(item instanceof AbstractProject){
+                return isApplicable((AbstractProject)item);
+            }
+            return true;
+        }
+
+        @Deprecated
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }
