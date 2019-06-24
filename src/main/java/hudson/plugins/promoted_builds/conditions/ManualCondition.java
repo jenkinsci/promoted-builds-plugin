@@ -3,13 +3,12 @@ package hudson.plugins.promoted_builds.conditions;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.*;
-import hudson.plugins.promoted_builds.Promotion;
+import hudson.plugins.promoted_builds.PromotionPermissionHelper;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
-import hudson.plugins.promoted_builds.PromotionPermissionHelper;
+import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
-import hudson.plugins.promoted_builds.pipeline.PromotionRun;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +37,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
+
 
 /**
  * {@link PromotionCondition} that requires manual promotion.
@@ -299,11 +299,12 @@ public class ManualCondition extends PromotionCondition {
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
         public boolean isApplicable(@Nonnull Job<?,?> item, @Nonnull TaskListener listener) {
             if(item instanceof AbstractProject){
-                return isApplicable((AbstractProject)item, TaskListener.NULL);
+                return isApplicable((AbstractProject)item);
             }
             return true;
         }
 
+        @Deprecated
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }

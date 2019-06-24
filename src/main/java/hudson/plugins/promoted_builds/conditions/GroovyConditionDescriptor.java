@@ -10,13 +10,14 @@ import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import jenkins.model.Jenkins;
 
 import javax.annotation.Nonnull;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Declared outside GroovyCondition as it depends on the optional 'script-security' dependency
  */
 @Extension(optional = true)
-public class GroovyConditionDescriptor extends PromotionConditionDescriptor {
+public final class GroovyConditionDescriptor extends PromotionConditionDescriptor {
 
     private static final Logger LOGGER = Logger.getLogger(GroovyConditionDescriptor.class.getName());
 
@@ -24,27 +25,23 @@ public class GroovyConditionDescriptor extends PromotionConditionDescriptor {
         super(GroovyCondition.class);
     }
 
-   @Override
-   public boolean isApplicable(@Nonnull Job<?,?> item, TaskListener listener){
-        if(item instanceof AbstractProject){
-            return isApplicable((AbstractProject)item, TaskListener.NULL);
-        }else{
-            final Jenkins jenkins = Jenkins.getInstance();
-            if (jenkins == null) {
-                // Jenkins not started or shut down
-                return false;
-            }
-            final PluginManager pluginManager = jenkins.getPluginManager();
-            final PluginWrapper plugin = pluginManager.getPlugin("script-security");
-            return plugin != null && plugin.isActive();
+    @Override
+    public boolean isApplicable(@Nonnull final Job<?, ?> run,@Nonnull TaskListener listener) {
+        if(run instanceof AbstractProject){
+           return isApplicable((AbstractProject)run);
         }
+        final PluginManager pluginManager = Jenkins.get().getPluginManager();
+        final PluginWrapper plugin = pluginManager.getPlugin("script-security");
+        return plugin != null && plugin.isActive();
+    }
 
-   }
 
-   public boolean isApplicable(AbstractProject<?, ?> item) {
-        return false;
-   }
-
+    @Deprecated
+    public boolean isApplicable(final AbstractProject<?, ?> item) {
+        final PluginManager pluginManager = Jenkins.get().getPluginManager();
+        final PluginWrapper plugin = pluginManager.getPlugin("script-security");
+        return plugin != null && plugin.isActive();
+    }
 
     @Override
     public String getDisplayName() {

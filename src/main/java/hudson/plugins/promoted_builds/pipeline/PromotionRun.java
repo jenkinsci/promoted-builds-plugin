@@ -12,17 +12,29 @@ import java.util.List;
 
 /**
  * @see Promotion
+ *<p>
+ * Interface to support pipeline builds' promotion
  */
 public interface PromotionRun { // always a run?
 
-    // Run which we try to promote
+
+    /**
+     *
+     * @return the run which we try to promote
+     */
     @Nonnull
     Run<?,?> getPromotedRun();
 
-    // Execution which does the promotion
+    /**
+     *
+     * @return method which does the {@link Promotion}
+     */
     @Nonnull
     Run<?,?> getPromotionRun();
 
-    //TODO: Move implementation to a default method?
+    /**
+     *
+     * @return the parameter values from future DSL commands.
+     */
     List<ParameterValue> getParameterValues();
 }

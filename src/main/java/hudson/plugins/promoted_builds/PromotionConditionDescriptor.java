@@ -31,9 +31,11 @@ public abstract class PromotionConditionDescriptor extends Descriptor<PromotionC
      */
     public boolean isApplicable(@Nonnull Job<?,?> item,@Nonnull TaskListener listener){
         if(item instanceof AbstractProject){
-            return isApplicable((AbstractProject)item, TaskListener.NULL);
+            return isApplicable((AbstractProject)item);
         }
         return isApplicable((Job) item, listener);
     }
+
+    @Deprecated
     public abstract boolean isApplicable(AbstractProject<?,?> item);
 }

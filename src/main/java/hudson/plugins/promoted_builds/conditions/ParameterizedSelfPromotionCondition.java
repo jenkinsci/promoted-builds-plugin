@@ -61,11 +61,12 @@ public class ParameterizedSelfPromotionCondition extends SelfPromotionCondition 
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
         public boolean isApplicable(@Nonnull Job<?,?> item, @Nonnull TaskListener listener) {
             if(item instanceof AbstractProject){
-                return isApplicable((AbstractProject)item, TaskListener.NULL);
+                return isApplicable((AbstractProject)item);
             }
             return true;
         }
 
+        @Deprecated
         public boolean isApplicable(AbstractProject<?,?> item) {
             return true;
         }
