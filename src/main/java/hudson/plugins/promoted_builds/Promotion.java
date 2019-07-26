@@ -4,23 +4,24 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.console.ConsoleLogFilter;
 import hudson.console.HyperlinkNote;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.BuildableItemWithBuildWrappers;
-import hudson.model.StreamBuildListener;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Cause.UserCause;
 import hudson.model.Cause.UserIdCause;
 import hudson.model.Environment;
+import hudson.model.Job;
 import hudson.model.Node;
 import hudson.model.ParameterDefinition;
-import hudson.model.ParametersAction;
 import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
 import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.model.TopLevelItem;
-import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.security.Permission;
@@ -84,13 +85,13 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      *      null if there's no such object. For example, if the build has already garbage collected.
      */
     @Exported
-    public AbstractBuild<?,?> getTarget() {
+    public Run<?,?> getTarget() {
         PromotionTargetAction pta = getAction(PromotionTargetAction.class);
         return pta == null ? null : pta.resolve(this);
     }
 
     @Override public AbstractBuild<?,?> getRootBuild() {
-        return getTarget().getRootBuild();
+        return this;
     }
 
     @Override
@@ -112,7 +113,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         // Augment environment with target build's information
         String rootUrl = Jenkins.get().getRootUrl();
-        AbstractBuild<?, ?> target = getTarget();
+        Run<?, ?> target = getTarget();
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
         e.put("PROMOTED_JOB_NAME", target.getParent().getName());
@@ -153,8 +154,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         e.put("PROMOTED_DISPLAY_NAME", target.getDisplayName());
         e.put("PROMOTED_USER_NAME", getUserName());
         e.put("PROMOTED_USER_ID", getUserId());
-        EnvVars envScm = new EnvVars();
-        target.getProject().getScm().buildEnvVars( target, envScm );
+        EnvVars envScm = target.getCharacteristicEnvVars();
         for ( Entry<String, String> entry : envScm.entrySet() )
         {
             e.put( "PROMOTED_" + entry.getKey(), entry.getValue() );
@@ -321,7 +321,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                         rootPath.child(getEnvironment(listener).expand(customWorkspace)));
             }
 
-            TopLevelItem item = (TopLevelItem)getTarget().getProject();
+            TopLevelItem item = (TopLevelItem)getTarget().getParent();
             FilePath workspace = n.getWorkspaceFor(item);
             if (workspace == null) {
                 throw new IOException("Cannot retrieve workspace for " + item + " on the node " + n);
@@ -330,10 +330,10 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         protected Result doRun(BuildListener listener) throws Exception {
-            AbstractBuild<?, ?> target = getTarget();
+            Run<?, ?> target = getTarget();
 
             OutputStream logger = listener.getLogger();
-            AbstractProject rootProject = project.getRootProject();
+            Job rootProject = project.getOwner();
             // Global log filters
             for (ConsoleLogFilter filter : ConsoleLogFilter.all()) {
                 logger = filter.decorateLogger(target, logger);
@@ -343,7 +343,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             if (rootProject instanceof BuildableItemWithBuildWrappers) {
                 BuildableItemWithBuildWrappers biwbw = (BuildableItemWithBuildWrappers) rootProject;
                 for (BuildWrapper bw : biwbw.getBuildWrappersList()) {
-                    logger = bw.decorateLogger(target, logger);
+                    logger = bw.decorateLogger((AbstractBuild)target, logger);
                 }
             }
             listener = new StreamBuildListener(logger);
@@ -361,7 +361,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                 return Result.FAILURE;
 
             try {
-              List<BuildWrapper> wrappers = new ArrayList<BuildWrapper>(project.getBuildWrappers().values());
+                List<BuildWrapper> wrappers = new ArrayList<BuildWrapper>(project.getBuildWrappers().values());
             	List<ParameterValue> params=getParameterValues();
 
             	if (params!=null){
@@ -548,7 +548,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         public static PromotionParametersAction buildFor(
-                @Nonnull AbstractBuild<?, ?> buildToBePromoted,
+                @Nonnull Run<?, ?> buildToBePromoted,
                 @CheckForNull List<ParameterValue> promotionParams) {
             if (promotionParams == null) {
                 promotionParams = new ArrayList<ParameterValue>();

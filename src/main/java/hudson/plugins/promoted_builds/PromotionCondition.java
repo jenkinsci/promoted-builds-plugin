@@ -2,8 +2,8 @@ package hudson.plugins.promoted_builds;
 
 import hudson.DescriptorExtensionList;
 import hudson.ExtensionPoint;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
+import hudson.model.Job;
+import hudson.model.Run;
 import hudson.model.Describable;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
      * @deprecated
      */
     @CheckForNull
-    public PromotionBadge isMet(AbstractBuild<?,?> build) {
+    public PromotionBadge isMet(Run<?,?> build) {
         return null;
     }
 
@@ -45,7 +45,7 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
      *      we know how a build was promoted.
      *      Null if otherwise, meaning it shouldn't be promoted.
      */
-    public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?,?> build) {
+    public PromotionBadge isMet(PromotionProcess promotionProcess, Run<?,?> build) {
         // just call the deprecated version to support legacy conditions
         return isMet(build);
     }
@@ -64,7 +64,7 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
     /**
      * Returns a subset of {@link PromotionConditionDescriptor}s that applys to the given project.
      */
-    public static List<PromotionConditionDescriptor> getApplicableTriggers(AbstractProject<?,?> p) {
+    public static List<PromotionConditionDescriptor> getApplicableTriggers(Job<?,?> p) {
         List<PromotionConditionDescriptor> r = new ArrayList<PromotionConditionDescriptor>();
         for (PromotionConditionDescriptor t : all()) {
             if(t.isApplicable(p))

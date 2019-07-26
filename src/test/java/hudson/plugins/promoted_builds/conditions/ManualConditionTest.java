@@ -1,7 +1,8 @@
 package hudson.plugins.promoted_builds.conditions;
 
 import hudson.ExtensionList;
-import hudson.model.AbstractProject;
+import hudson.model.Job;
+import hudson.model.Run;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Item;
 import hudson.model.ParameterDefinition;
@@ -343,7 +344,7 @@ public class ManualConditionTest {
         throw new AssertionError("Timeout to retrieve the buildByNumber: " + n);
     }
 
-    private PromotionProcess addPromotionProcess(AbstractProject<?,?> owner, String name) throws Exception {
+    private PromotionProcess addPromotionProcess(Job<?,?> owner, String name) throws Exception {
         ExtensionList<Descriptor> list = j.jenkins.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base = new JobPropertyImpl(owner);

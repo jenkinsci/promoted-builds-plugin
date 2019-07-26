@@ -7,30 +7,21 @@ import hudson.model.AbstractProject;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.InvisibleAction;
-import hudson.model.SimpleParameterDefinition;
+import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.User;
-import hudson.plugins.promoted_builds.PromotionPermissionHelper;
-import hudson.plugins.promoted_builds.PromotionBadge;
-import hudson.plugins.promoted_builds.PromotionCondition;
-import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
-import hudson.plugins.promoted_builds.Promotion;
-import hudson.plugins.promoted_builds.PromotionProcess;
+import hudson.plugins.promoted_builds.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -111,7 +102,7 @@ public class ManualCondition extends PromotionCondition {
     }
 
     @Override
-    public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?,?> build) {
+    public PromotionBadge isMet(PromotionProcess promotionProcess, Run<?,?> build) {
         List<ManualApproval> approvals = build.getActions(ManualApproval.class);
 
         for (ManualApproval approval : approvals) {
@@ -284,15 +275,15 @@ public class ManualCondition extends PromotionCondition {
         }
 
         @Override
-        public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
-            if (!(build instanceof Promotion)) {
-                throw new IllegalStateException ("Wrong build type. Expected a Promotion, but got "+build.getClass());
+        public void buildEnvVars(Run<?, ?> run, EnvVars env) {
+            if (!(run instanceof Promotion)) {
+                throw new IllegalStateException("Wrong build type. Expected a Promotion, but got " + run.getClass());
             }
-            
-            List<ParameterValue> params = ((Promotion) build).getParameterValues();
+
+            List<ParameterValue> params = ((Promotion)run).getParameterValues();
             if (params != null) {
                 for (ParameterValue value : params) {
-                    value.buildEnvVars(build, env);
+                    value.buildEnvironment(run, env);
                 }
             }
         }
@@ -300,7 +291,17 @@ public class ManualCondition extends PromotionCondition {
 
     @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
-        public boolean isApplicable(AbstractProject<?,?> item) {
+
+        @Override
+        public boolean isApplicable(@Nonnull Job<?,?> item, @Nonnull TaskListener listener) {
+            if(item instanceof AbstractProject){
+                return isApplicable((AbstractProject)item);
+            }
+            return true;
+        }
+
+        @Deprecated
+        public boolean isApplicable(Job<?,?> item) {
             return true;
         }
 

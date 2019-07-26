@@ -1,13 +1,18 @@
 package hudson.plugins.promoted_builds;
 
-import hudson.model.*;
-
 import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.CheckForNull;
+
+import hudson.model.AbstractBuild;
+import hudson.model.Api;
+import hudson.model.Job;
+import hudson.model.PermalinkProjectAction;
+import hudson.model.ProminentProjectAction;
+import hudson.model.Run;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
@@ -28,10 +33,10 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
 	//TODO externalize to a plugin property?
 	private static final int SUMMARY_SIZE = 10;
 	
-	public final AbstractProject<?,?> owner;
+	public final Job<?,?> owner;
     private final JobPropertyImpl property;
 
-    public PromotedProjectAction(AbstractProject<?, ?> owner, JobPropertyImpl property) {
+    public PromotedProjectAction(Job<?, ?> owner, JobPropertyImpl property) {
         this.owner = owner;
         this.property = property;
     }
@@ -97,8 +102,8 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
 
     public List<Promotion> getPromotions(PromotionProcess promotionProcess){
     	List<Promotion> list = new ArrayList<Promotion>(); 
-        for( AbstractBuild<?,?> build : owner.getBuilds() ) {
-            PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
+        for(Run<?, ?> runs : owner.getBuilds() ) {
+            PromotedBuildAction a = runs.getAction(PromotedBuildAction.class);
             if(a!=null && a.contains(promotionProcess))
             	list.addAll( a.getPromotionBuilds(promotionProcess) );
         }

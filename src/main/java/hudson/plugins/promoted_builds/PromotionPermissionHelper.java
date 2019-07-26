@@ -24,7 +24,7 @@
 
 package hudson.plugins.promoted_builds;
 
-import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.security.AccessDeniedException2;
 import javax.annotation.CheckForNull;
@@ -40,14 +40,14 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 @Restricted(NoExternalUse.class)
 public class PromotionPermissionHelper {
 
-    public static void checkPermission(@Nonnull AbstractProject<?,?> target, @CheckForNull ManualCondition associatedCondition) {
+    public static void checkPermission(@Nonnull Job<?,?> target, @CheckForNull ManualCondition associatedCondition) {
         if (!hasPermission(target, associatedCondition)) {
             // TODO: Give a more accurate error message if the user has Promotion.PROMOTE but is not in the list of approvers.
             throw new AccessDeniedException2(Jenkins.getAuthentication(), Promotion.PROMOTE);
         }
     }
 
-    public static boolean hasPermission(@Nonnull AbstractProject<?,?> target, @CheckForNull ManualCondition associatedCondition) {
+    public static boolean hasPermission(@Nonnull Job<?,?> target, @CheckForNull ManualCondition associatedCondition) {
         if (associatedCondition == null) {
             return target.hasPermission(Promotion.PROMOTE);
         } else if (associatedCondition.getUsersAsSet().isEmpty()) {

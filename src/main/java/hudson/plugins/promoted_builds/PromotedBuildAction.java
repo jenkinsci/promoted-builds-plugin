@@ -2,10 +2,11 @@ package hudson.plugins.promoted_builds;
 
 import hudson.RestrictedSince;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildBadgeAction;
-import hudson.model.Cause.UserCause;
+import hudson.model.Cause;
+import hudson.model.Job;
+import hudson.model.Run;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.util.CopyOnWriteList;
 import org.kohsuke.stapler.HttpResponse;
@@ -33,18 +34,25 @@ import org.kohsuke.stapler.export.ExportedBean;
 public final class PromotedBuildAction implements BuildBadgeAction {
     
     //TODO: bug: serialization of builds into the badge
-    public final AbstractBuild<?,?> owner;
+    public final Run<?,?> owner;
 
     /**
      * Per-process status.
      */
     private final CopyOnWriteList<Status> statuses = new CopyOnWriteList<Status>();
 
+    public PromotedBuildAction(Run<?,?> owner) {
+        assert owner != null;
+        this.owner = owner;
+    }
+
+    @Deprecated
     public PromotedBuildAction(AbstractBuild<?,?> owner) {
         assert owner!=null;
         this.owner = owner;
     }
 
+    @Deprecated
     public PromotedBuildAction(AbstractBuild<?,?> owner, Status firstStatus) {
         this(owner);
         statuses.add(firstStatus);
@@ -53,15 +61,15 @@ public final class PromotedBuildAction implements BuildBadgeAction {
     /**
      * Gets the owning build.
      */
-    public AbstractBuild<?,?> getOwner() {
+    public Run<?,?> getOwner() {
         return owner;
     }
 
     /**
      * Gets the owning project.
      */
-    public AbstractProject<?,?> getProject() {
-        return owner.getProject();
+    public Job<?,?> getProject() {
+        return owner.getParent();
     }
 
     /**
@@ -241,7 +249,7 @@ public final class PromotedBuildAction implements BuildBadgeAction {
         ManualCondition manualCondition = (ManualCondition) p.getPromotionCondition(ManualCondition.class.getName());
         PromotionPermissionHelper.checkPermission(getProject(), manualCondition);
 
-        p.promote(owner,new UserCause(),new ManualPromotionBadge());
+        p.promote(owner, new Cause.UserIdCause(), new ManualPromotionBadge());
 
         return HttpResponses.redirectToDot();
     }

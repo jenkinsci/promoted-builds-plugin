@@ -11,11 +11,11 @@
   <version>3.4-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
-  <name>Jenkins promoted builds plugin</name>
+  <name>PureCloud Jenkins promoted builds plugin</name>
   <url>https://wiki.jenkins.io/display/JENKINS/Promoted+Builds+Plugin</url>
 
   <properties>
-    <jenkins.version>2.138.4</jenkins.version>
+    <jenkins.version>2.164.3</jenkins.version>
     <java.level>8</java.level>
     <findbugs.effort>Max</findbugs.effort>
     <hpi.compatibleSinceVersion>3.0</hpi.compatibleSinceVersion>
@@ -36,12 +36,6 @@
     </developer>
   </developers>
 
-  <scm>
-    <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    <tag>HEAD</tag>
-  </scm>
   <licenses>
     <license>
       <name>MIT</name>
@@ -51,14 +45,32 @@
 
   <repositories>
     <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
+      <id>inin-release</id>
+      <name>ININ Release Repository</name>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <url>https://purecloud.artifactoryonline.com/purecloud/inin-release</url>
+    </repository>
+    <repository>
+      <id>inin-snapshot</id>
+      <name>ININ Snapshot Repository</name>
+      <url>https://purecloud.artifactoryonline.com/purecloud/inin-snapshot</url>
     </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
+      <id>inin-release</id>
+      <name>ININ Release Repository</name>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <url>https://purecloud.artifactoryonline.com/purecloud/plugins-release</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>inin-snapshot</id>
+      <name>ININ Snapshot Repository</name>
+      <url>https://purecloud.artifactoryonline.com/purecloud/plugins-snapshot</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -83,6 +95,11 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>junit</artifactId>
+      <version>1.20</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>mailer</artifactId>
       <version>1.20</version>
     </dependency>
     <dependency>
@@ -183,6 +200,36 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-project</artifactId>
       <version>1.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-step-api</artifactId>
+      <version>2.20</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-support</artifactId>
+      <version>3.2</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-cps</artifactId>
+      <version>2.9</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-job</artifactId>
+      <version>2.32</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-api</artifactId>
+      <version>2.32</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

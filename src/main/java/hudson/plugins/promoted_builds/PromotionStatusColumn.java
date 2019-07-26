@@ -4,12 +4,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
 import hudson.model.Job;
-import hudson.model.Run;
 import hudson.views.ListViewColumn;
 import hudson.views.ListViewColumnDescriptor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Show promotion statuses of the project.

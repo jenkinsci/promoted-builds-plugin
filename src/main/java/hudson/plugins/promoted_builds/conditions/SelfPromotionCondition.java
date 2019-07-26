@@ -26,7 +26,9 @@ package hudson.plugins.promoted_builds.conditions;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
@@ -36,6 +38,7 @@ import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
@@ -56,7 +59,7 @@ public class SelfPromotionCondition extends PromotionCondition {
     }
 
     @Override
-    public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?, ?> build) {
+    public PromotionBadge isMet(PromotionProcess promotionProcess, Run<?, ?> build) {
         if (!build.isBuilding()) {
             Result r = build.getResult();
             if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
@@ -101,7 +104,16 @@ public class SelfPromotionCondition extends PromotionCondition {
 
     @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
-        public boolean isApplicable(AbstractProject<?,?> item) {
+        @Override
+        public boolean isApplicable(@Nonnull Job<?, ?> item, @Nonnull TaskListener listener) {
+            if(item instanceof AbstractProject){
+                return isApplicable((AbstractProject)item);
+            }
+            return true;
+        }
+
+        @Deprecated
+        public boolean isApplicable(Job<?,?> item) {
             return true;
         }
 
