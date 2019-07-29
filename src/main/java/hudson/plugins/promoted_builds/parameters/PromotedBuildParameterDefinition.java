@@ -161,7 +161,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
     @Nonnull
     public List<Run<?,?>> getRuns(@CheckForNull Item base) {
         final List<Run<?,?>> runs = new ArrayList<Run<?,?>>();
-        final Jenkins jenkins = Jenkins.getInstance();
+        final Jenkins jenkins = Jenkins.getInstanceOrNull();
         if (jenkins == null) {
             return runs;
         }
@@ -212,10 +212,6 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
          * Checks the job name.
          */
         public FormValidation doCheckJobName(@AncestorInPath Item project, @QueryParameter String value ) {
-            final Jenkins jenkins = Jenkins.getInstance();
-            if (jenkins == null) {
-                return FormValidation.error("Jenkins instance is not ready");
-            }
             if (!project.hasPermission(Item.CONFIGURE) && project.hasPermission(Item.EXTENDED_READ)) {
                 return FormValidation.ok();
             }
@@ -229,7 +225,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
                     // suggest full name so that getBuilds() can find item.
                     AbstractProject nearest = AbstractProject.findNearest(value, project.getParent());
                     return FormValidation.error( nearest != null
-                            ? hudson.tasks.Messages.BuildTrigger_NoSuchProject(value, nearest.getFullName())
+                            ? hudson.plugins.promoted_builds.Messages.BuildTrigger_NoSuchProject(value, nearest.getRelativeNameFrom(project))
                             : hudson.plugins.promoted_builds.Messages.Shared_noSuchProject(value));
                 }
 
@@ -242,8 +238,8 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
         public AutoCompletionCandidates doAutoCompleteJobName(@AncestorInPath @CheckForNull Item project, 
                 @QueryParameter String value) {
             final AutoCompletionCandidates candidates = new AutoCompletionCandidates();
-            final Jenkins jenkins = Jenkins.getInstance();
-            if (jenkins == null || project == null || !project.hasPermission(Item.CONFIGURE)) {
+            final Jenkins jenkins = Jenkins.get();
+            if (project == null || !project.hasPermission(Item.CONFIGURE)) {
                 return candidates;
             }
           
@@ -265,10 +261,6 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
          */
         public ListBoxModel doFillProcessItems(@AncestorInPath Job defaultJob, @QueryParameter("jobName") String jobName) {
             final ListBoxModel r = new ListBoxModel();
-            final Jenkins jenkins = Jenkins.getInstance();
-            if (jenkins == null) {
-                return r;
-            }
             if (!defaultJob.hasPermission(Item.CONFIGURE) && defaultJob.hasPermission(Item.EXTENDED_READ)) {
                 return r;
             }

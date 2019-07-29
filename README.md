@@ -1,5 +1,11 @@
 
-See the wiki at: <http://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin>
+Promoted Builds Plugin
+======================
+
+[![Join the chat at https://gitter.im/jenkinsci/promoted-builds-plugin](https://badges.gitter.im/jenkinsci/promoted-builds-plugin.svg)](https://gitter.im/jenkinsci/promoted-builds-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/promoted-builds.svg)](https://plugins.jenkins.io/promoted-builds)
+[![GitHub release](https://img.shields.io/github/release/jenkinsci/promoted-builds-plugin.svg?label=release)](https://github.com/jenkinsci/promoted-builds-plugin/releases/latest)
+[![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/promoted-builds.svg?color=blue)](https://plugins.jenkins.io/promoted-builds)
 
 This plugin allows you to distinguish good builds from bad builds by
 introducing the notion of 'promotion'.Put simply, a promoted build is a
@@ -179,11 +185,11 @@ freeStyleJob('test-job') {
 }
 ```
 
-## Contributing
-
-* Making new releases is covered in [the "Hosting Plugins" wiki page](https://wiki.jenkins-ci.org/display/JENKINS/Hosting+Plugins).
-* If you want to send pull requests or work on some fixes, check [this document](http://jenkins-ci.org/pull-request-greeting).
-* There are a lot a issues and features that need attention, the JIRA bug tracker is listed on [the wiki page](https://wiki.jenkins-ci.org/display/JENKINS/Promoted+Builds+Plugin).
-
 [1]: https://wiki.jenkins-ci.org/display/JENKINS/Copy+Artifact+Plugin
 [2]: https://github.com/jenkinsci/promoted-builds-plugin/blob/master/src/main/java/hudson/plugins/promoted_builds/Promotion.java
+
+## Undergoing project based on this Plugin
+
+* `Artifact Promotion Plugin For Jenkins Pipeline` - Under GSoC 2019.
+   Join with the Project through the following Chat Link:
+    * [promoted-builds-plugin](https://gitter.im/jenkinsci/promoted-builds-plugin)

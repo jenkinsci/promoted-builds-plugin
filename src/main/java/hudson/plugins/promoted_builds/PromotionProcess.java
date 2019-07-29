@@ -35,7 +35,6 @@ import hudson.model.StringParameterValue;
 import hudson.model.labels.LabelAtom;
 import hudson.model.labels.LabelExpression;
 import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
-import hudson.plugins.promoted_builds.util.JenkinsHelper;
 import hudson.security.ACL;
 import hudson.tasks.BuildStep;
 import hudson.tasks.BuildStepDescriptor;
@@ -260,7 +259,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         // not just the same label.. but at least this works if job is tied to one node:
         if (assignedLabel == null) return getOwner().getAssignedLabel();
 
-        return JenkinsHelper.getInstance().getLabel(assignedLabel);
+        return Jenkins.get().getLabel(assignedLabel);
     }
 
     @Override public JDK getJDK() {
@@ -326,7 +325,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 				ParameterValue defaultParameterValue = parameterDefinition.getDefaultParameterValue();
 				if (defaultParameterValue!=null){
 					if (defaultParameterValue instanceof StringParameterValue){
-						envVars.put(parameterDefinition.getName(), ((StringParameterValue)defaultParameterValue).value);
+						envVars.put(parameterDefinition.getName(), (String)defaultParameterValue.getValue());
 					}
 				}
 			}
@@ -565,7 +564,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public boolean isInQueue(@Nonnull AbstractBuild<?,?> build) {
-        for (Item item : JenkinsHelper.getInstance().getQueue().getItems(this))
+        for (Item item : Jenkins.get().getQueue().getItems(this))
             if (item.getAction(PromotionTargetAction.class).resolve(this)==build)
                 return true;
         return false;
@@ -628,7 +627,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public DescriptorImpl getDescriptor() {
-        return (DescriptorImpl)JenkinsHelper.getInstance().getDescriptorOrDie(getClass());
+        return (DescriptorImpl)Jenkins.get().getDescriptorOrDie(getClass());
     }
 
     @Override
@@ -658,14 +657,14 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
                         Messages.JobPropertyImpl_LabelString_InvalidBooleanExpression(e.getMessage()));
             }
             // TODO: if there's an atom in the expression that is empty, report it
-            if (JenkinsHelper.getInstance().getLabel(value).isEmpty())
+            if (Jenkins.get().getLabel(value).isEmpty())
                 return FormValidation.warning(Messages.JobPropertyImpl_LabelString_NoMatch());
             return FormValidation.ok();
         }
 
         public AutoCompletionCandidates doAutoCompleteAssignedLabelString(@QueryParameter String value) {
             AutoCompletionCandidates c = new AutoCompletionCandidates();
-            Set<Label> labels = JenkinsHelper.getInstance().getLabels();
+            Set<Label> labels = Jenkins.get().getLabels();
             List<String> queries = new AutoCompleteSeeder(value).getSeeds();
 
             for (String term : queries) {

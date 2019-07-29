@@ -34,11 +34,15 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 public class JenkinsHelper {
     
     private JenkinsHelper() {};
-    
+
+    /**
+     * @deprecated Use {@link Jenkins#get()}
+     */
+    @Deprecated
     @Nonnull
     @Restricted(NoExternalUse.class)
     public static Jenkins getInstance() throws IllegalStateException {
-        Jenkins instance = Jenkins.getInstance();
+        Jenkins instance = Jenkins.getInstanceOrNull();
         if (instance == null) {
             throw new IllegalStateException("Jenkins has not been started, or was already shut down");
         }
