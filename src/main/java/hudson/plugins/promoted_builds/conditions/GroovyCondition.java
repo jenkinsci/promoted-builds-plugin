@@ -4,7 +4,8 @@ import groovy.lang.Binding;
 import hudson.EnvVars;
 import hudson.PluginManager;
 import hudson.Util;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.plugins.promoted_builds.PromotionBadge;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.PromotionProcess;
@@ -63,7 +64,7 @@ public class GroovyCondition extends PromotionCondition {
     }
 
     @Override
-    public PromotionBadge isMet(final PromotionProcess promotionProcess, final AbstractBuild<?, ?> build) {
+    public PromotionBadge isMet(final PromotionProcess promotionProcess, final Run<?, ?> build) {
         final Jenkins jenkins = Jenkins.get();
         final PluginManager pluginManager = jenkins.getPluginManager();
         final ClassLoader classLoader = pluginManager.uberClassLoader;
@@ -120,10 +121,9 @@ public class GroovyCondition extends PromotionCondition {
         }
 
         @Override
-        public void buildEnvVars(final AbstractBuild<?, ?> build, final EnvVars env) {
-            super.buildEnvVars(build, env);
-            for (final Map.Entry<String, String> entry :
-                    variables.entrySet()) {
+        public void buildEnvVars(final Run<?, ?> run, final EnvVars env) {
+            super.buildEnvVars(run, env);
+            for (final Map.Entry<String, String> entry : variables.entrySet()) {
                 env.put(entry.getKey(), entry.getValue());
             }
         }

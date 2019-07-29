@@ -4,11 +4,13 @@ import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Cause.UserCause;
+import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.util.Iterators;
 import net.sf.json.JSONArray;
@@ -40,13 +42,9 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
  * Promotion status of a build wrt a specific {@link PromotionProcess}.
  *
  * @author Kohsuke Kawaguchi
- * @see PromotedBuildAction#statuses
  */
 @ExportedBean
 public final class Status {
-    /**
-     * Matches with {@link PromotionProcess#name}.
-     */
     public final String name;
 
     private final PromotionBadge[] badges;
@@ -90,7 +88,7 @@ public final class Status {
     @CheckForNull
     public PromotedBuildAction getParent() {
     	if (parent==null){
-            final AbstractBuild<?, ?> target = getTarget();
+            final Run<?, ?> target = getTarget();
             if (target != null) {
                 parent = target.getAction(PromotedBuildAction.class);
             }
@@ -106,7 +104,7 @@ public final class Status {
     @CheckForNull
     public PromotionProcess getProcess() {
         assert parent != null : name;
-        AbstractProject<?,?> project = parent.getProject();
+        Job<?,?> project = parent.getProject();
         assert project != null : parent;
         JobPropertyImpl jp = project.getProperty(JobPropertyImpl.class);
         if(jp==null)    return null;
@@ -142,7 +140,7 @@ public final class Status {
      * @return Build reference
      */
     @CheckForNull
-    public AbstractBuild<?,?> getTarget() {
+    public Run<?,?> getTarget() {
         final PromotedBuildAction _parent = getParent();
         return _parent != null ? _parent.owner : null;
     }
@@ -155,7 +153,7 @@ public final class Status {
      * @param env
      *      Environment variables should be added to this map.
      */
-    public void buildEnvVars(AbstractBuild<?,?> build, EnvVars env) {
+    public void buildEnvVars(Run<?,?> build, EnvVars env) {
         for (PromotionBadge badge : badges) {
             badge.buildEnvVars(build, env);
         }
@@ -229,7 +227,7 @@ public final class Status {
      */
     public boolean isInQueue() {
         PromotionProcess p = getProcess();
-        AbstractBuild<?, ?> target = getTarget();
+        Run<?, ?> target = getTarget();
         return p != null && target != null && p.isInQueue(target);
     }
 
@@ -369,13 +367,13 @@ public final class Status {
             return false;
         }
 
-        AbstractBuild<?, ?> target = getTarget();
+        Run<?, ?> target = getTarget();
         if (target == null) {
             return false;
         }
 
         ManualCondition manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());
-        return PromotionPermissionHelper.hasPermission(target.getProject(), manualCondition);
+        return PromotionPermissionHelper.hasPermission(target.getParent(), manualCondition);
     }
 
     /**
@@ -392,14 +390,14 @@ public final class Status {
             throw new AbortException("Cannot retrieve the promotion process");
         }
         
-        AbstractBuild<?, ?> target = getTarget();
+        Run<?, ?> target = getTarget();
         if (target ==null) {
             throw new AbortException("Cannot get the target build to be promoted");
         }
         
         ManualCondition manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());     
         // TODO: Use PromotionPermissionHelper.checkPermission instead, but consider issues with backwards compatibility.
-        if (!PromotionPermissionHelper.hasPermission(target.getProject(), manualCondition)) {
+        if (!PromotionPermissionHelper.hasPermission(target.getParent(), manualCondition)) {
             return;
         }
         

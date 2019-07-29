@@ -13,6 +13,7 @@ import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -34,16 +35,19 @@ public class SelfPromotionTest {
 
         // promote if the downstream passes
         JobPropertyImpl promotion = new JobPropertyImpl(p);
-        p.addProperty(promotion);
 
         PromotionProcess promo1 = promotion.addProcess("promo1");
         promo1.conditions.add(new SelfPromotionCondition(false));
+        promo1.save();
 
         PromotionProcess promo2 = promotion.addProcess("promo2");
         promo2.conditions.add(new SelfPromotionCondition(false));
+        promo2.save();
+
+        p.addProperty(promotion);
 
         // ensure that the data survives the roundtrip
-        j.configRoundtrip(p);
+        p = j.configRoundtrip(p);
 
         // rebind
         promotion = p.getProperty(JobPropertyImpl.class);
@@ -73,7 +77,6 @@ public class SelfPromotionTest {
 
         // promote if the downstream passes
         JobPropertyImpl promotion = new JobPropertyImpl(p);
-        p.addProperty(promotion);
 
         PromotionProcess promo1 = promotion.addProcess("promo1");
         promo1.conditions.add(new SelfPromotionCondition(false));
@@ -81,8 +84,10 @@ public class SelfPromotionTest {
         PromotionProcess promo2 = promotion.addProcess("promo2");
         promo2.conditions.add(new SelfPromotionCondition(true));
 
+        p.addProperty(promotion);
+
         // ensure that the data survives the roundtrip
-        j.configRoundtrip(p);
+        p = j.configRoundtrip(p);
 
         // rebind
         promotion = p.getProperty(JobPropertyImpl.class);
@@ -112,7 +117,6 @@ public class SelfPromotionTest {
 
         // promote if the downstream passes
         JobPropertyImpl promotion = new JobPropertyImpl(p);
-        p.addProperty(promotion);
 
         PromotionProcess promo1 = promotion.addProcess("promo1");
         promo1.conditions.add(new SelfPromotionCondition(false));
@@ -120,8 +124,10 @@ public class SelfPromotionTest {
         PromotionProcess promo2 = promotion.addProcess("promo2");
         promo2.conditions.add(new SelfPromotionCondition(true));
 
+        p.addProperty(promotion);
+
         // ensure that the data survives the roundtrip
-        j.configRoundtrip(p);
+        p = j.configRoundtrip(p);
 
         // rebind
         promotion = p.getProperty(JobPropertyImpl.class);
@@ -155,13 +161,12 @@ public class SelfPromotionTest {
 
         // promote if the downstream passes
         JobPropertyImpl promotion = new JobPropertyImpl(p);
-        p.addProperty(promotion);
-
         PromotionProcess promo1 = promotion.addProcess("promo1");
         promo1.conditions.add(new SelfPromotionCondition(false));
+        p.addProperty(promotion);
 
         // ensure that the data survives the roundtrip
-        j.configRoundtrip(p);
+        p = j.configRoundtrip(p);
 
         // rebind
         promotion = p.getProperty(JobPropertyImpl.class);

@@ -25,7 +25,6 @@ import hudson.model.JDK;
 import hudson.model.Job;
 import hudson.model.Label;
 import hudson.model.ParameterDefinition;
-import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.PermalinkProjectAction.Permalink;
 import hudson.model.Queue.Item;
@@ -62,7 +61,6 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -163,8 +161,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @return the root project value.
      */
     @Override
-    public AbstractProject getRootProject() {
-        return getParent().getOwner().getRootProject();
+    public AbstractProject<?, ?> getRootProject() {
+        return (AbstractProject<?, ?>) getParent().getOwner();
     }
 
     @Override
@@ -177,7 +175,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * a job property.
      * @return Current owner project
      */
-    public AbstractProject<?,?> getOwner() {
+    public Job<?,?> getOwner() {
         return getParent().getOwner();
     }
 
@@ -257,13 +255,13 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     @Override public Label getAssignedLabel() {
         // Really would like to run on the exact node that the promoted build ran on,
         // not just the same label.. but at least this works if job is tied to one node:
-        if (assignedLabel == null) return getOwner().getAssignedLabel();
+        if (assignedLabel == null) return Jenkins.get().getSelfLabel();
 
         return Jenkins.get().getLabel(assignedLabel);
     }
 
     @Override public JDK getJDK() {
-        return getOwner().getJDK();
+        return Jenkins.get().getJDK(null);
     }
 
     /**
@@ -274,7 +272,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     @CheckForNull
     public String getCustomWorkspace() {
-        AbstractProject<?, ?> p = getOwner();
+        Job<?, ?> p = getOwner();
         if (p instanceof FreeStyleProject)
             return ((FreeStyleProject) p).getCustomWorkspace();
         return null;
@@ -298,7 +296,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     public boolean isVisible(){
     	if (isVisible == null) return true;
 
-    	AbstractProject<?, ?> job = getOwner();
+    	Job<?, ?> job = getOwner();
 
     	if (job == null) return true;
 
@@ -316,7 +314,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     	}
     	return true;
     }
-    private static EnvVars getDefaultParameterValuesAsEnvVars(AbstractProject owner) {
+    private static EnvVars getDefaultParameterValuesAsEnvVars(Job owner) {
     	EnvVars envVars = null;
 		ParametersDefinitionProperty parametersDefinitionProperty = (ParametersDefinitionProperty)owner.getProperty(ParametersDefinitionProperty.class);
 		if (parametersDefinitionProperty!=null){
@@ -393,7 +391,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      otherwise returns a list of badges that record how the promotion happened.
      */
     @CheckForNull
-    public Status isMet(AbstractBuild<?,?> build) {
+    public Status isMet(Run<?,?> build) {
         List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
         for (PromotionCondition cond : conditions) {
             PromotionBadge b = cond.isMet(this, build);
@@ -406,7 +404,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
     /**
      * @deprecated
-     *      Use {@link #considerPromotion2(AbstractBuild)}
+     *      Use {@link #considerPromotion2(Run)}
      */
     @Deprecated
     public boolean considerPromotion(AbstractBuild<?,?> build) throws IOException {
@@ -422,7 +420,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @throws IOException
      */
     @CheckForNull
-    public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build) throws IOException {
+    public Future<Promotion> considerPromotion2(Run<?, ?> build) throws IOException {
 		LOGGER.fine("Considering the promotion of "+build+" via "+getName()+" without parmeters");
 		// If the build has manual approvals, use the parameters from it
 		List<ParameterValue> params = new ArrayList<ParameterValue>();
@@ -439,7 +437,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 	}
 
     @CheckForNull
-    public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build, List<ParameterValue> params) throws IOException {
+    public Future<Promotion> considerPromotion2(Run<?,?> build, List<ParameterValue> params) throws IOException {
         if (!isActive())
             return null;    // not active
 
@@ -461,13 +459,13 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return f;
     }
 
-    public void promote(AbstractBuild<?,?> build, Cause cause, PromotionBadge... badges) throws IOException {
+    public void promote(Run<?,?> build, Cause cause, PromotionBadge... badges) throws IOException {
         promote2(build,cause,new Status(this,Arrays.asList(badges)));
     }
 
     /**
      * @deprecated
-     *      Use {@link #promote2(AbstractBuild, Cause, Status)}
+     *      Use {@link #promote2(Run, Cause, Status)}
      */
     public void promote(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
         promote2(build,cause,qualification);
@@ -482,7 +480,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @return Future to track the completion of the promotion.
      * @throws IOException Promotion failure
      */
-    public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
+    public Future<Promotion> promote2(Run<?,?> build, Cause cause, Status qualification) throws IOException {
     	return promote2(build, cause, qualification, null);
     }
 
@@ -496,13 +494,15 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @return Future to track the completion of the promotion.
      * @throws IOException Promotion failure
      */
-    public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification, List<ParameterValue> params) throws IOException {
+    public Future<Promotion> promote2(Run<?,?> build, Cause cause, Status qualification, List<ParameterValue> params) throws IOException {
         PromotedBuildAction a = build.getAction(PromotedBuildAction.class);
         // build is qualified for a promotion.
         if(a!=null) {
             a.add(qualification);
         } else {
-            build.addAction(new PromotedBuildAction(build,qualification));
+            PromotedBuildAction pba = new PromotedBuildAction(build);
+            pba.add(qualification);
+            build.addAction(pba);
             build.save();
         }
 
@@ -528,7 +528,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @param cause Promotion cause
      * @return {@code true} if scheduling is successful
      * @deprecated
-     *      Use {@link #scheduleBuild2(AbstractBuild, Cause)}
+     *      Use {@link #scheduleBuild2(Run, Cause)}
      */
     @Deprecated
     public boolean scheduleBuild(@Nonnull AbstractBuild<?,?> build, @Nonnull Cause cause) {
@@ -543,7 +543,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @return Future result or {@code null} if the promotion cannot be scheduled
      */
     @CheckForNull
-    public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build,
+    public Future<Promotion> scheduleBuild2(@Nonnull Run<?,?> build,
             Cause cause, @CheckForNull List<ParameterValue> params) {
         List<Action> actions = new ArrayList<Action>();
         actions.add(Promotion.PromotionParametersAction.buildFor(build, params));
@@ -559,11 +559,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         throw HttpResponses.error(404, "Promotion processes may not be built directly");
     }
 
-    public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build, @Nonnull Cause cause) {
+    public Future<Promotion> scheduleBuild2(@Nonnull Run<?,?> build, @Nonnull Cause cause) {
         return scheduleBuild2(build, cause, null);
     }
 
-    public boolean isInQueue(@Nonnull AbstractBuild<?,?> build) {
+    public boolean isInQueue(@Nonnull Run<?,?> build) {
         for (Item item : Jenkins.get().getQueue().getItems(this))
             if (item.getAction(PromotionTargetAction.class).resolve(this)==build)
                 return true;
@@ -720,7 +720,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         }
 
         // exposed for Jelly
-        public List<PromotionConditionDescriptor> getApplicableConditions(AbstractProject<?,?> p) {
+        public List<PromotionConditionDescriptor> getApplicableConditions(Job<?,?> p) {
             return p==null ? PromotionCondition.all() : PromotionCondition.getApplicableTriggers(p);
         }
 

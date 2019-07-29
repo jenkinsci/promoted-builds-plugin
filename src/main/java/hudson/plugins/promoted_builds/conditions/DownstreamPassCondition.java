@@ -2,7 +2,6 @@ package hudson.plugins.promoted_builds.conditions;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import hudson.CopyOnWrite;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Util;
@@ -17,6 +16,7 @@ import hudson.model.Fingerprint.BuildPtr;
 import hudson.model.InvisibleAction;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
+import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -36,15 +36,13 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
-import java.security.Security;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 import org.kohsuke.stapler.export.Exported;
 
@@ -81,28 +79,40 @@ public class DownstreamPassCondition extends PromotionCondition {
     }
     
     @Override
-    public PromotionBadge isMet(PromotionProcess promotionProcess, AbstractBuild<?,?> build) {
-        Badge badge = new Badge();
+    public PromotionBadge isMet(PromotionProcess promotionProcess, Run<?,?> build) {
+        Badge badge = null;
 
         PseudoDownstreamBuilds pdb = build.getAction(PseudoDownstreamBuilds.class);
-        EnvVars buildEnvironment = new EnvVars(build.getBuildVariables());
+        EnvVars buildEnvironment = build.getCharacteristicEnvVars();
+        if (build instanceof AbstractBuild) {
+            buildEnvironment = new EnvVars(((AbstractBuild<?, ?>) build).getBuildVariables());
+        }
         OUTER:
-        for (AbstractProject<?,?> j : getJobList(build.getProject().getParent(), buildEnvironment)) {
-            for( AbstractBuild<?,?> b : build.getDownstreamBuilds(j) ) {
-                if (!b.isBuilding()) {
-                    Result r = b.getResult();
-                    if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
-                        badge.add(b);
-                        continue OUTER;
+        for (Job<?,?> j : getJobList(build.getParent().getParent(), buildEnvironment)) {
+            if (build instanceof AbstractBuild) {
+                AbstractBuild<?, ?> abstractBuild = (AbstractBuild)build;
+                for (AbstractBuild<?, ?> b : abstractBuild.getDownstreamBuilds((AbstractProject<?, ?>) j)) {
+                    if (!b.isBuilding()) {
+                        Result r = b.getResult();
+                        if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
+                            if(badge == null){
+                                 badge = new Badge();
+                            }
+                            badge.add(b);
+                            continue OUTER;
+                        }
                     }
                 }
             }
 
             if (pdb!=null) {// if fingerprint doesn't have any, try the pseudo-downstream
-                for (AbstractBuild<?,?> b : pdb.listBuilds(j)) {
+                for (Run<?,?> b : pdb.listBuilds(j)) {
                     if (!b.isBuilding()) {
                         Result r = b.getResult();
                         if ((r == Result.SUCCESS) || (evenIfUnstable && r == Result.UNSTABLE)) {
+                            if(badge == null){
+                                badge = new Badge();
+                            }
                             badge.add(b);
                             continue OUTER;
                         }
@@ -156,7 +166,7 @@ public class DownstreamPassCondition extends PromotionCondition {
         return environment.expand(jobs);
     }
     /**
-     * @deprecated use {@link #contains(hudson.model.ItemGroup, hudson.model.AbstractProject, hudson.EnvVars)} 
+     * @deprecated use {@link #contains(hudson.model.ItemGroup, hudson.model.AbstractProject, hudson.EnvVars)}
      */
     public boolean contains(ItemGroup ctx, AbstractProject<?,?> job){
         return contains(ctx, job, null);
@@ -197,14 +207,24 @@ public class DownstreamPassCondition extends PromotionCondition {
         @Exported
         public final List<Fingerprint.BuildPtr> builds = new ArrayList<Fingerprint.BuildPtr>();
 
-        void add(AbstractBuild<?,?> b) {
+        void add(Run<?,?> b) {
            builds.add(new Fingerprint.BuildPtr(b));
         }
     }
 
     @Extension
     public static final class DescriptorImpl extends PromotionConditionDescriptor {
-        public boolean isApplicable(AbstractProject<?,?> item) {
+
+        @Override
+        public boolean isApplicable(@Nonnull Job<?,?> item, @Nonnull TaskListener listener) {
+            if (item instanceof AbstractProject) {
+                return isApplicable((AbstractProject)item);
+            }
+            return true;
+        }
+
+        @Deprecated
+        public boolean isApplicable(Job<?,?> item) {
             return true;
         }
 
@@ -217,36 +237,40 @@ public class DownstreamPassCondition extends PromotionCondition {
                     formData.getString("jobs"), formData.getBoolean("evenIfUnstable"));
         }
 
-        public AutoCompletionCandidates doAutoCompleteJobs(@QueryParameter String value, @AncestorInPath AbstractProject project) {
-            List<AbstractProject> downstreams = project.getDownstreamProjects();
-            List<Item> all = Jenkins.get().getItems(Item.class);
-            List<String> candidatesDownstreams = Lists.newArrayList();
-            List<String> candidatesOthers = Lists.newArrayList();
-            for (Item i : all) {
-                if(! i.hasPermission(Item.READ)) continue;
-                Set<String> names = Sets.newLinkedHashSet();
-                names.add(i.getRelativeNameFrom(project));
-                names.add(i.getFullName());
-                for(String name : names) {
-                    if(name.startsWith(value)) {
-                        if(downstreams.contains(i)) {
-                            candidatesDownstreams.add(name);
-                        }else{
-                            candidatesOthers.add(name);
+        public AutoCompletionCandidates doAutoCompleteJobs(@QueryParameter String value, @AncestorInPath Job project) {
+            AutoCompletionCandidates candidates = new AutoCompletionCandidates();
+            if (project instanceof AbstractProject) {
+                List<AbstractProject> downstreams = ((AbstractProject) project).getDownstreamProjects();
+                List<Item> all = Jenkins.get().getItems(Item.class);
+                List<String> candidatesDownstreams = Lists.newArrayList();
+                List<String> candidatesOthers = Lists.newArrayList();
+                for (Item i : all) {
+                    if (!i.hasPermission(Item.READ)) continue;
+                    Set<String> names = Sets.newLinkedHashSet();
+                    names.add(i.getRelativeNameFrom(project));
+                    names.add(i.getFullName());
+                    for (String name : names) {
+                        if (name.startsWith(value)) {
+                            if (downstreams.contains(i)) {
+                                candidatesDownstreams.add(name);
+                            } else {
+                                candidatesOthers.add(name);
+                            }
                         }
                     }
                 }
+                candidates = new AutoCompletionCandidates();
+                candidates.add(candidatesDownstreams.toArray(new String[candidatesDownstreams.size()]));
+                if (candidatesDownstreams.size() > 0 && candidatesOthers.size() > 0) {
+                    candidates.add("- - -");
+                }
+                // Downstream jobs might not be set when user wants to set DownstreamPassCondition.
+                // Better to show non-downstream candidates even if they are not downstreams at the moment.
+                candidates.add(candidatesOthers.toArray(new String[candidatesOthers.size()]));
             }
-            AutoCompletionCandidates candidates = new AutoCompletionCandidates();
-            candidates.add(candidatesDownstreams.toArray(new String[candidatesDownstreams.size()]));
-            if(candidatesDownstreams.size() > 0 && candidatesOthers.size() > 0) {
-                candidates.add("- - -");
-            }
-            // Downstream jobs might not be set when user wants to set DownstreamPassCondition.
-            // Better to show non-downstream candidates even if they are not downstreams at the moment.
-            candidates.add(candidatesOthers.toArray(new String[candidatesOthers.size()]));
             return candidates;
         }
+
     }
 
     /**
@@ -268,7 +292,7 @@ public class DownstreamPassCondition extends PromotionCondition {
             EnvVars buildEnvironment = new EnvVars(build.getBuildVariables());
             SecurityContext previousCtx = ACL.impersonate(ACL.SYSTEM);
             try {
-                for (AbstractProject<?,?> j : Jenkins.get().getAllItems(AbstractProject.class)) {
+                for (Job<?,?> j : Jenkins.get().getAllItems(Job.class)) {
                     boolean warned = false; // used to avoid warning for the same project more than once.
 
                     JobPropertyImpl jp = j.getProperty(JobPropertyImpl.class);
@@ -287,7 +311,10 @@ public class DownstreamPassCondition extends PromotionCondition {
                             }
                             if (considerPromotion) {
                                 try {
-                                    AbstractBuild<?,?> u = build.getUpstreamRelationshipBuild(j);
+                                    Run<?,?> u = null;
+                                    if (j instanceof AbstractProject) {
+                                        u = build.getUpstreamRelationshipBuild((AbstractProject)j);
+                                    }
                                     if (u==null) {
                                         // if the fingerprint doesn't tell us, perhaps the cause would tell us?
                                         final Stack<List<Cause>> stack = new Stack<List<Cause>>();
@@ -358,8 +385,8 @@ public class DownstreamPassCondition extends PromotionCondition {
             builds.add(new BuildPtr(run));
         }
 
-        public List<AbstractBuild<?,?>> listBuilds(AbstractProject<?, ?> job) {
-            List<AbstractBuild<?,?>> list = new ArrayList<AbstractBuild<?,?>>();
+        public List<Run<?,?>> listBuilds(Job<?, ?> job) {
+            List<Run<?,?>> list = new ArrayList<Run<?,?>>();
             for (BuildPtr b : builds) {
                 if (b.is(job)) {
                     Run r = b.getRun();

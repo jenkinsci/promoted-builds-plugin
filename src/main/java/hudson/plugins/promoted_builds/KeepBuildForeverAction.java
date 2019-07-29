@@ -6,6 +6,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -41,7 +42,7 @@ public class KeepBuildForeverAction extends Notifier {
             console.println(Messages.KeepBuildForEverAction_console_promotionNotGoodEnough(build.getResult()));
             return true;
         }
-        AbstractBuild promoted = ((Promotion) build).getTarget();
+        Run promoted = ((Promotion) build).getTarget();
         console.println(Messages.KeepBuildForEverAction_console_keepingBuild());
         promoted.keepLog();
         return true;

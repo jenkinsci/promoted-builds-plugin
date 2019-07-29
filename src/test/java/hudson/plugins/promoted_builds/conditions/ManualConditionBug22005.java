@@ -16,6 +16,7 @@ import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
 import java.io.IOException;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 

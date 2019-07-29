@@ -4,10 +4,12 @@ import hudson.Extension;
 import hudson.PluginManager;
 import hudson.PluginWrapper;
 import hudson.model.AbstractProject;
+import hudson.model.Job;
+import hudson.model.TaskListener;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import jenkins.model.Jenkins;
 
-import java.util.logging.Level;
+import javax.annotation.Nonnull;
 import java.util.logging.Logger;
 
 /**
@@ -23,7 +25,17 @@ public final class GroovyConditionDescriptor extends PromotionConditionDescripto
     }
 
     @Override
-    public boolean isApplicable(final AbstractProject<?, ?> item) {
+    public boolean isApplicable(@Nonnull final Job<?, ?> job, @Nonnull TaskListener listener) {
+        if(job instanceof AbstractProject){
+            return isApplicable((AbstractProject)job);
+        }
+        final PluginManager pluginManager = Jenkins.get().getPluginManager();
+        final PluginWrapper plugin = pluginManager.getPlugin("script-security");
+        return plugin != null && plugin.isActive();
+    }
+
+    @Deprecated
+    public boolean isApplicable(final Job<?, ?> item) {
         final PluginManager pluginManager = Jenkins.get().getPluginManager();
         final PluginWrapper plugin = pluginManager.getPlugin("script-security");
         return plugin != null && plugin.isActive();

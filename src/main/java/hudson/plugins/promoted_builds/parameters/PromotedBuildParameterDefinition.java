@@ -25,12 +25,13 @@ package hudson.plugins.promoted_builds.parameters;
 
 import hudson.Extension;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.Item;
+import hudson.model.Items;
 import hudson.model.Job;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
+import hudson.model.Run;
 import hudson.model.Run;
 import hudson.model.SimpleParameterDefinition;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
@@ -41,9 +42,7 @@ import hudson.plugins.promoted_builds.util.ItemPathResolver;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.ListBoxModel.Option;
-import hudson.util.RunList;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -167,7 +166,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
         }
 
         // JENKINS-25011: also look for jobs in folders.
-        final AbstractProject<?,?> job = ItemPathResolver.getByPath(projectName, base, AbstractProject.class);
+        final Job<?,?> job = ItemPathResolver.getByPath(projectName, base, Job.class);
         if (job == null) {
             return runs;
         }
@@ -220,10 +219,10 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
 
             if (StringUtils.isNotBlank(value)) {
                 // JENKINS-25011: also look for jobs in folders.
-                final AbstractProject p = ItemPathResolver.getByPath(value, project, AbstractProject.class);
+                final Job p = ItemPathResolver.getByPath(value, project, Job.class);
                 if (p==null) {
                     // suggest full name so that getBuilds() can find item.
-                    AbstractProject nearest = AbstractProject.findNearest(value, project.getParent());
+                    Job nearest = Items.findNearest(Job.class, value, project.getParent());
                     return FormValidation.error( nearest != null
                             ? hudson.plugins.promoted_builds.Messages.BuildTrigger_NoSuchProject(value, nearest.getRelativeNameFrom(project))
                             : hudson.plugins.promoted_builds.Messages.Shared_noSuchProject(value));
@@ -245,7 +244,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
           
             // JENKINS-25011: look for jobs in all folders.
             //TODO: remove prefixes
-            for (AbstractProject job: jenkins.getAllItems(AbstractProject.class)) {
+            for (Job job: jenkins.getAllItems(Job.class)) {
                 if (job.getFullName().contains(value)) {
                     if (job.hasPermission(Item.READ)) {
                         // suggest full name so that getBuilds() can find item.
@@ -266,9 +265,9 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
             }
             defaultJob.checkPermission(Item.CONFIGURE);
 
-            AbstractProject<?,?> j = null;
+            Job<?,?> j = null;
             if (jobName != null) {
-                j = ItemPathResolver.getByPath(jobName, defaultJob, AbstractProject.class);
+                j = ItemPathResolver.getByPath(jobName, defaultJob, Job.class);
             }
            
             if (j!=null) {

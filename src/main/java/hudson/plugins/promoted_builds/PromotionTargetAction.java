@@ -1,8 +1,8 @@
 package hudson.plugins.promoted_builds;
 
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.InvisibleAction;
+import hudson.model.Job;
+import hudson.model.Run;
 import jenkins.model.Jenkins;
 
 import javax.annotation.CheckForNull;
@@ -16,14 +16,14 @@ public class PromotionTargetAction extends InvisibleAction {
     private final String jobName;
     private final int number;
 
-    public PromotionTargetAction(AbstractBuild<?,?> build) {
+    public PromotionTargetAction(Run<?,?> build) {
         jobName = build.getParent().getFullName();
         number = build.getNumber();
     }
 
     @CheckForNull
-    public AbstractBuild<?,?> resolve() {
-        AbstractProject<?,?> job = Jenkins.get().getItemByFullName(jobName, AbstractProject.class);
+    public Run<?,?> resolve() {
+        Job<?,?> job = Jenkins.get().getItemByFullName(jobName, Job.class);
         if (job == null) {
             return null;
         }
@@ -31,18 +31,18 @@ public class PromotionTargetAction extends InvisibleAction {
     }
 
     @CheckForNull
-    public AbstractBuild<?,?> resolve(PromotionProcess parent) {
-        AbstractBuild<?,?> build = this.resolve();
-        if (build !=null){
-            return build;
+    public Run<?,?> resolve(PromotionProcess parent) {
+        Run<?,?> run = this.resolve();
+        if (run !=null){
+            return run;
         }
         //In case of project renamed.
-        AbstractProject<?,?> j = parent.getOwner();
+        Job<?,?> j = parent.getOwner();
         if (j==null)    return null;
         return j.getBuildByNumber(number);
     }
 
-    public AbstractBuild<?,?> resolve(Promotion parent) {
+    public Run<?,?> resolve(Promotion parent) {
         return resolve(parent.getParent());
     }
 }

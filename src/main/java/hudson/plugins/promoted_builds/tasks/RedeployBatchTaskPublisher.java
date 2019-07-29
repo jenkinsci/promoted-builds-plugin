@@ -7,6 +7,7 @@ import hudson.maven.RedeployPublisher;
 import hudson.maven.reporters.MavenAbstractArtifactRecord;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Run;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import net.sf.json.JSONObject;
@@ -26,7 +27,7 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
 
     /*@Override*/
     protected MavenModuleSetBuild getMavenBuild(AbstractBuild<?,?> build) {
-        return super.getMavenBuild(((Promotion) build).getTarget());
+        return super.getMavenBuild((AbstractBuild<?, ?>) ((Promotion) build).getTarget());
     }
 
     @Extension(optional = true)

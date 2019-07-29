@@ -12,17 +12,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jenkins.security.MasterToSlaveCallable;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-import org.kohsuke.stapler.Ancestor;
-import org.kohsuke.stapler.StaplerRequest;
-
-import hudson.Extension;
-import hudson.Util;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
@@ -35,6 +25,16 @@ import hudson.model.Items;
 import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
+import hudson.model.Run;
+import jenkins.security.MasterToSlaveCallable;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.Ancestor;
+import org.kohsuke.stapler.StaplerRequest;
+
+import hudson.Extension;
+import hudson.Util;
 import hudson.model.listeners.ItemListener;
 import hudson.util.IOUtils;
 import javax.annotation.CheckForNull;
@@ -51,7 +51,7 @@ import net.sf.json.JSONObject;
  * </p>
  * @author Kohsuke Kawaguchi
  */
-public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> implements ItemGroup<PromotionProcess> {
+public final class JobPropertyImpl extends JobProperty<Job<?,?>> implements ItemGroup<PromotionProcess> {
     /**
      * These are loaded from the disk in a different way.
      */
@@ -63,6 +63,8 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
      */
     private transient /*final*/ List<PromotionProcess> activeProcesses;
 
+    private transient /*final*/ String testJobName;
+
     /**
      * These {@link PromotionProcess}es are active.
      */
@@ -71,7 +73,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
      * Programmatic construction.
      * @param owner owner job
      */
-    public JobPropertyImpl(AbstractProject<?,?> owner) throws Descriptor.FormException, IOException {
+    public JobPropertyImpl(Job<?,?> owner) throws Descriptor.FormException, IOException {
         this.owner = owner;
         init();
     }
@@ -80,9 +82,10 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
      * @param other Property to be copied
      * @param owner owner job
      */
-    public JobPropertyImpl(JobPropertyImpl other, AbstractProject<?,?> owner) throws Descriptor.FormException, IOException {
+    public JobPropertyImpl(JobPropertyImpl other, Job<?,?> owner) throws Descriptor.FormException, IOException {
         this.owner = owner;
         this.activeProcessNames.addAll(other.activeProcessNames);
+        this.testJobName = other.testJobName;
         loadAllProcesses(other.getRootDir()); 
     }
 
@@ -95,24 +98,23 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     }
 
     private JobPropertyImpl(StaplerRequest req, JSONObject json) throws Descriptor.FormException, IOException {
-        // a hack to get the owning AbstractProject.
+        // a hack to get the owning Run.
         // this is needed here so that we can load items
         List<Ancestor> ancs = req.getAncestors();
-        final Object ancestor = ancs.get(ancs.size()-1).getObject();
-        if (ancestor instanceof AbstractProject) {
-            owner = (AbstractProject)ancestor;
-        } else if (ancestor == null) {
-            throw new Descriptor.FormException("Cannot retrieve the ancestor item in the request",
-            "owner");
+        final Object ancestor = ancs.get(ancs.size() - 1).getObject();
+        if (ancestor == null) {
+            throw new Descriptor.FormException("Cannot retrieve the ancestor item in the request", "owner");
+        } else if (ancestor instanceof Job) {
+            owner = (Job) ancestor;
         } else {
             throw new Descriptor.FormException("Cannot create Promoted Builds Job Property for " + ancestor.getClass()
-            + ". Currently the plugin supports instances of AbstractProject only."
+            + ". Currently the plugin supports instances of Run and Pipelines."
             + ". Other job types are not supported, submit a bug to the plugin, which provides the job type"
             + ". If you use Multi-Branch Project plugin, see https://issues.jenkins-ci.org/browse/JENKINS-32237",
             "owner");
         }
             
-        // newer version of Hudson put "promotions". This code makes it work with or without them.
+        //newer version of Hudson put "promotions". This code makes it work with or without them.
         if(json.has("promotions"))
             json = json.getJSONObject("promotions");
 
@@ -214,7 +216,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     }
 
     @Override
-    protected void setOwner(AbstractProject<?,?> owner) {
+    protected void setOwner(Job<?,?> owner) {
         super.setOwner(owner);
 
         // readResolve is too early because we don't have our parent set yet,
@@ -291,6 +293,10 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         return activeProcesses;
     }
 
+    public String getTestJobName(){
+        return testJobName;
+    }
+
     /** @see ItemGroupMixIn#createProjectFromXML */
     public PromotionProcess createProcessFromXml(final String name, InputStream xml) throws IOException {
         owner.checkPermission(Item.CONFIGURE); // CREATE is ItemGroup-scoped and owner is not an ItemGroup
@@ -323,10 +329,10 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     }
 
     /**
-     * Gets {@link AbstractProject} that contains us.
+     * Gets {@link Run} that contains us.
      * @return Owner project
      */
-    public AbstractProject<?,?> getOwner() {
+    public Job<?,?> getOwner() {
         return owner;
     }
 
@@ -392,14 +398,13 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         return "promotion";
     }
 
-    @Override
     public boolean prebuild(AbstractBuild<?,?> build, BuildListener listener) {
         build.addAction(new PromotedBuildAction(build));
         return true;
     }
 
     @Deprecated
-    public Action getJobAction(AbstractProject<?,?> job) {
+    public Action getJobAction(Job<?,?> job) {
         return new PromotedProjectAction(job,this);
     }
 
@@ -415,12 +420,12 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         }
 
         public String getDisplayName() {
-            return "Promote Builds When...";
+            return "Promote Builds when...";
         }
 
         @Override
         public boolean isApplicable(Class<? extends Job> jobType) {
-            return AbstractProject.class.isAssignableFrom(jobType);
+            return Job.class.isAssignableFrom(jobType);
         }
 
         @Override
