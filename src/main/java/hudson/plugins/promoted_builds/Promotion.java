@@ -111,7 +111,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> impleme
         EnvVars e = super.getEnvironment(listener);
 
         // Augment environment with target build's information
-        String rootUrl = JenkinsHelper.get().getRootUrl();
+        String rootUrl = Jenkins.get().getRootUrl();
         //TODO: Refactor to Run
         AbstractBuild<?, ?> target = getTarget();
         if(rootUrl!=null)
