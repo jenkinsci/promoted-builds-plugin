@@ -24,8 +24,16 @@
 package hudson.plugins.promoted_builds.parameters;
 
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AutoCompletionCandidates;
+import hudson.model.Item;
+import hudson.model.Items;
+import hudson.model.Job;
+import hudson.model.ParameterDefinition;
+import hudson.model.ParameterValue;
 import hudson.model.Run;
+import hudson.model.Run;
+import hudson.model.SimpleParameterDefinition;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.PromotedProjectAction;
@@ -34,9 +42,7 @@ import hudson.plugins.promoted_builds.util.ItemPathResolver;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.ListBoxModel.Option;
-import hudson.util.RunList;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;

@@ -13,7 +13,6 @@ import hudson.model.ParameterValue;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
-import hudson.plugins.promoted_builds.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +26,12 @@ import javax.annotation.Nonnull;
 
 import javax.servlet.ServletException;
 
+import hudson.plugins.promoted_builds.Promotion;
+import hudson.plugins.promoted_builds.PromotionBadge;
+import hudson.plugins.promoted_builds.PromotionCondition;
+import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
+import hudson.plugins.promoted_builds.PromotionPermissionHelper;
+import hudson.plugins.promoted_builds.PromotionProcess;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 

@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.common.base.Strings;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.BuildListener;
@@ -27,7 +26,6 @@ import hudson.model.Job;
 import hudson.model.JobProperty;
 import hudson.model.JobPropertyDescriptor;
 import hudson.model.Run;
-import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.accmod.Restricted;
@@ -422,7 +420,7 @@ public final class JobPropertyImpl extends JobProperty<Job<?,?>> implements Item
         }
 
         public String getDisplayName() {
-            return "Promote builds when...";
+            return "Promote Builds when...";
         }
 
         @Override
