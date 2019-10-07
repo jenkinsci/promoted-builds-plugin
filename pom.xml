@@ -12,7 +12,7 @@
   <packaging>hpi</packaging>
 
   <name>Jenkins promoted builds plugin</name>
-  <url>https://wiki.jenkins.io/display/JENKINS/Promoted+Builds+Plugin</url>
+  <url>https://github.com/jenkinsci/promoted-builds-plugin</url>
 
   <properties>
     <jenkins.version>2.138.4</jenkins.version>
