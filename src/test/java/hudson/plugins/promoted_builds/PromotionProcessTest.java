@@ -88,7 +88,7 @@ public class PromotionProcessTest {
 
         {// verify that it promoted the right stuff
             Promotion pb = proc.getBuilds().get(0);
-            assertSame(pb.getTarget(),up1);
+            assertSame(pb.getTargetBuild(),up1);
             PromotedBuildAction badge = (PromotedBuildAction) up1.getBadgeActions().get(0);
             assertTrue(badge.contains(proc));
         }
@@ -134,7 +134,7 @@ public class PromotionProcessTest {
 
         {// verify that it promoted the right stuff
             Promotion pb = proc.getBuilds().get(0);
-            assertSame(pb.getTarget(),up2);
+            assertSame(pb.getTargetBuild(),up2);
             PromotedBuildAction badge = (PromotedBuildAction) up2.getBadgeActions().get(0);
             assertTrue(badge.contains(proc));
         }

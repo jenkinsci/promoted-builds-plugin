@@ -47,7 +47,7 @@ public class PromotionBuildWrapperTest {
         
         assertEquals(1,promotion.getBuilds().size());
         Promotion promotionBuild = promotion.getBuilds().get(0);
-        assertSame(promotionBuild.getTarget(), build);
+        assertSame(promotionBuild.getTargetBuild(), build);
         assertEquals(Result.SUCCESS, buildWrapper.buildResultInTearDown);
     }
 
