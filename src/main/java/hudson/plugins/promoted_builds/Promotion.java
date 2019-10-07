@@ -83,19 +83,19 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      * @return
      *      null if there's no such object. For example, if the build has already garbage collected.
      */
-    @Exported
-    public AbstractBuild<?,?> getTarget() {
+    @Exported(name = "target")
+    public AbstractBuild<?,?> getTargetBuild() {
         PromotionTargetAction pta = getAction(PromotionTargetAction.class);
         return pta == null ? null : pta.resolve(this);
     }
 
     @Override public AbstractBuild<?,?> getRootBuild() {
-        return getTarget().getRootBuild();
+        return getTargetBuild().getRootBuild();
     }
 
     @Override
     public String getUrl() {
-        return getTarget().getUrl() + "promotion/" + getParent().getName() + "/promotionBuild/" + getNumber() + "/";
+        return getTargetBuild().getUrl() + "promotion/" + getParent().getName() + "/promotionBuild/" + getNumber() + "/";
     }
 
     /**
@@ -103,7 +103,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      * performed for a build, including this {@link Promotion}.
      */
     public Status getStatus() {
-        return getTarget().getAction(PromotedBuildAction.class).getPromotion(getParent().getName());
+        return getTargetBuild().getAction(PromotedBuildAction.class).getPromotion(getParent().getName());
     }
 
     @Override
@@ -112,7 +112,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         // Augment environment with target build's information
         String rootUrl = Jenkins.get().getRootUrl();
-        AbstractBuild<?, ?> target = getTarget();
+        AbstractBuild<?, ?> target = getTargetBuild();
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
         e.put("PROMOTED_JOB_NAME", target.getParent().getName());
@@ -292,7 +292,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     }
 
     public void run() {
-        if (getTarget() != null) {
+        if (getTargetBuild() != null) {
             getStatus().addPromotionAttempt(this);
         }
         run(new RunnerImpl(this));
@@ -307,7 +307,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
-            if (getTarget() == null) {
+            if (getTargetBuild() == null) {
                 throw new IOException("No Promotion target, cannot retrieve workspace");
             }
             String customWorkspace = Promotion.this.getProject().getCustomWorkspace();
@@ -321,7 +321,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
                         rootPath.child(getEnvironment(listener).expand(customWorkspace)));
             }
 
-            TopLevelItem item = (TopLevelItem)getTarget().getProject();
+            TopLevelItem item = (TopLevelItem) getTargetBuild().getProject();
             FilePath workspace = n.getWorkspaceFor(item);
             if (workspace == null) {
                 throw new IOException("Cannot retrieve workspace for " + item + " on the node " + n);
@@ -330,7 +330,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         protected Result doRun(BuildListener listener) throws Exception {
-            AbstractBuild<?, ?> target = getTarget();
+            AbstractBuild<?, ?> target = getTargetBuild();
 
             OutputStream logger = listener.getLogger();
             AbstractProject rootProject = project.getRootProject();
@@ -402,7 +402,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         protected void post2(BuildListener listener) throws Exception {
-            if (getTarget() == null) {
+            if (getTargetBuild() == null) {
                 listener.error("No Promotion target, cannot save target or update status");
                 return;
             }
@@ -410,14 +410,14 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             if(getResult()== Result.SUCCESS)
                 getStatus().onSuccessfulPromotion(Promotion.this);
             // persist the updated build record
-            getTarget().save();
+            getTargetBuild().save();
 
             if (getResult() == Result.SUCCESS) {
                 // we should evaluate any other pending promotions in case
                 // they had a condition on this promotion
-                PromotedBuildAction pba = getTarget().getAction(PromotedBuildAction.class);
+                PromotedBuildAction pba = getTargetBuild().getAction(PromotedBuildAction.class);
                 for (PromotionProcess pp : pba.getPendingPromotions()) {
-                    pp.considerPromotion2(getTarget());
+                    pp.considerPromotion2(getTargetBuild());
                 }
 
                 // tickle PromotionTriggers

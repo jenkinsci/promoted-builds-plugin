@@ -28,7 +28,6 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -45,9 +44,8 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import hudson.util.StreamTaskListener;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.acegisecurity.context.SecurityContextHolder;
@@ -137,7 +135,7 @@ public class PromotedEnvVarTokenMacroTest {
                 throws InterruptedException, IOException {
             if (build instanceof Promotion) {
                 // TODO: It seems to be a bug in the test suite
-                AbstractBuild<?, ?> target = ((Promotion)build).getTarget();
+                AbstractBuild<?, ?> target = ((Promotion)build).getTargetBuild();
                 return performWithParentBuild(build, listener);
             }
             return false;
