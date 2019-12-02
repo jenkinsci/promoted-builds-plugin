@@ -77,14 +77,30 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         super(project, buildDir);
     }
 
+
+    /**
+     * Gets the build that this promotion promoted.
+     * @since 3.4
+     * @return
+     *      {@code null} if there's no such object. For example, if the build has already garbage collected.
+     */
+    @Exported
+    @CheckForNull
+    public AbstractBuild<?,?> getTargetBuild() {
+        return getTarget();
+    }
+
     /**
      * Gets the build that this promotion promoted.
      *
+     * @deprecated Use {@link #getTargetBuild()}. This method will be removed once the baseline is updated in Promoted Builds 4.0
      * @return
      *      null if there's no such object. For example, if the build has already garbage collected.
      */
-    @Exported(name = "target")
-    public AbstractBuild<?,?> getTargetBuild() {
+    @Exported
+    @Deprecated
+    @CheckForNull
+    public AbstractBuild<?,?> getTarget() {
         PromotionTargetAction pta = getAction(PromotionTargetAction.class);
         return pta == null ? null : pta.resolve(this);
     }
