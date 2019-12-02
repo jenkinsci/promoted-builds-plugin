@@ -25,7 +25,7 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
 
     /*@Override*/
     protected MavenModuleSetBuild getMavenBuild(AbstractBuild<?,?> build) {
-        return super.getMavenBuild(((Promotion) build).getTargetBuild());
+        return super.getMavenBuild(((Promotion) build).getTargetBuildOrFail());
     }
 
     @Extension(optional = true)

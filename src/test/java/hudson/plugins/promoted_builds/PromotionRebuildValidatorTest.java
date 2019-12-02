@@ -54,7 +54,7 @@ public class PromotionRebuildValidatorTest {
         Thread.sleep(1000);
 
         Promotion pb = promo1.getBuilds().iterator().next();
-        assertSame(pb.getTargetBuild(), b);
+        assertSame(pb.getTargetBuildOrFail(), b);
 
         assertNull(pb.getAction(RebuildAction.class));
     }
