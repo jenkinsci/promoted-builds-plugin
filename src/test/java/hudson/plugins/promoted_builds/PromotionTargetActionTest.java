@@ -46,6 +46,6 @@ public class PromotionTargetActionTest {
 
         up.renameTo("up2");
 
-        assertSame(b,p.getTargetBuild());
+        assertSame(b,p.getTargetBuildOrFail());
     }
 }

@@ -64,7 +64,7 @@ public class PromotionTest {
         Thread.sleep(1000);
 
         Promotion pb = promo1.getBuilds().getLastBuild();
-        assertSame(pb.getTargetBuild(), b);
+        assertSame(pb.getTargetBuildOrFail(), b);
 
         JenkinsRule.WebClient wc = r.createWebClient();
         wc.goTo(pb.getUrl()); // spot-check that promotion itself is accessible
@@ -98,7 +98,7 @@ public class PromotionTest {
         Thread.sleep(1000);
 
         Promotion pb = promo1.getBuilds().getLastBuild();
-        assertSame(pb.getTargetBuild(), b);
+        assertSame(pb.getTargetBuildOrFail(), b);
 
         JenkinsRule.WebClient wc = r.createWebClient();
         final Page page = wc.getPage( r.getURL() + "/" + pb.getUrl() + "consoleText");// spot-check that promotion itself is accessible
