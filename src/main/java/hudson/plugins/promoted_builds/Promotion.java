@@ -83,7 +83,6 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      * @return
      *      {@code null} if there's no such object. For example, if the build has already garbage collected.
      */
-    @Exported
     @CheckForNull
     public AbstractBuild<?,?> getTargetBuild() {
         return getTarget();
