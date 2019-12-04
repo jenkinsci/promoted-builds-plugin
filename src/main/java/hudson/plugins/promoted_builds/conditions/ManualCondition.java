@@ -31,6 +31,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -54,6 +56,7 @@ import org.kohsuke.stapler.export.Exported;
 public class ManualCondition extends PromotionCondition {
     private String users;
     private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
+    private static final Logger LOGGER = Logger.getLogger(ManualCondition.class.getName());
     
     /**
      * 
@@ -96,6 +99,10 @@ public class ManualCondition extends PromotionCondition {
     }
 
     public Set<String> getUsersAsSet() {
+        return getUsersAsSet(null);
+    }
+
+    public Set<String> getUsersAsSet(AbstractBuild<?,?> build) {
         if (users == null || users.equals(""))
             return Collections.emptySet();
 
@@ -103,10 +110,20 @@ public class ManualCondition extends PromotionCondition {
         for (String user : users.split(",")) {
             user = user.trim();
 
-            if (user.trim().length() > 0)
+            LOGGER.log(Level.FINER, "ManualCondition.getUsersAsSet(): user={0}", user);
+            if (user.startsWith("$")){
+                user = user.substring(1);
+                if (user.startsWith("{") && user.endsWith("}"))
+                    user = user.substring(1, user.length() -1);
+                LOGGER.log(Level.INFO, "ManualCondition.getUsersAsSet(): build.getBuildVariableResolver().resolve(user=${0})={1}", 
+                        new Object [] {user, build.getBuildVariableResolver().resolve(user)});
+                user = build.getBuildVariableResolver().resolve(user);
+            }
+            if (user != null && user.trim().length() > 0)
                 set.add(user);
         }
         
+        LOGGER.log(Level.INFO, "ManualCondition.getUsersAsSet(): return set={0}", set);
         return set;
     }
 
@@ -129,7 +146,7 @@ public class ManualCondition extends PromotionCondition {
      * approved.
      */
     public boolean canApprove(PromotionProcess promotionProcess, AbstractBuild<?,?> build) {
-        if (!PromotionPermissionHelper.hasPermission(build.getProject(), this)) {
+        if (!PromotionPermissionHelper.hasPermission(build.getProject(), build, this)) {
             return false;
         }
         
@@ -150,8 +167,12 @@ public class ManualCondition extends PromotionCondition {
      * @since 2.24 
      */
     public boolean isInUsersList() {
+        return isInUsersList(null);
+    }
+
+    public boolean isInUsersList(AbstractBuild<?,?> build) {
         // Current user must be in users list or users list is empty
-        Set<String> usersSet = getUsersAsSet();
+        Set<String> usersSet = getUsersAsSet(build);
         return usersSet.contains(Hudson.getAuthentication().getName());
     }
 
@@ -159,7 +180,11 @@ public class ManualCondition extends PromotionCondition {
      * Check if user is a member of a groups as listed in the user / group field
      */
     public boolean isInGroupList() {
-        Set<String> groups = getUsersAsSet();
+        return isInGroupList(null);
+    }
+
+    public boolean isInGroupList(AbstractBuild<?,?> build) {
+        Set<String> groups = getUsersAsSet(build);
         GrantedAuthority[] authorities = Hudson.getAuthentication().getAuthorities();
         for (GrantedAuthority authority : authorities) {
             if (groups.contains(authority.getAuthority()))
