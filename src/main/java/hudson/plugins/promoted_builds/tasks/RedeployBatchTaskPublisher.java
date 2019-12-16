@@ -4,7 +4,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.maven.MavenModuleSetBuild;
 import hudson.maven.RedeployPublisher;
-import hudson.maven.reporters.MavenAbstractArtifactRecord;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.promoted_builds.Promotion;
@@ -26,7 +25,7 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
 
     /*@Override*/
     protected MavenModuleSetBuild getMavenBuild(AbstractBuild<?,?> build) {
-        return super.getMavenBuild(((Promotion) build).getTarget());
+        return super.getMavenBuild(((Promotion) build).getTargetBuildOrFail());
     }
 
     @Extension(optional = true)

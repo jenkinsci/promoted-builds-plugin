@@ -58,7 +58,7 @@ public class PromotedBuildRebuildParameterProviderTest {
         j.waitUntilNoActivity();
 
         // verify that promotion happened
-        Assert.assertSame(proc.getBuilds().getLastBuild().getTarget(), b1);
+        Assert.assertSame(proc.getBuilds().getLastBuild().getTargetBuildOrFail(), b1);
 
         // job with parameter
         FreeStyleProject p2 = j.createFreeStyleProject("paramjob");

@@ -8,7 +8,7 @@
     <l:side-panel>
       <l:tasks>
         <l:task icon="images/24x24/up.png"
-                href="${h.getNearestAncestorUrl(request,it.target)}/promotion/"
+                href="${h.getNearestAncestorUrl(request,it.targetBuild)}/promotion/"
                 title="${%Back to Promotion Status}" />
       </l:tasks>
     </l:side-panel>

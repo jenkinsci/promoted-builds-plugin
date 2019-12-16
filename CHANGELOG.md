@@ -1,6 +1,243 @@
 
 ## Changelog
 
+[![GitHub release](https://img.shields.io/github/release/jenkinsci/promoted-builds-plugin.svg?label=changelog)](https://github.com/jenkinsci/promoted-builds-plugin/releases/latest)
+
+##### Version 3.3 and newer releases
+
+See [GitHub Releases](https://github.com/jenkinsci/promoted-builds-plugin/releases)
+
+##### Version 3.2 (JUN 4, 2018)
+
+-   [PR #116](https://github.com/jenkinsci/promoted-builds-plugin/pull/116)
+    -  Show the full display name of runs in promoted build parameters
+
+##### Version 3.1 (Mar 12, 2018)
+
+-   [JENKINS-40803](https://issues.jenkins-ci.org/browse/JENKINS-40803) - Prevent
+    infinite loop while promoting a build when the Config File Provider Plugin is installed.
+
+##### Version 3.0 (Feb 26, 2018)
+
+-   ![(error)](images/bug.svg "(error)")    [SECURITY-746](https://jenkins.io/security/advisory/2018-02-26/#SECURITY-746) -
+    Make permissions consistent for _Approve_, _Re-Execute_, and _Force_ promotion actions
+    -   Users with just the Promotion/Promote permission are no longer
+        allowed to re-execute or force promotions with a manual
+        condition that specifies a list of users, unless the user is on
+        that list
+    -   Users specified in a manual promotion condition are now allowed
+        to force this promotion
+
+    -   Administrators are now able to approve any promotion with a
+        manual condition
+
+Compatibility Notes:
+
+-   This change alters the behavior of the Plugin in some conditions, jobs may require reconfiguration.
+-   Table below shows the permission changes.
+    Legend:
+    -   Cells with bold red text - indicate combinations, which revoke dangerous permissions
+    -   (manual condition) - Action
+
+![(permission)](images/permission_matrix_3.0.png)
+
+##### Version 2.31.1 (Feb 13, 2018)
+
+-   [![(error)](images/bug.svg "(error)")
+    ](https://issues.jenkins-ci.org/browse/JENKINS-47573) [JENKINS-49433](https://issues.jenkins-ci.org/browse/JENKINS-49433) -
+    Prevent NullPointerException in JobDSL when omitting
+    the `evenIfUnstable` argument
+    -   Affected JobDSL
+        methods: `selfPromotion()`, `parameterizedSelfPromotion()`, `downstream()`
+-   [![(error)](images/bug.svg "(error)")
+    ](https://issues.jenkins-ci.org/browse/JENKINS-47573) [JENKINS-48634](https://issues.jenkins-ci.org/browse/JENKINS-48634) -
+    Prevent ClassCastException when running promotion from a status page
+    with empty forms
+
+##### Version 2.31 (Oct 23, 2017)
+
+-   [![(error)](images/bug.svg "(error)")
+     JENKINS-47573](https://issues.jenkins-ci.org/browse/JENKINS-47573) -
+    Prevent the extension loading issue when the [Rebuild Plugin](https://plugins.jenkins.io/rebuild)
+    is not installed (regression in 2.30)
+
+##### Version 2.30 (Oct 19, 2017)
+
+-   [![(info)](images/improvement.svg "(info)")
+    ](https://issues.jenkins-ci.org/browse/JENKINS-37368) [PR
+    \#106](https://github.com/jenkinsci/promoted-builds-plugin/pull/106) -
+    Update Jenkins core requirement to 1.625.3
+-   [![(info)](images/improvement.svg "(info)")
+    ](https://issues.jenkins-ci.org/browse/JENKINS-37368) [PR
+    \#106](https://github.com/jenkinsci/promoted-builds-plugin/pull/106) -
+    Update Maven plugin requirement to 3.0 and cleanup issues in library
+    dependency conflicts
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-22068](https://issues.jenkins-ci.org/browse/JENKINS-22068) -
+    Fail promotion builds instead of hanging when a promotion is built/rebuilt directly
+
+##### Version 2.29.1 (Sep 7, 2017)
+
+-   [![(info)](images/improvement.svg "(info)")
+     JENKINS-37368](https://issues.jenkins-ci.org/browse/JENKINS-37368) -
+    Improve performance of DownstreamPass promotion condition listener logic
+
+##### Version 2.29 (Jun 16, 2017)
+
+-   ![(info)](images/improvement.svg "(info)")
+     [PR #103](https://github.com/jenkinsci/promoted-builds-plugin/pull/103) -
+    Update the target core baseline to 1.609.3 
+-   ![(plus)](images/feature.svg "(plus)")
+     [JENKINS-29586](https://issues.jenkins-ci.org/browse/JENKINS-29586)
+    - Add support for ANSI color output in console
+-   [PR #102](https://github.com/jenkinsci/promoted-builds-plugin/pull/102) -
+    Fix link to the Fingerprint Wiki Page
+
+##### Version 2.28.1 (Jan 31, 2017)
+
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-40552](https://issues.jenkins-ci.org/browse/JENKINS-40552) -
+    Prevent possible deadlock between JobPropertyImpl and
+    PromotionProcess
+
+##### Version 2.28 (Nov 18, 2016)
+
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-29358](https://issues.jenkins-ci.org/browse/JENKINS-29358) -
+    Fix the sort order of the Promotion History
+-   ![(info)](images/improvement.svg "(info)")
+    [JENKINS-36623](https://issues.jenkins-ci.org/browse/JENKINS-36623) -
+    Fix test runs against the 1.651.3 core (Plugin compatibility tester)
+-   ![(info)](images/improvement.svg "(info)")
+    [JENKINS-39362](https://issues.jenkins-ci.org/browse/JENKINS-39362) -
+    Fix the binary compatibility issues in test runs by getting rid of `mockito-all`
+
+##### Version 2.27 (May 25th, 2016)
+
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-34826](https://issues.jenkins-ci.org/browse/JENKINS-34826) -
+    Make the plugin compatible with
+    [SECURITY-170](https://wiki.jenkins-ci.org/display/SECURITY/Jenkins+Security+Advisory+2016-05-11)
+    fix in Jenkins 1.651.2+ and 2.3+
+-   ![(error)](images/bug.svg "(error)")
+     [PR #91](https://github.com/jenkinsci/promoted-builds-plugin/pull/91) -
+    Prevent exceptions on startup if the optional JobDSL plugin is
+    missing
+-   ![(info)](images/improvement.svg "(info)")
+     [PR #90](https://github.com/jenkinsci/promoted-builds-plugin/pull/90) -
+    Improve the workspace allocation performance
+
+##### Version 2.26 (May 9th, 2016)
+
+-   ![(plus)](images/feature.svg "(plus)")
+    [JENKINS-29776](https://issues.jenkins-ci.org/browse/JENKINS-29776) -
+    Add Job DSL support for Promoted Builds Plugin
+-   ![(plus)](images/feature.svg "(plus)")
+    [JENKINS-33147](https://issues.jenkins-ci.org/browse/JENKINS-33147) -
+    PROMOTED\_TIMESTAMP used to show the UTC timestamp instead of the local JVM one. 
+    Behavior is configurable now
+-   ![(plus)](images/feature.svg "(plus)")
+     [PR #76](https://github.com/jenkinsci/promoted-builds-plugin/pull/76) -
+    Allow hiding promotion processes based on a parameter value
+-   ![(info)](images/improvement.svg "(info)")
+     [PR
+    \#89](https://github.com/jenkinsci/promoted-builds-plugin/pull/89) -
+    Migration to the new Jenkins Plugin parent POM
+-   ![(error)](images/bug.svg "(error)")
+     [PR
+    \#87](https://github.com/jenkinsci/promoted-builds-plugin/pull/87) -
+    Fixes of minor issues discovered by FindBugs
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-34204](https://issues.jenkins-ci.org/browse/JENKINS-34204) -
+    Fix minor issues in Job DSL support discovered during the local snapshot testing (not a regression)
+
+##### Version 2.25 (Feb 19th, 2016)
+
+-   ![(plus)](images/feature.svg "(plus)")
+    [JENKINS-32993](https://issues.jenkins-ci.org/browse/JENKINS-32993) -
+    Expose the PROMOTED\_TIMESTAMP variable in promotion processes
+-   ![(plus)](images/feature.svg "(plus)")
+     [PR
+    \#75](https://github.com/jenkinsci/promoted-builds-plugin/pull/75) -
+    Add support for running promotions on inheritance projects
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-31908](https://issues.jenkins-ci.org/browse/JENKINS-31908) -
+    Sort Promotions in UI by Number instead of customization ID
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-31406](https://issues.jenkins-ci.org/browse/JENKINS-31406) -
+    Broken layout of promotion status pages in 1.625+
+
+##### Version 2.24.1 (Dec 17th, 2015)
+
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-32006](https://issues.jenkins-ci.org/browse/JENKINS-32006) -
+    Revert the erroneous fix of
+    [JENKINS-13751](https://issues.jenkins-ci.org/browse/JENKINS-13751)
+    in 2.24
+
+##### Version 2.24 (Nov 25th, 2015)
+
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-13751](https://issues.jenkins-ci.org/browse/JENKINS-13751) -
+    Promotion process should provide the project\'s SCM to promotion
+    steps (**reverted in 2.24.1**)
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-31356](https://issues.jenkins-ci.org/browse/JENKINS-31356) -
+    The plugin should consider approvers in the re-execution action
+-   ![(error)](images/bug.svg "(error)")
+     [PR
+    \#72](https://github.com/jenkinsci/promoted-builds-plugin/pull/72) -
+    Fix exception if somebody calls
+    PromotionProcess::isFingerprintConfigured()
+-   ![(info)](images/improvement.svg "(info)")
+    [JENKINS-29793](https://issues.jenkins-ci.org/browse/JENKINS-29793) -
+    Provide parameters from manual approval on all promotions
+-   ![(plus)](images/feature.svg "(plus)")
+    [JENKINS-27716](https://issues.jenkins-ci.org/browse/JENKINS-27716) -
+    Support disabling the promotion jobs in jenkins-1.585+
+
+##### Version 2.23.1 (Nov 2nd, 2015)
+
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-31320](https://issues.jenkins-ci.org/browse/JENKINS-31320) -
+    Make the plugin compatible with breaking UI changes in Jenkins 1.619+
+
+##### Version 2.23 (Sept 15th, 2015)
+
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-30212](https://issues.jenkins-ci.org/browse/JENKINS-30212) -
+    Medium-sized promotion star icons were missing
+-   ![(plus)](images/feature.svg "(plus)")
+    [JENKINS-30411](https://issues.jenkins-ci.org/browse/JENKINS-30411) -
+    Add the PROMOTION\_ENV token macro
+
+##### Version 2.22 (Aug 25th, 2015)
+
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-25011](https://issues.jenkins-ci.org/browse/JENKINS-25011) -
+    Fix the Folders support in Promoted builds parameter
+    -   Now there is a support of global and relative addressing to
+        builds (\'.\' and \'..\' markers are supported)
+    -   See the built-in documentation for more details
+    -   The change alters the default behavior
+-   ![(error)](images/bug.svg "(error)")
+    [JENKINS-7739](https://issues.jenkins-ci.org/browse/JENKINS-7739) -
+    Recursively evaluate downstream projects in DownstreamPassCondition
+-   ![(plus)](images/feature.svg "(plus)")
+    [JENKINS-3549](https://issues.jenkins-ci.org/browse/JENKINS-3549) -
+    Promotion Status column (last promotions for each type)
+-   ![(plus)](images/feature.svg "(plus)")
+    [JENKINS-3549](https://issues.jenkins-ci.org/browse/JENKINS-3549) -
+    Last Build Promotion Status column
+-   ![(plus)](images/feature.svg "(plus)")
+    [JENKINS-16063](https://issues.jenkins-ci.org/browse/JENKINS-16063) -
+    Inject PROMOTED\_USER\_ID variable into the build
+-   ![(info)](images/improvement.svg "(info)")
+     FindBugs cleanup (potential NPEs,
+    concurrency, etc.)
+
+  The fix for [JENKINS-25011](https://issues.jenkins-ci.org/browse/JENKINS-25011) changes the default behavior for paths without an explicit absolute/relative address specification (e.g. project=\"myProject\"). By default it will resolve relative paths and then falls back to global paths. If you have \"myProject\" within a folder and on the top level, another project may be returned after the plugin update. In order to restore the legacy behavior, use the **hudson.plugins.promoted\_builds.util.ItemPathResolver.enableResolutionAgainstRoot** Boolean system property
+
 ##### Version 2.21 (Apr 7, 2015)
 
 *   [issue #24782](http://issues.jenkins-ci.org/browse/JENKINS-24782) Prevent phantom builds from being scheduled when PromotionProcesses are built directly. 

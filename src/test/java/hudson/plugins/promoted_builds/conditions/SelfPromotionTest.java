@@ -57,10 +57,10 @@ public class SelfPromotionTest {
 
         // verify that both promotions happened
         Promotion pb = promo1.getBuilds().get(0);
-        assertSame(pb.getTarget(),b);
+        assertSame(pb.getTargetBuildOrFail(),b);
 
         pb = promo2.getBuilds().get(0);
-        assertSame(pb.getTarget(),b);
+        assertSame(pb.getTargetBuildOrFail(),b);
 
         PromotedBuildAction badge = (PromotedBuildAction) b.getBadgeActions().get(0);
         assertTrue(badge.contains(promo1));
@@ -99,7 +99,7 @@ public class SelfPromotionTest {
         assertTrue(promo1.getBuilds().isEmpty());
 
         Promotion pb = promo2.getBuilds().get(0);
-        assertSame(pb.getTarget(),b);
+        assertSame(pb.getTargetBuildOrFail(),b);
 
         PromotedBuildAction badge = (PromotedBuildAction) b.getBadgeActions().get(0);
         assertFalse(badge.contains(promo1));

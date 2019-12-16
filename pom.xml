@@ -8,14 +8,17 @@
   </parent>
 
   <artifactId>promoted-builds</artifactId>
-  <version>3.4-SNAPSHOT</version>
+  <version>3.6-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>Jenkins promoted builds plugin</name>
-  <url>https://wiki.jenkins.io/display/JENKINS/Promoted+Builds+Plugin</url>
+  <url>https://github.com/jenkinsci/promoted-builds-plugin</url>
 
   <properties>
-    <jenkins.version>2.138.4</jenkins.version>
+    <!-- Last version before https://jenkins.io/security/advisory/2018-08-15/ which causes instabilities
+         due to Promotion#getTarget(). And we cannot just remove it without breaking binary compatibility
+         (see JENKINS-59704, JENKINS-59773 and so on for the fallout in 3.4)-->
+    <jenkins.version>2.121.1</jenkins.version>
     <java.level>8</java.level>
     <findbugs.effort>Max</findbugs.effort>
     <hpi.compatibleSinceVersion>3.0</hpi.compatibleSinceVersion>

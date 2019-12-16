@@ -79,23 +79,53 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> impleme
 
     /**
      * Gets the build that this promotion promoted.
+     * @since 3.4
+     * @return
+     *      {@code null} if there's no such object. For example, if the build has already garbage collected.
+     */
+    @CheckForNull
+    public AbstractBuild<?,?> getTargetBuild() {
+        return getTarget();
+    }
+
+    /**
+     * Gets the build that this promotion promoted.
+     * @since 3.5
+     * @return Target build
+     * @throws IllegalStateException There is no target build
+     */
+    @Nonnull
+    public AbstractBuild<?,?> getTargetBuildOrFail() {
+        final AbstractBuild<?, ?> target = getTarget();
+        if (target == null) {
+            throw new IllegalStateException("There is no target build associated with " + this +
+                    ". Most probably, the build has been already removed");
+        }
+        return target;
+    }
+
+    /**
+     * Gets the build that this promotion promoted.
      *
+     * @deprecated Use {@link #getTargetBuildOrFail()} or {@link #getTargetBuild()}. This method will be removed once the baseline is updated in Promoted Builds 4.0
      * @return
      *      null if there's no such object. For example, if the build has already garbage collected.
      */
     @Exported
+    @Deprecated
+    @CheckForNull
     public AbstractBuild<?,?> getTarget() {
         PromotionTargetAction pta = getAction(PromotionTargetAction.class);
         return pta == null ? null : pta.resolve(this);
     }
 
     @Override public AbstractBuild<?,?> getRootBuild() {
-        return getTarget().getRootBuild();
+        return getTargetBuildOrFail().getRootBuild();
     }
 
     @Override
     public String getUrl() {
-        return getTarget().getUrl() + "promotion/" + getParent().getName() + "/promotionBuild/" + getNumber() + "/";
+        return getTargetBuildOrFail().getUrl() + "promotion/" + getParent().getName() + "/promotionBuild/" + getNumber() + "/";
     }
 
     /**
@@ -103,7 +133,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> impleme
      * performed for a build, including this {@link Promotion}.
      */
     public Status getStatus() {
-        return getTarget().getAction(PromotedBuildAction.class).getPromotion(getParent().getName());
+        return getTargetBuildOrFail().getAction(PromotedBuildAction.class).getPromotion(getParent().getName());
     }
 
     @Override
@@ -113,7 +143,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> impleme
         // Augment environment with target build's information
         String rootUrl = Jenkins.get().getRootUrl();
         //TODO: Refactor to Run
-        AbstractBuild<?, ?> target = getTarget();
+        AbstractBuild<?, ?> target = getTargetBuildOrFail();
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
         e.put("PROMOTED_JOB_NAME", target.getParent().getName());
@@ -308,7 +338,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> impleme
     }
 
     public void run() {
-        if (getTarget() != null) {
+        if (getTargetBuildOrFail() != null) {
             getStatus().addPromotionAttempt(this);
         }
         run(new RunnerImpl(this));
@@ -323,7 +353,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> impleme
 
         @Override
         protected Lease decideWorkspace(Node n, WorkspaceList wsl) throws InterruptedException, IOException {
-            if (getTarget() == null) {
+            if (getTargetBuild() == null) {
                 throw new IOException("No Promotion target, cannot retrieve workspace");
             }
             String customWorkspace = Promotion.this.getProject().getCustomWorkspace();
@@ -337,7 +367,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> impleme
                         rootPath.child(getEnvironment(listener).expand(customWorkspace)));
             }
 
-            TopLevelItem item = (TopLevelItem)getTarget().getProject();
+            TopLevelItem item = (TopLevelItem) getTargetBuildOrFail().getProject();
             FilePath workspace = n.getWorkspaceFor(item);
             if (workspace == null) {
                 throw new IOException("Cannot retrieve workspace for " + item + " on the node " + n);
@@ -346,7 +376,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> impleme
         }
 
         protected Result doRun(BuildListener listener) throws Exception {
-            AbstractBuild<?, ?> target = getTarget();
+            AbstractBuild<?, ?> target = getTargetBuildOrFail();
 
             OutputStream logger = listener.getLogger();
             AbstractProject rootProject = project.getRootProject();
@@ -418,7 +448,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> impleme
         }
 
         protected void post2(BuildListener listener) throws Exception {
-            if (getTarget() == null) {
+            if (getTargetBuild() == null) {
                 listener.error("No Promotion target, cannot save target or update status");
                 return;
             }
@@ -426,14 +456,14 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> impleme
             if(getResult()== Result.SUCCESS)
                 getStatus().onSuccessfulPromotion(Promotion.this);
             // persist the updated build record
-            getTarget().save();
+            getTargetBuildOrFail().save();
 
             if (getResult() == Result.SUCCESS) {
                 // we should evaluate any other pending promotions in case
                 // they had a condition on this promotion
-                PromotedBuildAction pba = getTarget().getAction(PromotedBuildAction.class);
+                PromotedBuildAction pba = getTargetBuildOrFail().getAction(PromotedBuildAction.class);
                 for (PromotionProcess pp : pba.getPendingPromotions()) {
-                    pp.considerPromotion2(getTarget());
+                    pp.considerPromotion2(getTargetBuildOrFail());
                 }
 
                 // tickle PromotionTriggers
