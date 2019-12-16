@@ -1,0 +1,199 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jenkins-ci.plugins</groupId>
+    <artifactId>plugin</artifactId>
+    <version>3.45</version>
+  </parent>
+
+  <artifactId>promoted-builds</artifactId>
+  <version>3.6-SNAPSHOT</version>
+  <packaging>hpi</packaging>
+
+  <name>Jenkins promoted builds plugin</name>
+  <description>The plugin includes promotion support for Freestyle/Matrix projects</description>
+  <url>https://github.com/jenkinsci/promoted-builds-plugin</url>
+
+  <properties>
+    <!-- Last version before https://jenkins.io/security/advisory/2018-08-15/ which causes instabilities
+         due to Promotion#getTarget(). And we cannot just remove it without breaking binary compatibility
+         (see JENKINS-59704, JENKINS-59773 and so on for the fallout in 3.4)-->
+    <jenkins.version>2.121.1</jenkins.version>
+    <java.level>8</java.level>
+    <findbugs.effort>Max</findbugs.effort>
+    <hpi.compatibleSinceVersion>3.0</hpi.compatibleSinceVersion>
+  </properties>
+
+  <developers>
+    <developer>
+      <id>kohsuke</id>
+      <name>Kohsuke Kawaguchi</name>
+    </developer>
+    <developer>
+      <id>petehayes</id>
+      <name>Peter Hayes</name>
+    </developer>
+    <developer>
+      <id>oleg_nenashev</id>
+      <name>Oleg Nenashev</name>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
+    <tag>HEAD</tag>
+  </scm>
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>http://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+
+  <repositories>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>promotion-api</artifactId>
+      <version>3.6-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>maven-plugin</artifactId>
+      <version>3.2</version>
+      <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-net</groupId>
+          <artifactId>commons-net</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>apache-httpcomponents-client-4-api</artifactId>
+      <version>4.5.3-2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>junit</artifactId>
+      <version>1.20</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sonyericsson.hudson.plugins.rebuild</groupId>
+      <artifactId>rebuild</artifactId>
+      <version>1.31</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>structs</artifactId>
+      <version>1.19</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-core</artifactId>
+      <version>2.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>token-macro</artifactId>
+      <version>2.0</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>credentials</artifactId>
+      <version>2.1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>ssh-credentials</artifactId>
+      <version>1.13</version>
+    </dependency>
+    <dependency>
+      <groupId>hudson.plugins</groupId>
+      <artifactId>project-inheritance</artifactId>
+      <version>1.5.3</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>job-dsl</artifactId>
+      <version>1.74</version>
+      <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>org.codehaus.groovy</groupId>
+          <artifactId>groovy-all</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>script-security</artifactId>
+      <version>1.54</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jvnet.hudson</groupId>
+      <artifactId>xstream</artifactId>
+      <version>1.4.7-jenkins-1</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>config-file-provider</artifactId>
+      <version>2.18</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <!-- TODO: it is something insane, no? -->
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>parameterized-trigger</artifactId>
+      <version>2.33</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>matrix-auth</artifactId>
+      <version>1.6</version>
+      <scope>test</scope>
+      <exclusions>
+        <!-- Real Upper Bounds dependency issue,
+             See the discussion in https://github.com/jenkinsci/plugin-pom/pull/72 -->
+        <exclusion>
+          <groupId>org.jenkins-ci.plugins.icon-shim</groupId>
+          <artifactId>icon-set</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>matrix-project</artifactId>
+      <version>1.12</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

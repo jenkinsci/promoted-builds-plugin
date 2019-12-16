@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2016 Oleg Nenashev.
+ * Copyright 2017 CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,31 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package hudson.plugins.promoted_builds.util;
+package hudson.plugins.promoted_builds;
 
-import javax.annotation.Nonnull;
-import jenkins.model.Jenkins;
+import com.sonyericsson.rebuild.RebuildValidator;
+import hudson.Extension;
+import hudson.model.Run;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 /**
- * Util class, which provides helpers for {@link Jenkins}.
+ * Disables the rebuild button for {@link Promotion} objects since rebuilding
+ * is handled separately for them.
+ *
+ * @see Status
  */
-public class JenkinsHelper {
-    
-    private JenkinsHelper() {};
+@Extension(optional=true)
+@Restricted(NoExternalUse.class)
+public class PromotionRebuildValidator extends RebuildValidator {
 
-    /**
-     * @deprecated Use {@link Jenkins#get()}
-     */
-    @Deprecated
-    @Nonnull
-    @Restricted(NoExternalUse.class)
-    public static Jenkins getInstance() throws IllegalStateException {
-        Jenkins instance = Jenkins.getInstanceOrNull();
-        if (instance == null) {
-            throw new IllegalStateException("Jenkins has not been started, or was already shut down");
-        }
-        return instance;
+    @Override
+    public boolean isApplicable(Run build) {
+        return build instanceof Promotion;
     }
+
 }
