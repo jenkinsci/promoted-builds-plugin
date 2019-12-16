@@ -135,7 +135,7 @@ public final class Status {
             }
             baseName = p.getIcon();
         }
-        return Jenkins.RESOURCE_PATH+"/plugin/promoted-builds/icons/"+size+"/"+ baseName +".png";
+        return Jenkins.RESOURCE_PATH+"/plugin/promotion-api/icons/"+size+"/"+ baseName +".png";
     }
 
     //TODO: what is the Null status?

@@ -200,7 +200,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
 
         @Override
         public String getHelpFile() {
-            return "/plugin/promoted-builds/parameter/promotion.html";
+            return "/plugin/promotion-api/parameter/promotion.html";
         }
 
         @Override

@@ -1,5 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-  This plugin implements a "promoted build" feature where a build of one job can be marked as "promoted"
-  when it passes certain criteria.
+  This plugin provides promotion API which can be used by other plugins to define the promotion logic.
 </div>

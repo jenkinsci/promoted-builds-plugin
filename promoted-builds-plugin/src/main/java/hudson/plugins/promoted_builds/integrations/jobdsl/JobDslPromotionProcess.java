@@ -19,8 +19,8 @@ public final class JobDslPromotionProcess {
     private String name;
     /**
      * The icon that represents this promotion process. This is the name of
-     * the GIF icon that can be found in ${rootURL}/plugin/promoted-builds/icons/16x16/
-     * and ${rootURL}/plugin/promoted-builds/icons/32x32/, e.g. <code>"star-gold"</code>.
+     * the GIF icon that can be found in ${rootURL}/plugin/promotion-api/icons/16x16/
+     * and ${rootURL}/plugin/promotion-api/icons/32x32/, e.g. <code>"star-gold"</code>.
      */
     private String icon;
 

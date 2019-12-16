@@ -4,7 +4,7 @@
   <l:layout title="Promotions : ${it.owner.displayName}">
 
     <l:header>
-      <link type="text/css" rel="stylesheet" href="${resURL}/plugin/promoted-builds/css/promoted-builds.css" />
+      <link type="text/css" rel="stylesheet" href="${resURL}/plugin/promotio-api/css/promoted-builds.css" />
     </l:header>
 
     <st:include page="sidepanel.jelly" it="${it.owner}" />
@@ -17,7 +17,7 @@
         <j:forEach var="c" items="${it.processes}">
            <j:if test="${c.isVisible()}">
 	          <h2>
-	            <img src="${resURL}/plugin/promoted-builds/icons/32x32/${c.getIcon()}.png"/> <a href="process/${c.name}" class="model-link">${c.name}</a>
+	            <img src="${resURL}/plugin/promotion-api/icons/32x32/${c.getIcon()}.png"/> <a href="process/${c.name}" class="model-link">${c.name}</a>
 	          </h2>
 
 	          <!-- history of this promotion process -->

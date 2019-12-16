@@ -9,7 +9,7 @@
            <j:if test="${process.isVisible()}">
 	          <j:set var="status" value="${ppa.getStatus(process)}"/>
 	          <j:set var="icon" value="${process.getIcon()}"/>
-	          <j:set var="iconUrl" value="${resURL}/plugin/promoted-builds/icons/${iconSize}/${icon}.png"/>
+	          <j:set var="iconUrl" value="${resURL}/plugin/promotion-api/icons/${iconSize}/${icon}.png"/>
 	          <img width="${iconSize}" height="${iconSize}"
 	            title="${%PromotionProcess} ${process.name}"
 	            src="${iconUrl}"/>

@@ -4,7 +4,7 @@
   <l:layout title="${%Promotions} : ${it.project.displayName} ${it.owner.displayName}" xmlns:local="local">
 
     <l:header>
-      <link type="text/css" rel="stylesheet" href="${resURL}/plugin/promoted-builds/css/promoted-builds.css" />
+      <link type="text/css" rel="stylesheet" href="${resURL}/plugin/promotion-api/css/promoted-builds.css" />
     </l:header>
 
     <st:include page="sidepanel.jelly" it="${it.owner}" />
@@ -17,7 +17,7 @@
         <j:forEach var="p" items="${it.promotions}">
           <j:if test="${p.getProcess()!=null and p.getProcess().isVisible()}">
             <h2>
-              <img src="${resURL}/plugin/promoted-builds/icons/32x32/${p.getProcess().getIcon()}.png"/>
+              <img src="${resURL}/plugin/promotion-api/icons/32x32/${p.getProcess().getIcon()}.png"/>
               <a href="../../promotion/process/${p.name}" class="model-link">${p.name}</a>
             </h2>
 
@@ -92,7 +92,7 @@
         <j:forEach var="p" items="${it.pendingPromotions}">
           <j:if test="${p.isVisible()}">
             <h2>
-              <img src="${resURL}/plugin/promoted-builds/icons/32x32/${p.getIcon()}.png"/>
+              <img src="${resURL}/plugin/promotion-api/icons/32x32/${p.getIcon()}.png"/>
               <a href="../../promotion/process/${p.name}" class="model-link">${p.name}</a>
             </h2>
             <j:choose>

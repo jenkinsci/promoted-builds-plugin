@@ -29,10 +29,10 @@ THE SOFTWARE.
 	<f:entry title="${%Name}" help="/help/parameter/name.html">
 		<f:textbox field="name" />
 	</f:entry>
-        <f:entry title="${%Job Name}" help="/plugin/promoted-builds/parameter/help-job.html">
+        <f:entry title="${%Job Name}" help="/plugin/promotion-api/parameter/help-job.html">
             <f:textbox field="jobName" />
         </f:entry>
-        <f:entry title="${%Promotion}" help="/plugin/promoted-builds/parameter/help-promotion.html">
+        <f:entry title="${%Promotion}" help="/plugin/promotion-api/parameter/help-promotion.html">
             <f:select field="process" />
 	</f:entry>
     <f:entry title="${%Description}" help="/help/parameter/description.html">
