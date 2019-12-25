@@ -130,7 +130,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
                 p = (PromotionProcess) Items.load(this, getRootDirFor(name));
             } catch (IOException e) {
                 // failed to load
-                p = new PromotionProcess(this,name);
+                p = new JobPropertyPromotionProcess(this,name);
             }
 
             // apply configuration
@@ -180,7 +180,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
      * @throws IOException Execution error
      */
     public synchronized PromotionProcess addProcess(String name) throws IOException {
-        PromotionProcess p = new PromotionProcess(this, name);
+        JobPropertyPromotionProcess p = new JobPropertyPromotionProcess(this, name);
         activeProcessNames.add(name);
         safeAddToProcessesList(p);
         buildActiveProcess();

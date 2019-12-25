@@ -41,7 +41,7 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
     }
 
     public boolean appliesTo(PromotionProcess proc) {
-        return proc.getName().equals(process) && proc.getParent().getOwner().getFullName().equals(jobName);
+        return proc.getName().equals(process) && proc.getOwner().getFullName().equals(jobName);
     }
 
     public void consider(Promotion p) {

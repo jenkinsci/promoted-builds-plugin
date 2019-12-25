@@ -67,12 +67,15 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
- * A dummy {@link AbstractProject} to carry out promotion operations.
+ * A dummy {@link AbstractProject} to carry out promotion operations for other {@link AbstractProject}s.
  *
+ * @deprecated This class is used only for the Promoted Builds Plugin, as a compatibility layer for {@link PromotionCondition}s and other types.
+ *  This class was significantly refactored, but the data and binary compatibility are mostly retained.
  * @author Kohsuke Kawaguchi
  */
  // BuildableItem, LazyBuildMixIn.LazyLoadingJob<P,R>, ParameterizedJobMixIn.ParameterizedJob<P, R>
-public final class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements Saveable, Describable<PromotionProcess>, BuildableItemWithBuildWrappers {
+@Deprecated
+public abstract class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements Saveable, Describable<PromotionProcess>, BuildableItemWithBuildWrappers, PromotionTask {
 
     /**
      * {@link PromotionCondition}s. All have to be met for a build to be promoted.
@@ -95,44 +98,9 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     public String isVisible;
 
-    private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
-
-    private volatile DescribableList<BuildWrapper, Descriptor<BuildWrapper>> buildWrappers;
-    private static final AtomicReferenceFieldUpdater<PromotionProcess,DescribableList> buildWrappersSetter
-            = AtomicReferenceFieldUpdater.newUpdater(PromotionProcess.class,DescribableList.class,"buildWrappers");
-
-    /*package*/ PromotionProcess(JobPropertyImpl property, String name) {
-        super(property, name);
-    }
 
     /*package*/ PromotionProcess(ItemGroup parent, String name) {
         super(parent, name);
-    }
-
-    /**
-     * Creates unconnected {@link PromotionProcess} instance from the JSON configuration.
-     * This is mostly only useful for capturing its configuration in XML format.
-     * @param req Request
-     * @param o JSON object with source data
-     * @throws FormException form submission issue, includes form validation
-     * @throws IOException {@link PromotionProcess} creation issue
-     * @return Parsed promotion process
-     */
-    public static PromotionProcess fromJson(StaplerRequest req, JSONObject o) throws FormException, IOException {
-        String name = o.getString("name");
-        try {
-            Jenkins.checkGoodName(name);
-        } catch (Failure f) {
-            throw new Descriptor.FormException(f.getMessage(), name);
-        }
-        PromotionProcess p = new PromotionProcess(null,name);
-        BulkChange bc = new BulkChange(p);
-        try {
-            p.configure(req, o); // apply configuration. prevent it from trying to save to disk while we do this
-        } finally {
-            bc.abort();
-        }
-        return p;
     }
 
     @Override
@@ -144,8 +112,6 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         // apply configuration
         conditions.rebuild(req,c.optJSONObject("conditions"), PromotionCondition.all());
 
-        buildSteps = (List)Descriptor.newInstancesFromHeteroList(
-                req, c, "buildStep", (List) PromotionProcess.getAll());
         getBuildWrappersList().rebuild(req, c, BuildWrappers.getFor(this));
         icon = c.getString("icon");
         if (c.optBoolean("hasAssignedLabel")) {
@@ -158,56 +124,13 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     /**
-     * Returns the root project value.
-     *
-     * @return the root project value.
-     */
-    @Override
-    public AbstractProject getRootProject() {
-        return getParent().getOwner().getRootProject();
-    }
-
-    @Override
-    public JobPropertyImpl getParent() {
-        return (JobPropertyImpl)super.getParent();
-    }
-
-    /**
-     * Gets the owner {@link AbstractProject} that configured {@link JobPropertyImpl} as
-     * a job property.
+     * Gets the owner {@link AbstractProject} that configured this promotion.
      * @return Current owner project
      */
-    public AbstractProject<?,?> getOwner() {
-        return getParent().getOwner();
-    }
+    public abstract AbstractProject<?,?> getOwner();
 
     @Override public ACL getACL() {
         return getOwner().getACL();
-    }
-
-    /**
-     * JENKINS-27716: Since 1.585, the promotion must explicitly indicate that
-     * it can be disabled. Otherwise, promotions which trigger automatically
-     * upon build completion will execute, even if they're archived.
-     */
-    @Override public boolean supportsMakeDisabled() {
-        return true;
-    }
-
-    /**
-     * Get the promotion condition by referencing it fully qualified class name
-     * @param promotionClassName Class name of {@link Promotion}
-     * @return Promotion condition if exists
-     */
-    @CheckForNull
-    public PromotionCondition getPromotionCondition(String promotionClassName) {
-        for (PromotionCondition condition : conditions) {
-            if (condition.getClass().getName().equals(promotionClassName)) {
-                return condition;
-            }
-        }
-
-        return null;
     }
 
     public DescribableList<Publisher, Descriptor<Publisher>> getPublishersList() {
@@ -215,29 +138,20 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return new DescribableList<Publisher,Descriptor<Publisher>>(this);
     }
 
-    public AbstractProject<?,?> asProject() {
+    public final AbstractProject<?,?> asProject() {
         return this;
     }
 
-    public Map<Descriptor<BuildWrapper>,BuildWrapper> getBuildWrappers() {
+    public final Map<Descriptor<BuildWrapper>,BuildWrapper> getBuildWrappers() {
       return getBuildWrappersList().toMap();
     }
 
-    public DescribableList<BuildWrapper,Descriptor<BuildWrapper>> getBuildWrappersList() {
-        if(buildWrappers == null) {
-            buildWrappersSetter.compareAndSet(this,null,new DescribableList<BuildWrapper,Descriptor<BuildWrapper>>(this));
-        }
-        return buildWrappers;
-    }
+    @Override
+    protected abstract Class<Promotion> getBuildClass();
 
-    protected Class<Promotion> getBuildClass() {
-        return Promotion.class;
-    }
+    public abstract List<BuildStep> getBuildSteps();
 
-    public List<BuildStep> getBuildSteps() {
-        return buildSteps;
-    }
-
+    //TODO(oleg_nenashev): canRoam is the only difference from the current parent
     /**
      * Gets the textual representation of the assigned label as it was entered by the user.
      * @return Assigned label string
@@ -254,30 +168,13 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         }
     }
 
+    //TODO(oleg_nenashev): canRoam is the only difference from the current parent
     @Override public Label getAssignedLabel() {
         // Really would like to run on the exact node that the promoted build ran on,
         // not just the same label.. but at least this works if job is tied to one node:
         if (assignedLabel == null) return getOwner().getAssignedLabel();
 
         return Jenkins.get().getLabel(assignedLabel);
-    }
-
-    @Override public JDK getJDK() {
-        return getOwner().getJDK();
-    }
-
-    /**
-     * Gets the customWorkspace of the owner project.
-     *
-     * Support for FreeStyleProject only.
-     * @return customWorkspace
-     */
-    @CheckForNull
-    public String getCustomWorkspace() {
-        AbstractProject<?, ?> p = getOwner();
-        if (p instanceof FreeStyleProject)
-            return ((FreeStyleProject) p).getCustomWorkspace();
-        return null;
     }
 
     /**
@@ -316,6 +213,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     	}
     	return true;
     }
+
     private static EnvVars getDefaultParameterValuesAsEnvVars(AbstractProject owner) {
     	EnvVars envVars = null;
 		ParametersDefinitionProperty parametersDefinitionProperty = (ParametersDefinitionProperty)owner.getProperty(ParametersDefinitionProperty.class);
