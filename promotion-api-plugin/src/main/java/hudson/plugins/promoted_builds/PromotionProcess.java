@@ -146,9 +146,6 @@ public abstract class PromotionProcess extends AbstractProject<PromotionProcess,
       return getBuildWrappersList().toMap();
     }
 
-    @Override
-    protected abstract Class<Promotion> getBuildClass();
-
     public abstract List<BuildStep> getBuildSteps();
 
     //TODO(oleg_nenashev): canRoam is the only difference from the current parent

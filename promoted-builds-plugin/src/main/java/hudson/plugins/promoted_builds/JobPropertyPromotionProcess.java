@@ -123,11 +123,11 @@ public class JobPropertyPromotionProcess extends PromotionProcess {
         return true;
     }
 
-    //TODO(oleg_nenashev): We cannot change it without breaking binary compatibility. In tests we trust
-    //@Override
-    //protected Class<Promotion> getBuildClass() {
-    //    return JobPropertyPromotionProcess.class;
-    //}
+    // TODO(oleg_nenashev): We cannot change it without breaking binary compatibility. In tests we trust
+    @Override
+    protected Class<JobPropertyPromotionProcess> getBuildClass() {
+        return JobPropertyPromotionProcess.class;
+    }
 
     @Override public JDK getJDK() {
         return getOwner().getJDK();
