@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<div>
+  This plugin provides promotion API which can be used by other plugins to define the promotion logic.
+</div>
