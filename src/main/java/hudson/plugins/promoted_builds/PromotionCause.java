@@ -5,6 +5,8 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.console.HyperlinkNote;
 
+import java.util.Objects;
+
 /**
  * Cause used to indicate that a build was triggered by a promotion.  Extends
  * UpstreamCause so that existing build steps can use "the upstream build that
@@ -76,10 +78,10 @@ public class PromotionCause extends Cause.UpstreamCause {
             return false;
         }
         final PromotionCause other = (PromotionCause) obj;
-        if ((this.promotionProcessName == null) ? (other.promotionProcessName != null) : !this.promotionProcessName.equals(other.promotionProcessName)) {
+        if (!Objects.equals(this.promotionProcessName, other.promotionProcessName)) {
             return false;
         }
-        if ((this.promotionBuildUrl == null) ? (other.promotionBuildUrl != null) : !this.promotionBuildUrl.equals(other.promotionBuildUrl)) {
+        if (!Objects.equals(this.promotionBuildUrl, other.promotionBuildUrl)) {
             return false;
         }
         if (this.promotionBuildNumber != other.promotionBuildNumber) {
