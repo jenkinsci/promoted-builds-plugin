@@ -91,8 +91,6 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
                     IOUtils.copy(in, configXml);
                     LOGGER.log(Level.INFO, String.format(createUpdate + " promotion with name %s for %s", name, item.getName()));
                     update = true;
-                } catch (UnsupportedEncodingException e) {
-                    throw new IllegalStateException("Error handling extension code", e);
                 } catch (IOException e) {
                     throw new IllegalStateException("Error handling extension code", e);
                 }
