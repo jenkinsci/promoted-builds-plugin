@@ -25,7 +25,6 @@ import hudson.model.JDK;
 import hudson.model.Job;
 import hudson.model.Label;
 import hudson.model.ParameterDefinition;
-import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.PermalinkProjectAction.Permalink;
 import hudson.model.Queue.Item;
@@ -62,7 +61,6 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 

@@ -7,7 +7,6 @@ import hudson.model.AbstractProject;
 import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import jenkins.model.Jenkins;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

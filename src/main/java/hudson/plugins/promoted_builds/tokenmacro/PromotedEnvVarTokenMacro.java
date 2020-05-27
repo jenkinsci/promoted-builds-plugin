@@ -23,7 +23,6 @@
  */
 package hudson.plugins.promoted_builds.tokenmacro;
 
-import com.google.common.collect.ListMultimap;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Executor;
@@ -33,7 +32,6 @@ import hudson.plugins.promoted_builds.Promotion;
 import java.io.IOException;
 import java.util.Map;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
-import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro.Parameter;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.impl.EnvironmentVariableMacro;
 

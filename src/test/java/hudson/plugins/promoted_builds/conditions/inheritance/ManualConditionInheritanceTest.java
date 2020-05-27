@@ -1,11 +1,9 @@
 package hudson.plugins.promoted_builds.conditions.inheritance;
 
 import hudson.ExtensionList;
-import hudson.model.FreeStyleBuild;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.Descriptor;
-import hudson.model.FreeStyleProject;
 import hudson.model.StringParameterDefinition;
 import hudson.plugins.project_inheritance.projects.InheritanceBuild;
 import hudson.plugins.project_inheritance.projects.InheritanceProject.IMode;
@@ -13,7 +11,6 @@ import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
-import hudson.plugins.promoted_builds.Status;
 
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
