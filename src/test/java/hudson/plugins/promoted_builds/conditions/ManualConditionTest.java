@@ -156,11 +156,11 @@ public class ManualConditionTest {
         //Approve Promotion
         List<HtmlForm> forms=getFormsByName(page, "approve");
         assertFalse(forms.isEmpty());
-        assertTrue(forms.size()==1);
+        assertEquals(1, forms.size());
         
         HtmlForm form=forms.get(0);
         List<HtmlElement> parameters=getFormParameters(form);
-        assertTrue(parameters.size()==condition.getParameterDefinitions().size());
+        assertEquals(parameters.size(), condition.getParameterDefinitions().size());
         for(HtmlElement param:parameters){
         	HtmlElement v=param.getElementsByAttribute("input", "name", "value").get(0);
         	v.setAttribute("value", v.getAttribute("value")+"1");
@@ -171,16 +171,16 @@ public class ManualConditionTest {
         assertNotNull(approval);
         SortedMap<Integer, Promotion> builds=foo.getBuildsAsMap();
         assertNotNull(builds);
-        assertTrue(builds.size()==1);
+        assertEquals(1, builds.size());
         
         //Re-Execute approved promotion
         page=j.createWebClient().getPage(b1, "promotion");
         forms=getFormsByName(page,"build");
         assertFalse(forms.isEmpty());
-        assertTrue(forms.size()==1);
+        assertEquals(1, forms.size());
         form=forms.get(0);
         parameters=getFormParameters(form);
-        assertTrue(parameters.size()==condition.getParameterDefinitions().size());
+        assertEquals(parameters.size(), condition.getParameterDefinitions().size());
         
         for(HtmlElement param:parameters){
         	HtmlElement v=param.getElementsByAttribute("input", "name", "value").get(0);
@@ -189,9 +189,9 @@ public class ManualConditionTest {
         submit(form);
         
         builds=foo.getBuildsAsMap();
-        assertTrue(builds.size()==2);
+        assertEquals(2, builds.size());
         List<ManualApproval> actions=b1.getActions(ManualApproval.class);
-        assertTrue(actions.size()==1);
+        assertEquals(1, actions.size());
         
         PromotedBuildAction buildActions=b1.getAction(PromotedBuildAction.class);
         int buildIndex=1;
@@ -202,7 +202,7 @@ public class ManualConditionTest {
         Collections.reverse(promotions);
         for (Promotion build:promotions){
         	List<ParameterDefinition> values=build.getParameterDefinitionsWithValue();
-        	assertTrue(values.size()==condition.getParameterDefinitions().size());
+                assertEquals(values.size(), condition.getParameterDefinitions().size());
         	for (ParameterDefinition v:values){
         		assertTrue(v instanceof StringParameterDefinition);
         		String pvalue=((StringParameterDefinition)v).getDefaultValue();
@@ -215,7 +215,7 @@ public class ManualConditionTest {
         for (Status status:buildActions.getPromotions()){
         	assertNotNull(status.getLast()!=null);
         	List<ParameterDefinition> values=status.getLast().getParameterDefinitionsWithValue();
-        	assertTrue(values.size()==condition.getParameterDefinitions().size());
+                assertEquals(values.size(), condition.getParameterDefinitions().size());
         }
         
     }
