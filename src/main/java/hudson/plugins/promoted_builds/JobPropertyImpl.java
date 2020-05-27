@@ -141,21 +141,13 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
     }
     
     private void loadAllProcesses(File rootDir) throws IOException {
-        File[] subdirs = rootDir.listFiles(new FileFilter() {
-            public boolean accept(File child) {
-                return child.isDirectory();
-            }
-        });
+        File[] subdirs = rootDir.listFiles(File::isDirectory);
 
         loadProcesses(subdirs);
     }
     private void init() throws IOException {
         // load inactive processes
-        File[] subdirs = getRootDir().listFiles(new FileFilter() {
-            public boolean accept(File child) {
-                return child.isDirectory() && !isActiveProcessNameIgnoreCase(child.getName());
-            }
-        });
+        File[] subdirs = getRootDir().listFiles(child -> child.isDirectory() && !isActiveProcessNameIgnoreCase(child.getName()));
         loadProcesses(subdirs);
     }
     private void loadProcesses(File[] subdirs) throws IOException {

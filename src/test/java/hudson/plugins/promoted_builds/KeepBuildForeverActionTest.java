@@ -111,23 +111,19 @@ public class KeepBuildForeverActionTest {
     }
 
     private void waitForBuild(final Job job, final int buildNumber) throws Exception {
-        waitFor(new WaitCondition() {
-            public boolean isMet() {
-                return (job.getBuildByNumber(buildNumber) != null) && !job.getBuildByNumber(buildNumber).isBuilding();
-            }
+        waitFor(() -> {
+            return (job.getBuildByNumber(buildNumber) != null) && !job.getBuildByNumber(buildNumber).isBuilding();
         }, 2000);
     }
 
     private void waitFor(final WaitCondition condition, long timeout) throws Exception {
-        Thread waiter = new Thread() {
-            public void run() {
-                try {
-                    while (!condition.isMet()) {
-                        Thread.sleep(100);
-                    }
-                } catch (InterruptedException ie) { }
-            }
-        };
+        Thread waiter = new Thread(() -> {
+            try {
+                while (!condition.isMet()) {
+                    Thread.sleep(100);
+                }
+            } catch (InterruptedException ie) { }
+        });
         waiter.start();
         waiter.join(timeout);
         if (waiter.isAlive()) {
