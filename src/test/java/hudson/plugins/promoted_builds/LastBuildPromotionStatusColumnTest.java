@@ -24,7 +24,6 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.model.Cause;
-import hudson.model.Descriptor;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.ListView;
