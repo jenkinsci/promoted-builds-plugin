@@ -3,7 +3,7 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/promoted_builds">
   <f:nested>
     <f:repeatable var="s" items="${instance.criteria}" noAddButton="true" minimum="1" name="criteria">
-      <div>
+      <p:blockWrapper>
         <f:entry title="Name">
           <f:textbox name="criteria.name" value="${s.name}" />
         </f:entry>
@@ -22,7 +22,7 @@
             <input type="button" value="Delete" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
           </div>
         </f:entry>
-      </div>
+      </p:blockWrapper>
     </f:repeatable>
   </f:nested>
 </j:jelly>
