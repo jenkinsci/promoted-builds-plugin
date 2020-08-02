@@ -150,24 +150,22 @@ public class PromotionProcessTest {
 
     @Test
     public void testCaptureXml() throws Exception {
-        j.executeOnServer(new Callable<Object>() {
-            public Object call() throws Exception {
-                JSONObject o = new JSONObject()
-                        .accumulate("name", "foo")
-                        .accumulate("isVisible", "")
-                        .accumulate("icon", "star-gold")
-                        .accumulate("conditions",new JSONObject()
-                            .accumulate("hudson-plugins-promoted_builds-conditions-SelfPromotionCondition",
-                                    new JSONObject().accumulate("evenIfUnstable", false)));
-                PromotionProcess p = PromotionProcess.fromJson(Stapler.getCurrentRequest(), o);
-                assertEquals("foo", p.getName());
-                assertEquals("star-gold", p.getIcon());
-                assertEquals(1, p.conditions.size());
-                assertEquals(0, p.getBuildWrappers().size());
-                assertNotNull(p.conditions.get(SelfPromotionCondition.class));
-                System.out.println(Items.XSTREAM2.toXML(p));
-                return null;
-            }
+        j.executeOnServer(() -> {
+            JSONObject o = new JSONObject()
+                    .accumulate("name", "foo")
+                    .accumulate("isVisible", "")
+                    .accumulate("icon", "star-gold")
+                    .accumulate("conditions",new JSONObject()
+                        .accumulate("hudson-plugins-promoted_builds-conditions-SelfPromotionCondition",
+                                new JSONObject().accumulate("evenIfUnstable", false)));
+            PromotionProcess p = PromotionProcess.fromJson(Stapler.getCurrentRequest(), o);
+            assertEquals("foo", p.getName());
+            assertEquals("star-gold", p.getIcon());
+            assertEquals(1, p.conditions.size());
+            assertEquals(0, p.getBuildWrappers().size());
+            assertNotNull(p.conditions.get(SelfPromotionCondition.class));
+            System.out.println(Items.XSTREAM2.toXML(p));
+            return null;
         });
     }
 

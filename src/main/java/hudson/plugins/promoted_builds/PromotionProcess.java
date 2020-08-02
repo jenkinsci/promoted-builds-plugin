@@ -309,10 +309,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     	if (expandedIsVisible == null){
     		return true;
     	}
-    	if (expandedIsVisible.toLowerCase().equals("false")){
-    		return false;
-    	}
-    	return true;
+       return !expandedIsVisible.toLowerCase().equals("false");
     }
     private static EnvVars getDefaultParameterValuesAsEnvVars(AbstractProject owner) {
     	EnvVars envVars = null;
