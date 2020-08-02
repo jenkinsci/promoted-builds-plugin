@@ -1,8 +1,8 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:p="/lib/promoted_builds">
   <fieldset style="margin-bottom:1em">
     <legend>${%Promotion process}</legend>
-    <table width="100%">
+    <div width="100%">
       <f:entry title="Name" field="name">
         <f:textbox />
       </f:entry>
@@ -51,9 +51,9 @@
 
       <f:section title="Criteria">
         <f:nested>
-          <table style="width:100%">
+          <p:blockWrapper>
             <f:descriptorList field="conditions" descriptors="${descriptor.getApplicableConditions(it)}" />
-          </table>
+          </p:blockWrapper>
         </f:nested>
       </f:section>
  
@@ -81,6 +81,6 @@
           <input type="button" value="${%Delete this promotion process}" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
         </div>
       </f:entry>
-    </table>
+    </div>
   </fieldset>
 </j:jelly>

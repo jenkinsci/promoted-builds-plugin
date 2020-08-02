@@ -1,0 +1,23 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <st:documentation>
+    This adds a wrapper allowing adding an ID to a field or group of fields that can be targeted by JavaScript
+    The wrapper will be a `table` tag before form layout changes are merged: https://github.com/jenkinsci/jenkins/pull/3895,
+    and a `div` tag after that.
+    
+  </st:documentation>
+
+  <j:choose>
+    <j:when test="${divBasedFormLayout}">
+      <div>
+        <d:invokeBody/>
+      </div>
+    </j:when>
+    <j:otherwise>
+      <table>
+        <d:invokeBody/>
+      </table>
+    </j:otherwise>
+  </j:choose>
+
+</j:jelly>
