@@ -1,8 +1,9 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/promoted_builds">
   <f:nested>
     <f:repeatable var="s" items="${instance.criteria}" noAddButton="true" minimum="1" name="criteria">
-      <table width="100%">
+      <p:blockWrapper>
         <f:entry title="Name">
           <f:textbox name="criteria.name" value="${s.name}" />
         </f:entry>
@@ -10,9 +11,9 @@
           Promote a build when all of the following conditions are met:
         </f:block>
         <f:entry>
-          <table>
+          <p:blockWrapper>
             <f:descriptorList varName="condition" descriptors="${descriptor.getApplicableConditions(it)}" instances="${s.conditions.toMap()}" />
-          </table>
+          </p:blockWrapper>
         </f:entry>
 
         <f:entry>
@@ -21,7 +22,7 @@
             <input type="button" value="Delete" class="repeatable-delete show-if-not-only" style="margin-left: 1em;" />
           </div>
         </f:entry>
-      </table>
+      </p:blockWrapper>
     </f:repeatable>
   </f:nested>
 </j:jelly>
