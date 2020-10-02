@@ -5,16 +5,20 @@
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
     <version>3.45</version>
+    <relativePath />
   </parent>
 
   <artifactId>promoted-builds</artifactId>
-  <version>3.7-SNAPSHOT</version>
+  <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
 
   <name>Jenkins promoted builds plugin</name>
   <url>https://github.com/jenkinsci/promoted-builds-plugin</url>
 
   <properties>
+    <revision>3.7</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <gitHubRepo>jenkinsci/promoted-builds-plugin</gitHubRepo>
     <!-- Last version before https://jenkins.io/security/advisory/2018-08-15/ which causes instabilities
          due to Promotion#getTarget(). And we cannot just remove it without breaking binary compatibility
          (see JENKINS-59704, JENKINS-59773 and so on for the fallout in 3.4)-->
@@ -40,15 +44,15 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    <tag>HEAD</tag>
+    <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
+    <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+    <url>https://github.com/${gitHubRepo}</url>
+    <tag>${scmTag}</tag>
   </scm>
   <licenses>
     <license>
       <name>MIT</name>
-      <url>http://opensource.org/licenses/MIT</url>
+      <url>https://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
 
@@ -148,12 +152,6 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>script-security</artifactId>
       <version>1.54</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jvnet.hudson</groupId>
-      <artifactId>xstream</artifactId>
-      <version>1.4.7-jenkins-1</version>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
