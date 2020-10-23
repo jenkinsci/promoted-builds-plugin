@@ -75,6 +75,7 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
                 JobDslPromotionProcess promotionProcess = promotionProcesses.get(name);
                 XSTREAM.registerConverter(new JobDslPromotionProcessConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
                 XSTREAM.registerConverter(new ManualConditionConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
+                XSTREAM.processAnnotations(new Class<?>[] {JobDslPromotionProcess.class, JobDslManualCondition.class, ReleasePromotionCondition.class});
                 String xml = XSTREAM.toXML(promotionProcess);
                 File dir = new File(item.getRootDir(), "promotions/" + name);
                 File configXml = Items.getConfigFile(dir).getFile();
