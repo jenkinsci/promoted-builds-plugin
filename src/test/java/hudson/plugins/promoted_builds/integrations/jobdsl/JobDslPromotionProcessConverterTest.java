@@ -1,13 +1,8 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import com.thoughtworks.xstream.XStream;
@@ -16,6 +11,12 @@ import groovy.util.Node;
 import hudson.plugins.promoted_builds.PromotionCondition;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.util.XStream2;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.notNullValue;
 
 public class JobDslPromotionProcessConverterTest  {
 
@@ -50,12 +51,12 @@ public class JobDslPromotionProcessConverterTest  {
         pp.setBuildWrappers(buildWrappers);
         // When
         XSTREAM.registerConverter(new JobDslPromotionProcessConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
+        XSTREAM.processAnnotations(new Class<?>[] {JobDslPromotionProcess.class});
         String xml = XSTREAM.toXML(pp);
         // Then
-        assertNotNull(xml);
-        System.out.println(xml);
-        assertTrue(StringUtils.contains(xml, "hudson.plugins.promoted__builds.PromotionProcess"));
-        assertTrue(Pattern.compile("<buildWrappers>\\s+<hudson\\.test\\.buildwrapper\\.ExampleWrapper/>\\s+</buildWrappers>")
-                    .matcher(xml).find());
+        assertThat(xml,
+                   allOf(notNullValue(),
+                         containsString("hudson.plugins.promoted__builds.PromotionProcess"),
+                         matchesPattern("(?s).*<buildWrappers>\\s+<hudson\\.test\\.buildwrapper\\.ExampleWrapper/>\\s+</buildWrappers>.*")));
     }
 }
