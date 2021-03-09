@@ -9,14 +9,14 @@
   </parent>
 
   <artifactId>promoted-builds</artifactId>
-  <version>3.9</version>
+  <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
 
   <name>Jenkins promoted builds plugin</name>
   <url>https://github.com/jenkinsci/promoted-builds-plugin</url>
 
   <properties>
-    <revision>3.8</revision>
+    <revision>3.10</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/promoted-builds-plugin</gitHubRepo>
     <!-- Last version before https://jenkins.io/security/advisory/2018-08-15/ which causes instabilities
@@ -47,7 +47,7 @@
     <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
     <url>https://github.com/${gitHubRepo}</url>
-    <tag>promoted-builds-3.9</tag>
+    <tag>${scmTag}</tag>
   </scm>
   <licenses>
     <license>
