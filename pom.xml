@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>promoted-builds</artifactId>
-  <version>${revision}${changelist}</version>
+  <version>3.9.1</version>
   <packaging>hpi</packaging>
 
   <name>Jenkins promoted builds plugin</name>
@@ -47,7 +47,7 @@
     <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
     <url>https://github.com/${gitHubRepo}</url>
-    <tag>${scmTag}</tag>
+    <tag>promoted-builds-3.9.1</tag>
   </scm>
   <licenses>
     <license>
