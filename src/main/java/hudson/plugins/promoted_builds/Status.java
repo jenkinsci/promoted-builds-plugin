@@ -35,6 +35,7 @@ import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.verb.POST;
 
 /**
  * Promotion status of a build wrt a specific {@link PromotionProcess}.
@@ -385,6 +386,7 @@ public final class Status {
      * @throws IOException Functional error
      * @throws ServletException Request handling error
      */
+    @POST
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
         
         final PromotionProcess process = getProcess();
