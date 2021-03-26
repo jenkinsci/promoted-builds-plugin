@@ -44,6 +44,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
+import org.kohsuke.stapler.verb.POST;
 
 /**
  * {@link PromotionCondition} that requires manual promotion.
@@ -199,6 +200,7 @@ public class ManualCondition extends PromotionCondition {
     /**
      * Web method to handle the approval action submitted by the user.
      */
+    @POST
     public void doApprove(StaplerRequest req, StaplerResponse rsp,
             @AncestorInPath PromotionProcess promotionProcess,
             @AncestorInPath AbstractBuild<?,?> build) throws IOException, ServletException {
