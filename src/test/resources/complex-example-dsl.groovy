@@ -4,7 +4,7 @@ freeStyleJob('test-job-complex') {
             promotion {
                 name("Development")
                 icon("star-red")
-                restrict('slave1')
+                restrict('agent1')
                 conditions {
                     manual('testuser'){
                       parameters{
@@ -32,7 +32,7 @@ freeStyleJob('test-job-complex') {
             promotion {
                 name("Test")
                 icon("star-yellow")
-                restrict('slave2')
+                restrict('agent2')
                 conditions {
                     manual('testuser')
                     upstream("Development")
