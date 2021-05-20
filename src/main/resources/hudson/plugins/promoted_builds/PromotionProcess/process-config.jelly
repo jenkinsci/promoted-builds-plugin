@@ -44,8 +44,8 @@
       <f:optionalBlock name="hasAssignedLabel" title="${%Restrict where this promotion process can be run}"
                        checked="${instance.assignedLabelString!=null}" inline="true">
         <f:entry title="${%Label Expression}"
-                 description="If not set, the label of the promoted build will be used.">
-          <f:textbox autoCompleteDelimChar=" " name="assignedLabelString" value="${instance.assignedLabelString}" autoCompleteField="assignedLabelString"/>
+                 description="If not set, the label of the promoted build will be used." field="assignedLabelString">
+          <f:textbox autoCompleteDelimChar=" "/>
         </f:entry>
       </f:optionalBlock>
 
