@@ -104,7 +104,10 @@ public class JobDslPromotionProcessConverter extends ReflectionConverter {
         writeNodeAttributes(node, writer);
         if (node.value() instanceof Collection) {
             for (Object subNode : (Collection) node.value()) {
-                convertNode((Node) subNode, writer);
+               if(subNode instanceof Node)
+            	   convertNode((Node) subNode, writer);
+               else
+            	   writer.setValue(String.valueOf(subNode));
             }
         } else {
             writer.setValue(node.value().toString());
