@@ -98,4 +98,20 @@ public class PromotionsDslContextExtensionTest {
                 .matcher(content).find());
     }
 
+    @Test
+    public void testShouldGenerateTheDynamicDslJob() throws Exception {
+        // Given
+        String dsl = FileUtils.readFileToString(new File("src/test/resources/dynamic-dsl-example-dsl.groovy"));
+        FreeStyleProject seedJob = j.createFreeStyleProject();
+        seedJob.getBuildersList().add(createScript(dsl));
+        // When
+        QueueTaskFuture<FreeStyleBuild> scheduleBuild2 = seedJob.scheduleBuild2(0);
+        j.assertBuildStatusSuccess(scheduleBuild2.get());
+
+        TopLevelItem item = j.jenkins.getItem("dynamic-dsl-test");
+        File config = new File(item.getRootDir(), "promotions/Development/config.xml");
+        String content = Files.toString(config, Charset.forName("UTF-8"));
+        assert content.contains("<javaposse.jobdsl.plugin.ExecuteDslScripts>");
+    }
+
 }
