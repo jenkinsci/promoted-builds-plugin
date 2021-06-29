@@ -87,24 +87,20 @@ public class JobDslPromotionProcessConverter extends ReflectionConverter {
 
     private void writeNodes(HierarchicalStreamWriter writer, List<Node> nodes) {
         for (Node node : nodes) {
-            writer.startNode(node.name().toString());
-            if (node.value() instanceof Collection) {
-                for (Object subNode : (Collection) node.value()) {
-                    convertNode((Node) subNode, writer);
-                }
-            } else {
-                writer.setValue(node.value().toString());
-            }
-            writer.endNode();
+            writeNode(node, writer);
         }
     }
 
-    private void convertNode(Node node, HierarchicalStreamWriter writer) {
+    private void writeNode(Node node, HierarchicalStreamWriter writer) {
         writer.startNode(node.name().toString());
         writeNodeAttributes(node, writer);
         if (node.value() instanceof Collection) {
             for (Object subNode : (Collection) node.value()) {
-                convertNode((Node) subNode, writer);
+                if (subNode instanceof Node) {
+                    writeNode((Node) subNode, writer);
+                } else {
+                    writer.setValue(subNode.toString());
+                }
             }
         } else {
             writer.setValue(node.value().toString());
