@@ -13,6 +13,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import java.io.IOException;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -48,9 +49,11 @@ public class PromotedBuildActionTest {
             } 
             HtmlImage img = (HtmlImage)candidate;
             try {
-                img.getHeight();
+                assertEquals("Failed to load " + img.getSrcAttribute(),
+                        200,
+                        img.getWebResponse(true).getStatusCode());
             } catch (IOException e) {
-                throw new IOException2("Failed to load "+img.getSrcAttribute(),e);
+                throw new AssertionError("Failed to load " + img.getSrcAttribute());
             }
         }
     }
