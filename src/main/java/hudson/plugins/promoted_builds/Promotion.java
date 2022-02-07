@@ -35,7 +35,6 @@ import hudson.tasks.BuildTrigger;
 import jenkins.model.Jenkins;
 
 import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.export.Exported;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,7 +84,8 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      */
     @CheckForNull
     public AbstractBuild<?,?> getTargetBuild() {
-        return getTarget();
+        PromotionTargetAction pta = getAction(PromotionTargetAction.class);
+        return pta == null ? null : pta.resolve(this);
     }
 
     /**
@@ -96,27 +96,13 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      */
     @Nonnull
     public AbstractBuild<?,?> getTargetBuildOrFail() {
-        final AbstractBuild<?, ?> target = getTarget();
+        PromotionTargetAction pta = getAction(PromotionTargetAction.class);
+        final AbstractBuild<?, ?> target = pta == null ? null : pta.resolve(this);
         if (target == null) {
             throw new IllegalStateException("There is no target build associated with " + this +
                     ". Most probably, the build has been already removed");
         }
         return target;
-    }
-
-    /**
-     * Gets the build that this promotion promoted.
-     *
-     * @deprecated Use {@link #getTargetBuildOrFail()} or {@link #getTargetBuild()}. This method will be removed once the baseline is updated in Promoted Builds 4.0
-     * @return
-     *      null if there's no such object. For example, if the build has already garbage collected.
-     */
-    @Exported
-    @Deprecated
-    @CheckForNull
-    public AbstractBuild<?,?> getTarget() {
-        PromotionTargetAction pta = getAction(PromotionTargetAction.class);
-        return pta == null ? null : pta.resolve(this);
     }
 
     @Override public AbstractBuild<?,?> getRootBuild() {

@@ -40,7 +40,7 @@ public class ConfigurationDoCheckTest {
         client.getOptions().setThrowExceptionOnFailingStatusCode(false);
 
         HtmlPage page = (HtmlPage) submit(client.getPage(p, "configure").getFormByName("config"));
-        assertTrue(page.asText().contains("No name is specified"));
+        assertTrue(page.getVisibleText().contains("No name is specified"));
 
     }
 
@@ -63,7 +63,7 @@ public class ConfigurationDoCheckTest {
         client.getOptions().setThrowExceptionOnFailingStatusCode(false);
 
         HtmlPage page = (HtmlPage) submit(client.getPage(p, "configure").getFormByName("config"));
-        assertTrue(page.asText().contains("unsafe character"));
+        assertTrue(page.getVisibleText().contains("unsafe character"));
 
     }
 }
