@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-buildPlugin(useContainerAgent: true,
+buildPlugin(useContainerAgent: false, // temporarily disable for Windows issues
         configurations: [
                 [platform: 'linux', jdk: '11'],
                 [platform: 'windows', jdk: '8'],
