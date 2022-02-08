@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>3.45</version>
+    <version>4.33</version>
     <relativePath />
   </parent>
 
@@ -16,16 +16,14 @@
   <url>https://github.com/jenkinsci/promoted-builds-plugin</url>
 
   <properties>
-    <revision>3.12</revision>
+    <revision>4.0</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/promoted-builds-plugin</gitHubRepo>
-    <!-- Last version before https://jenkins.io/security/advisory/2018-08-15/ which causes instabilities
-         due to Promotion#getTarget(). And we cannot just remove it without breaking binary compatibility
-         (see JENKINS-59704, JENKINS-59773 and so on for the fallout in 3.4)-->
-    <jenkins.version>2.121.1</jenkins.version>
+    <bom>2.289.x</bom>
+    <jenkins.version>2.289.1</jenkins.version>
     <java.level>8</java.level>
     <findbugs.effort>Max</findbugs.effort>
-    <hpi.compatibleSinceVersion>3.0</hpi.compatibleSinceVersion>
+    <hpi.compatibleSinceVersion>4.0</hpi.compatibleSinceVersion>
   </properties>
 
   <developers>
@@ -69,11 +67,28 @@
     </pluginRepository>
   </pluginRepositories>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.jenkins.tools.bom</groupId>
+        <artifactId>bom-${bom}</artifactId>
+        <version>987.v4ade2e49fe70</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.12.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>maven-plugin</artifactId>
-      <version>3.2</version>
+      <version>3.12</version>
       <optional>true</optional>
       <exclusions>
         <exclusion>
@@ -85,12 +100,10 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>apache-httpcomponents-client-4-api</artifactId>
-      <version>4.5.3-2.1</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>junit</artifactId>
-      <version>1.20</version>
     </dependency>
     <dependency>
       <groupId>com.sonyericsson.hudson.plugins.rebuild</groupId>
@@ -101,12 +114,10 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>structs</artifactId>
-      <version>1.19</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-core</artifactId>
-      <version>2.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -117,18 +128,15 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>token-macro</artifactId>
-      <version>2.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>credentials</artifactId>
-      <version>2.1.4</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>ssh-credentials</artifactId>
-      <version>1.13</version>
     </dependency>
     <dependency>
       <groupId>hudson.plugins</groupId>
@@ -151,7 +159,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>script-security</artifactId>
-      <version>1.54</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -169,7 +176,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-auth</artifactId>
-      <version>1.6</version>
       <scope>test</scope>
       <exclusions>
         <!-- Real Upper Bounds dependency issue,
@@ -183,7 +189,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-project</artifactId>
-      <version>1.12</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -36,12 +36,16 @@ import hudson.tasks.BatchFile;
 import hudson.tasks.Shell;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.net.URL;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 public class PromotionTest {
 
@@ -101,7 +105,7 @@ public class PromotionTest {
         assertSame(pb.getTargetBuildOrFail(), b);
 
         JenkinsRule.WebClient wc = r.createWebClient();
-        final Page page = wc.getPage( r.getURL() + "/" + pb.getUrl() + "consoleText");// spot-check that promotion itself is accessible
+        final Page page = wc.goTo(pb.getUrl() + "consoleText", "text/plain");// spot-check that promotion itself is accessible
         assertThat(pb.getUrl() + "/consoleText + is not a promotion log", page.getWebResponse().getContentAsString(), CoreMatchers.containsString("ABCDEFGH"));
     }
 
