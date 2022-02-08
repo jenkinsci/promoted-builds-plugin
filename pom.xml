@@ -107,7 +107,7 @@
     <dependency>
       <groupId>com.sonyericsson.hudson.plugins.rebuild</groupId>
       <artifactId>rebuild</artifactId>
-      <version>1.31</version>
+      <version>1.33</version>
       <optional>true</optional>
     </dependency>
     <dependency>
