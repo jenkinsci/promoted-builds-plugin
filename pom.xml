@@ -140,7 +140,7 @@
     <dependency>
       <groupId>hudson.plugins</groupId>
       <artifactId>project-inheritance</artifactId>
-      <version>19.08.02</version>
+      <version>21.04.03</version>
       <optional>true</optional>
     </dependency>
     <dependency>
