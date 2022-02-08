@@ -96,8 +96,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      */
     @Nonnull
     public AbstractBuild<?,?> getTargetBuildOrFail() {
-        PromotionTargetAction pta = getAction(PromotionTargetAction.class);
-        final AbstractBuild<?, ?> target = pta == null ? null : pta.resolve(this);
+        final AbstractBuild<?, ?> target = getTargetBuild();
         if (target == null) {
             throw new IllegalStateException("There is no target build associated with " + this +
                     ". Most probably, the build has been already removed");

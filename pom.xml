@@ -20,10 +20,10 @@
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/promoted-builds-plugin</gitHubRepo>
     <bom>2.289.x</bom>
-    <jenkins.version>2.289.3</jenkins.version>
+    <jenkins.version>2.289.1</jenkins.version>
     <java.level>8</java.level>
     <findbugs.effort>Max</findbugs.effort>
-    <hpi.compatibleSinceVersion>3.0</hpi.compatibleSinceVersion>
+    <hpi.compatibleSinceVersion>4.0</hpi.compatibleSinceVersion>
   </properties>
 
   <developers>
