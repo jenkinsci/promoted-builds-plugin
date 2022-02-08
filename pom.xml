@@ -9,15 +9,14 @@
   </parent>
 
   <artifactId>promoted-builds</artifactId>
-  <version>${revision}${changelist}</version>
+  <version>${changelist}</version>
   <packaging>hpi</packaging>
 
   <name>Jenkins promoted builds plugin</name>
   <url>https://github.com/jenkinsci/promoted-builds-plugin</url>
 
   <properties>
-    <revision>4.0</revision>
-    <changelist>-SNAPSHOT</changelist>
+    <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/promoted-builds-plugin</gitHubRepo>
     <bom>2.289.x</bom>
     <jenkins.version>2.289.1</jenkins.version>
