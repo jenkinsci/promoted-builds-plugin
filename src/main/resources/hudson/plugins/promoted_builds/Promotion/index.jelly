@@ -2,12 +2,12 @@
   Displays the console output
 -->
 <?jelly escape-by-default='true'?>
-<st:compress xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+<st:compress xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout" xmlns:t="/lib/hudson">
   <l:layout title="${it.parent.displayName} #${it.number} Console" norefresh="true">
     <l:header />
     <l:side-panel>
       <l:tasks>
-        <l:task icon="images/24x24/up.png"
+        <l:task icon="icon-up icon-md"
                 href="${h.getNearestAncestorUrl(request,it.targetBuild)}/promotion/"
                 title="${%Back to Promotion Status}" />
       </l:tasks>
@@ -18,7 +18,7 @@
       </t:buildCaption>
       <l:rightspace>
         <a href="consoleText">
-          <img src="${imagesURL}/24x24/document.png" alt="" />${%View as plain text}
+          <l:icon class="icon-document icon-md" alt="" />${%View as plain text}
         </a>
       </l:rightspace>
       <j:choose>
