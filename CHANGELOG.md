@@ -1,8 +1,6 @@
 
 ## Changelog
 
-[![GitHub release](https://img.shields.io/github/release/jenkinsci/promoted-builds-plugin.svg?label=changelog)](https://github.com/jenkinsci/promoted-builds-plugin/releases/latest)
-
 ##### Version 3.3 and newer releases
 
 See [GitHub Releases](https://github.com/jenkinsci/promoted-builds-plugin/releases)
