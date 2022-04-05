@@ -24,6 +24,7 @@ import javaposse.jobdsl.dsl.helpers.properties.PropertiesContext;
 import javaposse.jobdsl.plugin.ContextExtensionPoint;
 import javaposse.jobdsl.plugin.DslEnvironment;
 import javaposse.jobdsl.plugin.DslExtensionMethod;
+import jenkins.model.Jenkins;
 
 /**
  * The Job DSL Extension Point for the Promotions. 
@@ -72,6 +73,7 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
         Set<String> names = (Set<String>) dslEnvironment.get("processNames");
         if (names != null && names.size() > 0) {
             for (String name : names) {
+                Jenkins.checkGoodName(name);
                 JobDslPromotionProcess promotionProcess = promotionProcesses.get(name);
                 XSTREAM.registerConverter(new JobDslPromotionProcessConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
                 XSTREAM.registerConverter(new ManualConditionConverter(XSTREAM.getMapper(), XSTREAM.getReflectionProvider()));
