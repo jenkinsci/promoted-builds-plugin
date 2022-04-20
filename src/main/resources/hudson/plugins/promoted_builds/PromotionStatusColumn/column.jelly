@@ -16,10 +16,8 @@
 	          <j:choose>
 	            <j:when test="${status!=null}">
 	              <j:if test="${status.isLastAnError()}">
-	                <j:set var="iconUrl" value="${resURL}/images/${iconSize}/error.png"/>
-	                <img width="${iconSize}" height="${iconSize}"
-	                  title="${%PromotionProcess} ${process.name} ${%PromotionProcess.failed}"
-	                  src="${iconUrl}"/>
+	                <l:icon title="${%PromotionProcess} ${process.name} ${%PromotionProcess.failed}"
+	                  class="icon-error ${subIconSizeClass}"/>
 	              </j:if>
 	              <j:set var="target" value="${status.getTarget()}"/>
 	              <a href="${jobBaseUrl}${job.shortUrl}${target.number}/" class="model-link inside">
