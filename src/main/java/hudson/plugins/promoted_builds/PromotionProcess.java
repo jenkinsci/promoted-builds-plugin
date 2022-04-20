@@ -69,7 +69,7 @@ import javax.annotation.Nonnull;
  *
  * @author Kohsuke Kawaguchi
  */
- // BuildableItem, LazyBuildMixIn.LazyLoadingJob<P,R>, ParameterizedJobMixIn.ParameterizedJob<P, R>
+// BuildableItem, LazyBuildMixIn.LazyLoadingJob<P,R>, ParameterizedJobMixIn.ParameterizedJob<P, R>
 public final class PromotionProcess extends AbstractProject<PromotionProcess,Promotion> implements Saveable, Describable<PromotionProcess>, BuildableItemWithBuildWrappers {
 
     /**
@@ -79,8 +79,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
     /**
      * The icon that represents this promotion process. This is the name of
-     * the GIF icon that can be found in ${rootURL}/plugin/promoted-builds/icons/16x16/
-     * and ${rootURL}/plugin/promoted-builds/icons/32x32/, e.g. <code>"star-gold"</code>.
+     * the SVG icon that can be found in ${rootURL}/plugin/promoted-builds/icons/,
+     * e.g. <code>"star-gold"</code>.
      */
     public String icon;
 
@@ -218,7 +218,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public Map<Descriptor<BuildWrapper>,BuildWrapper> getBuildWrappers() {
-      return getBuildWrappersList().toMap();
+        return getBuildWrappersList().toMap();
     }
 
     public DescribableList<BuildWrapper,Descriptor<BuildWrapper>> getBuildWrappersList() {
@@ -290,44 +290,44 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public String getIsVisible(){
-    	return isVisible;
+        return isVisible;
     }
 
     public boolean isVisible(){
-    	if (isVisible == null) return true;
+        if (isVisible == null) return true;
 
-    	AbstractProject<?, ?> job = getOwner();
+        AbstractProject<?, ?> job = getOwner();
 
-    	if (job == null) return true;
+        if (job == null) return true;
 
-    	String expandedIsVisible = isVisible;
-    	EnvVars environment = getDefaultParameterValuesAsEnvVars(job);
-    	if (environment != null){
-    		expandedIsVisible = environment.expand(expandedIsVisible);
-    	}
+        String expandedIsVisible = isVisible;
+        EnvVars environment = getDefaultParameterValuesAsEnvVars(job);
+        if (environment != null){
+            expandedIsVisible = environment.expand(expandedIsVisible);
+        }
 
-    	if (expandedIsVisible == null){
-    		return true;
-    	}
-       return !expandedIsVisible.toLowerCase().equals("false");
+        if (expandedIsVisible == null){
+            return true;
+        }
+        return !expandedIsVisible.toLowerCase().equals("false");
     }
     private static EnvVars getDefaultParameterValuesAsEnvVars(AbstractProject owner) {
-    	EnvVars envVars = null;
-		ParametersDefinitionProperty parametersDefinitionProperty = (ParametersDefinitionProperty)owner.getProperty(ParametersDefinitionProperty.class);
-		if (parametersDefinitionProperty!=null){
-			envVars = new EnvVars();
-			for (ParameterDefinition parameterDefinition: parametersDefinitionProperty.getParameterDefinitions()){
-				ParameterValue defaultParameterValue = parameterDefinition.getDefaultParameterValue();
-				if (defaultParameterValue!=null){
-					if (defaultParameterValue instanceof StringParameterValue){
-						envVars.put(parameterDefinition.getName(), (String)defaultParameterValue.getValue());
-					}
-				}
-			}
-			EnvVars.resolve(envVars);
-		}
+        EnvVars envVars = null;
+        ParametersDefinitionProperty parametersDefinitionProperty = (ParametersDefinitionProperty)owner.getProperty(ParametersDefinitionProperty.class);
+        if (parametersDefinitionProperty!=null){
+            envVars = new EnvVars();
+            for (ParameterDefinition parameterDefinition: parametersDefinitionProperty.getParameterDefinitions()){
+                ParameterValue defaultParameterValue = parameterDefinition.getDefaultParameterValue();
+                if (defaultParameterValue!=null){
+                    if (defaultParameterValue instanceof StringParameterValue){
+                        envVars.put(parameterDefinition.getName(), (String)defaultParameterValue.getValue());
+                    }
+                }
+            }
+            EnvVars.resolve(envVars);
+        }
 
-		return envVars;
+        return envVars;
     }
     /**
      * Handle compatibility with pre-1.8 configs.
@@ -418,20 +418,20 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     @CheckForNull
     public Future<Promotion> considerPromotion2(AbstractBuild<?, ?> build) throws IOException {
-		LOGGER.fine("Considering the promotion of "+build+" via "+getName()+" without parmeters");
-		// If the build has manual approvals, use the parameters from it
-		List<ParameterValue> params = new ArrayList<ParameterValue>();
-		List<ManualApproval> approvals = build.getActions(ManualApproval.class);
-		for (ManualApproval approval : approvals) {
-			if (approval.name.equals(getName())) {
-				LOGGER.fine("Getting parameters from existing manual promotion");
-				params = approval.badge.getParameterValues();
-				LOGGER.finer("Using paramters: "+params.toString());
-			}
-		}
+        LOGGER.fine("Considering the promotion of "+build+" via "+getName()+" without parmeters");
+        // If the build has manual approvals, use the parameters from it
+        List<ParameterValue> params = new ArrayList<ParameterValue>();
+        List<ManualApproval> approvals = build.getActions(ManualApproval.class);
+        for (ManualApproval approval : approvals) {
+            if (approval.name.equals(getName())) {
+                LOGGER.fine("Getting parameters from existing manual promotion");
+                params = approval.badge.getParameterValues();
+                LOGGER.finer("Using paramters: "+params.toString());
+            }
+        }
 
-		return considerPromotion2(build, params);
-	}
+        return considerPromotion2(build, params);
+    }
 
     @CheckForNull
     public Future<Promotion> considerPromotion2(AbstractBuild<?,?> build, List<ParameterValue> params) throws IOException {
@@ -478,7 +478,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @throws IOException Promotion failure
      */
     public Future<Promotion> promote2(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
-    	return promote2(build, cause, qualification, null);
+        return promote2(build, cause, qualification, null);
     }
 
     /**
@@ -539,7 +539,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      */
     @CheckForNull
     public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build,
-            Cause cause, @CheckForNull List<ParameterValue> params) {
+                                            Cause cause, @CheckForNull List<ParameterValue> params) {
         List<Action> actions = new ArrayList<Action>();
         actions.add(Promotion.PromotionParametersAction.buildFor(build, params));
         actions.add(new PromotionTargetAction(build));

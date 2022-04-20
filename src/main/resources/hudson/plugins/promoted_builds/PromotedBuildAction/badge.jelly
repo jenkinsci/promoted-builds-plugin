@@ -1,13 +1,20 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core">
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout">
   <j:if test="${it.hasPromotion()}">
     <j:forEach var="status" items="${it.getPromotions()}">
       <j:if test="${status.getProcess()!=null and status.getProcess().isVisible()}">
-          <a href="${link}promotion/">
-            <img width="16" height="16"
-              title="${status.name}"
-              src="${rootURL}${status.getIcon('16px')}"/>
-          </a>
+        <a href="${link}promotion/">
+          <j:choose>
+            <j:when test="${status.getIcon() == 'icon-red'}">
+              <l:icon class="icon-red icon-sm" tooltip="${status.name}" style="vertical-align: middle"/>
+            </j:when>
+            <j:otherwise>
+              <img width="16" height="16"
+                   title="${status.name}"
+                   src="${rootURL}${status.getIcon()}"/>
+            </j:otherwise>
+          </j:choose>
+        </a>
       </j:if>
     </j:forEach>
   </j:if>
