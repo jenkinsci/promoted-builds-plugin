@@ -33,7 +33,7 @@ public class LastBuildPromotionStatusColumn extends ListViewColumn {
             if (a != null) {
                 for (Status s : a.getPromotions()) {
                 	PromotionProcess process = s.getProcess();
-            		if (process !=null && process.isVisible()){
+                	if (process !=null && process.isVisible()){
                 		icons.add(s.getIcon());
                 	}
                 }
