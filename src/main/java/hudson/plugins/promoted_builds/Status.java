@@ -398,7 +398,7 @@ public final class Status {
             throw new AbortException("Cannot get the target build to be promoted");
         }
         
-        ManualCondition manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());
+        ManualCondition manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());     
         // TODO: Use PromotionPermissionHelper.checkPermission instead, but consider issues with backwards compatibility.
         if (!PromotionPermissionHelper.hasPermission(target.getProject(), manualCondition)) {
             return;
