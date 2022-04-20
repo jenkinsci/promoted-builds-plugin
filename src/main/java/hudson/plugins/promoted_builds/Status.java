@@ -90,12 +90,12 @@ public final class Status {
      */
     @CheckForNull
     public PromotedBuildAction getParent() {
-        if (parent==null){
+    	if (parent==null){
             final AbstractBuild<?, ?> target = getTarget();
             if (target != null) {
                 parent = target.getAction(PromotedBuildAction.class);
             }
-        }
+    	}
         return parent;
     }
 
@@ -129,7 +129,7 @@ public final class Status {
         } else {
             Promotion l = getLast();
             if (l!=null && l.getResult()!= Result.SUCCESS) {
-                return "icon-red";
+              return "icon-red";
             }
             baseName = p.getIcon();
         }
@@ -206,15 +206,15 @@ public final class Status {
 
     /**
      * Returns true if the promotion was successfully completed.
-     * @return {@code true} if the there were successful promotions.
+     * @return {@code true} if the there were successful promotions. 
      */
     public boolean isPromotionSuccessful() {
         return promotion>=0;
     }
 
     /**
-     * Checks promotion attempts.
-     * @return
+     * Checks promotion attempts. 
+     * @return 
      *  {@code true} if at least one {@link Promotion} activity is attempted.
      *  {@code false} if none is executed yet (this includes the case where it's in the queue.
      */
@@ -318,8 +318,8 @@ public final class Status {
 
     @Restricted(NoExternalUse.class)
     public Boolean isLastAnError() {
-        Promotion l = getLast();
-        return (l != null && l.getResult() != Result.SUCCESS);
+      Promotion l = getLast();
+      return (l != null && l.getResult() != Result.SUCCESS);
     }
 
 
@@ -356,11 +356,11 @@ public final class Status {
 
     public boolean isManuallyApproved(){
         final PromotionProcess process = getProcess();
-        if (process == null) {
+    	if (process == null) {
             return false; // Should not be processed
         }
         ManualCondition manualCondition=(ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());
-        return manualCondition != null;
+    	return manualCondition != null;
     }
 
     public boolean canBuild() {
@@ -387,30 +387,30 @@ public final class Status {
      */
     @POST
     public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-
+        
         final PromotionProcess process = getProcess();
         if (process == null) {
             throw new AbortException("Cannot retrieve the promotion process");
         }
-
+        
         AbstractBuild<?, ?> target = getTarget();
         if (target ==null) {
             throw new AbortException("Cannot get the target build to be promoted");
         }
-
+        
         ManualCondition manualCondition = (ManualCondition) process.getPromotionCondition(ManualCondition.class.getName());
         // TODO: Use PromotionPermissionHelper.checkPermission instead, but consider issues with backwards compatibility.
         if (!PromotionPermissionHelper.hasPermission(target.getProject(), manualCondition)) {
             return;
         }
-
+        
         JSONObject formData = req.getSubmittedForm();
-
+        
         List<ParameterValue> paramValues=null;
         if (formData!=null){
             paramValues = new ArrayList<ParameterValue>();
             if (manualCondition!=null){
-                List<ParameterDefinition> parameterDefinitions=manualCondition.getParameterDefinitions();
+            	List<ParameterDefinition> parameterDefinitions=manualCondition.getParameterDefinitions();
                 if (parameterDefinitions != null && !parameterDefinitions.isEmpty()) {
                     JSONArray a = JSONArray.fromObject(formData.get("parameter"));
 
@@ -436,7 +436,7 @@ public final class Status {
             }
         }
         if (paramValues==null){
-            paramValues = new ArrayList<ParameterValue>();
+        	paramValues = new ArrayList<ParameterValue>();
         }
         Future<Promotion> f = process.scheduleBuild2(target, new UserCause(), paramValues);
         if (f==null)

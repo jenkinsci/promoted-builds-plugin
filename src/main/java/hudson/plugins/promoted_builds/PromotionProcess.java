@@ -294,25 +294,25 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
     }
 
     public boolean isVisible(){
-		if (isVisible == null) return true;
+    	if (isVisible == null) return true;
 
-		AbstractProject<?, ?> job = getOwner();
+    	AbstractProject<?, ?> job = getOwner();
 
-		if (job == null) return true;
+    	if (job == null) return true;
 
-		String expandedIsVisible = isVisible;
-		EnvVars environment = getDefaultParameterValuesAsEnvVars(job);
-		if (environment != null){
-			expandedIsVisible = environment.expand(expandedIsVisible);
-		}
+    	String expandedIsVisible = isVisible;
+    	EnvVars environment = getDefaultParameterValuesAsEnvVars(job);
+    	if (environment != null){
+    		expandedIsVisible = environment.expand(expandedIsVisible);
+    	}
 
-		if (expandedIsVisible == null){
-			return true;
-		}
-		return !expandedIsVisible.toLowerCase().equals("false");
+    	if (expandedIsVisible == null){
+    		return true;
+    	}
+      return !expandedIsVisible.toLowerCase().equals("false");
     }
     private static EnvVars getDefaultParameterValuesAsEnvVars(AbstractProject owner) {
-		EnvVars envVars = null;
+    	EnvVars envVars = null;
 		ParametersDefinitionProperty parametersDefinitionProperty = (ParametersDefinitionProperty)owner.getProperty(ParametersDefinitionProperty.class);
 		if (parametersDefinitionProperty!=null){
 			envVars = new EnvVars();
@@ -327,7 +327,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 			EnvVars.resolve(envVars);
 		}
 
-        return envVars;
+		return envVars;
     }
     /**
      * Handle compatibility with pre-1.8 configs.
