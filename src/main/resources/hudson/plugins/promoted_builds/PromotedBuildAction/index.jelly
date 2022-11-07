@@ -17,7 +17,7 @@
         <j:forEach var="p" items="${it.promotions}">
           <j:if test="${p.getProcess()!=null and p.getProcess().isVisible()}">
             <h2>
-              <img src="${resURL}/plugin/promoted-builds/icons/32x32/${p.getProcess().getIcon()}.png"/>
+              <img src="${resURL}/plugin/promoted-builds/icons/${p.getProcess().getIcon()}.svg" height="32px"/>
               <a href="../../promotion/process/${p.name}" class="model-link">${p.name}</a>
             </h2>
 
@@ -27,7 +27,7 @@
                 <tr>
                   <td>
                     <a href="${p.name}/promotionBuild/${attempt.number}/console">
-                      <img src="${imagesURL}/16x16/${attempt.buildStatusUrl}"
+                      <l:icon class="${attempt.iconColor.iconClassName} icon-sm"
                        alt="${attempt.iconColor.description}"/> ${attempt.displayName} (${attempt.timestamp.time})
                     </a> by ${attempt.userName}
                   </td>
@@ -58,7 +58,7 @@
               </j:choose>
               <j:choose>
                 <j:when test="${p.isPromotionSuccessful()}">
-                  <img src="${imagesURL}/16x16/blue.png" alt="Unstable" width="16" height="16" />
+                  <l:icon class="icon-blue icon-sm"/>
                   ${%Successfully promoted} (<a href="${p.name}/lastSuccessful">${%log}</a>)
                 </j:when>
                 <j:when test="${!p.isPromotionAttempted()}">
@@ -78,7 +78,7 @@
                       ${%Promotion in progress} (<a href="${p.name}/lastSuccessful">${%log}</a>)
                     </j:when>
                     <j:otherwise>
-                      <img src="${imagesURL}/16x16/red.png" alt="Unstable" width="16" height="16" />
+                      <l:icon class="icon-red icon-sm"/>
                       ${%Promotion failed} (<a href="${p.name}/lastFailed">${%log}</a>)
                     </j:otherwise>
                   </j:choose>
@@ -92,7 +92,7 @@
         <j:forEach var="p" items="${it.pendingPromotions}">
           <j:if test="${p.isVisible()}">
             <h2>
-              <img src="${resURL}/plugin/promoted-builds/icons/32x32/${p.getIcon()}.png"/>
+              <img src="${resURL}/plugin/promoted-builds/icons/${p.getIcon()}.svg" height="32px"/>
               <a href="../../promotion/process/${p.name}" class="model-link">${p.name}</a>
             </h2>
             <j:choose>

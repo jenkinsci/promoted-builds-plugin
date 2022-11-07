@@ -57,6 +57,10 @@ import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
+import hudson.init.InitMilestone;
+import hudson.init.Initializer;
+import org.kohsuke.accmod.restrictions.DoNotUse;
+
 /**
  * Records a promotion process.
  *
@@ -485,6 +489,16 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
     public static final PermissionGroup PERMISSIONS = new PermissionGroup(Promotion.class, Messages._Promotion_Permissions_Title());
     public static final Permission PROMOTE = new Permission(PERMISSIONS, "Promote", Messages._Promotion_PromotePermission_Description(), Jenkins.ADMINISTER, PermissionScope.RUN);
+
+    @Initializer(before = InitMilestone.SYSTEM_CONFIG_LOADED)
+    @Restricted(DoNotUse.class)
+    public static void registerPermissions() {
+    // Pending JENKINS-17200, ensure that the above permissions have been registered prior to
+    // allowing plugins to adapt the system configuration, which may depend on these permissions
+    // having been registered. Since this method is static and since it follows the above
+    // construction of static permission objects (and therefore their calls to
+    // PermissionGroup#register), there is nothing further to do in this method.
+    }
 
     @Override
     public int hashCode() {

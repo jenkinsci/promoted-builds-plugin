@@ -11,6 +11,7 @@
         <j:if test="${!it.parameterDefinitions.isEmpty()}">
           <f:section title="${%Parameters}">
             <j:forEach var="parameterDefinition" items="${it.parameterDefinitions}">
+              <j:set var="escapeEntryTitleAndDescription" value="true"/>
               <st:include it="${parameterDefinition}" page="${parameterDefinition.descriptor.valuePage}" />
             </j:forEach>
           </f:section>
