@@ -1,12 +1,8 @@
 #!/usr/bin/env groovy
 
-buildPlugin(useContainerAgent: false, // temporarily disable for Windows issues
-        configurations: [
-                [platform: 'linux', jdk: '11'],
-                [platform: 'windows', jdk: '8'],
-
-                // testing the Guava & Guice bumps
-                // https://github.com/jenkinsci/jenkins/pull/5707
-                // https://github.com/jenkinsci/jenkins/pull/5858
-                //[ platform: "linux", jdk: "8", jenkins: '2.321', javaLevel: "8" ]
-        ])
+buildPlugin(
+  useContainerAgent: true, // Set to `false` if you need to use Docker for containerized tests
+  configurations: [
+    [platform: 'linux', jdk: 17],
+    [platform: 'windows', jdk: 11],
+])
