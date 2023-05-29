@@ -652,7 +652,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
                         Messages.JobPropertyImpl_LabelString_InvalidBooleanExpression(e.getMessage()));
             }
             // TODO: if there's an atom in the expression that is empty, report it
-            if (Jenkins.get().getLabel(value).isEmpty())
+            Label label = Jenkins.get().getLabel(value);
+            if (label == null || label.isEmpty())
                 return FormValidation.warning(Messages.JobPropertyImpl_LabelString_NoMatch());
             return FormValidation.ok();
         }
