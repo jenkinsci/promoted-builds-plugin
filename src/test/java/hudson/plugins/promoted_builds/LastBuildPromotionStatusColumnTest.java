@@ -27,10 +27,14 @@ import hudson.model.Cause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.ListView;
+import hudson.model.Result;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Future;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -68,7 +72,10 @@ public class LastBuildPromotionStatusColumnTest {
         
         // Promote a build
         FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        foo.promote(b1, new Cause.UserIdCause(), new ManualPromotionBadge());
+        Status status = foo.isMet(b1);
+        Future<Promotion> y = foo.promote2(b1, new Cause.UserIdCause(), status);
+        Promotion promotion = y.get();
+        assertThat(promotion.getResult(), is(Result.SUCCESS));
         
         // Check column contents
         LastBuildPromotionStatusColumn retrieved = 
