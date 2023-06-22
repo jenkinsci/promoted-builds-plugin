@@ -19,13 +19,13 @@ import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlElement;
+import org.htmlunit.html.HtmlForm;
+import org.htmlunit.html.HtmlPage;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import static com.gargoylesoftware.htmlunit.html.HtmlFormUtil.submit;
+import static org.htmlunit.html.HtmlFormUtil.submit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;

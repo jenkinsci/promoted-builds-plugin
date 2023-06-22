@@ -25,8 +25,8 @@ package hudson.plugins.promoted_builds.util;
 
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -150,8 +150,8 @@ public class ItemPathResolverTest {
         assertsPathIsNull("/a/c", null, FreeStyleProject.class);
     }
     
-    private <T extends Item> void assertsPath(@Nonnull String path, @CheckForNull Item base, 
-            Item expected, @Nonnull Class<T> clazz) throws Exception {
+    private <T extends Item> void assertsPath(@NonNull String path, @CheckForNull Item base, 
+            Item expected, @NonNull Class<T> clazz) throws Exception {
         final Item res = ItemPathResolver.getByPath(path, base, clazz);
         if (expected != res) {
             StringBuilder errorDetails = new StringBuilder("Wrong result for clase='")
@@ -201,13 +201,13 @@ public class ItemPathResolverTest {
         assertsPath("/FOO", null, prjInRoot);
     }
     
-    private <T extends Item> void assertsPath(@Nonnull String path, @CheckForNull Item base, 
-            @Nonnull T expected) throws Exception {
+    private <T extends Item> void assertsPath(@NonNull String path, @CheckForNull Item base, 
+            @NonNull T expected) throws Exception {
         assertsPath(path, base, expected, expected.getClass());
     }
     
-    private <T extends Item> void assertsPathIsNull(@Nonnull String path, @CheckForNull Item base, 
-            @Nonnull Class<T> clazz) throws Exception {
+    private <T extends Item> void assertsPathIsNull(@NonNull String path, @CheckForNull Item base, 
+            @NonNull Class<T> clazz) throws Exception {
         assertsPath(path, base, null, clazz);
     }
     

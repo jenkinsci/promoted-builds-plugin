@@ -24,8 +24,8 @@
 
 package hudson.plugins.promoted_builds;
 
-import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebRequest;
+import org.htmlunit.HttpMethod;
+import org.htmlunit.WebRequest;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;

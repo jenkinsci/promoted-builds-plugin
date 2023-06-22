@@ -11,7 +11,7 @@ import javaposse.jobdsl.dsl.helpers.BuildParametersContext;
 
 import javaposse.jobdsl.plugin.DslEnvironment;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import static javaposse.jobdsl.plugin.ContextExtensionPoint.executeInContext;
 

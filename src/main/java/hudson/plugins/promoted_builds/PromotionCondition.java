@@ -8,7 +8,7 @@ import hudson.model.Describable;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import jenkins.model.Jenkins;
 
 /**
