@@ -31,8 +31,8 @@ import hudson.model.ItemGroup;
 import hudson.model.TopLevelItem;
 import hudson.plugins.promoted_builds.parameters.PromotedBuildParameterDefinition;
 import java.util.StringTokenizer;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -109,8 +109,8 @@ public class ItemPathResolver {
     @CheckForNull
     @SuppressWarnings("unchecked")
     @Restricted(NoExternalUse.class)
-    public static <T extends Item> T getByPath(@Nonnull String path, 
-            @CheckForNull Item baseItem, @Nonnull Class<T> type) {
+    public static <T extends Item> T getByPath(@NonNull String path, 
+            @CheckForNull Item baseItem, @NonNull Class<T> type) {
         final Jenkins jenkins = Jenkins.getInstanceOrNull();
         if (jenkins == null) {
             return null;
@@ -146,7 +146,7 @@ public class ItemPathResolver {
     @CheckForNull
     @SuppressWarnings("unchecked")
     private static <T extends Item> T findPath(@CheckForNull ItemGroup base, 
-            @Nonnull String path, @Nonnull Class<T> type) {
+            @NonNull String path, @NonNull Class<T> type) {
         Item item = findPath(base, path);
         if (item != null && type.isAssignableFrom(item.getClass())) {
             return (T) item;
@@ -155,7 +155,7 @@ public class ItemPathResolver {
     }
     
     @CheckForNull
-    private static Item findPath(@CheckForNull ItemGroup base, @Nonnull String path) {
+    private static Item findPath(@CheckForNull ItemGroup base, @NonNull String path) {
         @CheckForNull ItemGroup<?> pointer = base;
         final StringTokenizer t = new StringTokenizer(path, "/");
         while(pointer != null && t.hasMoreTokens()) {

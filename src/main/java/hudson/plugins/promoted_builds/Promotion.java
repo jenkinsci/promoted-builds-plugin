@@ -49,8 +49,8 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.HttpResponses;
@@ -98,7 +98,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      * @return Target build
      * @throws IllegalStateException There is no target build
      */
-    @Nonnull
+    @NonNull
     public AbstractBuild<?,?> getTargetBuildOrFail() {
         final AbstractBuild<?, ?> target = getTargetBuild();
         if (target == null) {
@@ -191,7 +191,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      * The method tries various sources like {@link UserIdCause} or {@link ManualCondition.Badge}.
      * @return user's name who triggered the promotion, or 'anonymous' if the search fails
      */
-    @Nonnull
+    @NonNull
     public String getUserName() {
         // Deprecated, but we still want to support it in order to maintain the compatiibility
         final UserCause userCause = getCause(UserCause.class);
@@ -227,7 +227,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      *         If the search fails, returns ID of {@link User#getUnknown()}.
      * @since 2.22
      */
-    @Nonnull
+    @NonNull
     public String getUserId() {
         // Deprecated, but we still want to support it in order to maintain the compatibility
         // We try to convert the cause to the user ID by using a search by the full name, not reliable
@@ -286,7 +286,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      * @return List of parameter definitions to be presented.
      *         May be empty if there is no {@link ManualCondition}.
      */
-    @Nonnull
+    @NonNull
     public List<ParameterDefinition> getParameterDefinitionsWithValue(){
     	List<ParameterDefinition> definitions=new ArrayList<ParameterDefinition>();
     	ManualCondition manualCondition=(ManualCondition) getProject().getPromotionCondition(ManualCondition.class.getName());
@@ -539,8 +539,8 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
      * @deprecated Use {@link PromotionParametersAction} with constructor instead.
      */
     @Deprecated
-    public static void buildParametersAction(@Nonnull List<Action> actions,
-            @Nonnull AbstractBuild<?, ?> build,
+    public static void buildParametersAction(@NonNull List<Action> actions,
+            @NonNull AbstractBuild<?, ?> build,
             @CheckForNull List<ParameterValue> promotionParams) {
         // Create list of actions to pass to scheduled build
         actions.add(PromotionParametersAction.buildFor(build, promotionParams));
@@ -577,7 +577,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         public static PromotionParametersAction buildFor(
-                @Nonnull AbstractBuild<?, ?> buildToBePromoted,
+                @NonNull AbstractBuild<?, ?> buildToBePromoted,
                 @CheckForNull List<ParameterValue> promotionParams) {
             if (promotionParams == null) {
                 promotionParams = new ArrayList<ParameterValue>();

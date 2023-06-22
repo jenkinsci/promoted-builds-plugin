@@ -3,7 +3,6 @@ package hudson.plugins.promoted_builds.integrations.jobdsl;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.io.Files;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -12,6 +11,8 @@ import hudson.model.queue.QueueTaskFuture;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.regex.Pattern;
 
 import javaposse.jobdsl.plugin.RemovedJobAction;
@@ -73,7 +74,7 @@ public class PromotionsDslContextExtensionTest {
 
         TopLevelItem item = j.jenkins.getItem("copy-artifacts-test");
         File config = new File(item.getRootDir(), "promotions/Development/config.xml");
-        String content = Files.toString(config, Charset.forName("UTF-8"));
+        String content = Files.readString(config.toPath(), StandardCharsets.UTF_8);
         assert content.contains("<selector class=\"hudson.plugins.copyartifact.SpecificBuildSelector\">");
     }
     
@@ -92,7 +93,7 @@ public class PromotionsDslContextExtensionTest {
         TopLevelItem item = j.jenkins.getItem("build-wrapper-test");
         assertNotNull(item);
         File config = new File(item.getRootDir(), "promotions/build-wrapper-promotion/config.xml");
-        String content = Files.toString(config, Charset.forName("UTF-8"));
+        String content = Files.readString(config.toPath(), StandardCharsets.UTF_8);
        
         assertTrue(Pattern.compile("<buildWrappers>\\s+<hudson\\.plugins\\.timestamper\\.TimestamperBuildWrapper/>\\s+</buildWrappers>")
                 .matcher(content).find());

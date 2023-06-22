@@ -43,8 +43,8 @@ import hudson.util.ListBoxModel;
 import hudson.util.ListBoxModel.Option;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -140,7 +140,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
      * you use this method outside {@link StaplerRequest}s. 
      * Use {@link #getRuns(hudson.model.Item)} instead
      */
-    @Nonnull
+    @NonNull
     @Deprecated
     public List getBuilds() {
         // Try to get ancestor from the object, otherwise pass null and disable the relative addressing
@@ -156,7 +156,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
      *         May return an empty list if {@link Jenkins} instance is not ready
      * @since 2.22
      */
-    @Nonnull
+    @NonNull
     public List<Run<?,?>> getRuns(@CheckForNull Item base) {
         final List<Run<?,?>> runs = new ArrayList<Run<?,?>>();
         final Jenkins jenkins = Jenkins.getInstanceOrNull();

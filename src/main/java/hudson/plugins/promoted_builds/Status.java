@@ -28,8 +28,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -119,7 +119,7 @@ public final class Status {
      * @param size size of the icon, will be used in the icon path
      * @return Path to the icon in resources
      */
-    @Nonnull
+    @NonNull
     public String getIcon(String size) {
         String baseName;
 

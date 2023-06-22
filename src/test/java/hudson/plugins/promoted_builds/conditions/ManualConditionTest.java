@@ -24,10 +24,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 
-import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.htmlunit.FailingHttpStatusCodeException;
+import org.htmlunit.html.HtmlElement;
+import org.htmlunit.html.HtmlForm;
+import org.htmlunit.html.HtmlInput;
+import org.htmlunit.html.HtmlPage;
 import hudson.model.StringParameterValue;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
@@ -40,7 +41,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 
-import static com.gargoylesoftware.htmlunit.html.HtmlFormUtil.submit;
+import static org.htmlunit.html.HtmlFormUtil.submit;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -163,8 +164,8 @@ public class ManualConditionTest {
         List<HtmlElement> parameters=getFormParameters(form);
         assertEquals(parameters.size(), condition.getParameterDefinitions().size());
         for(HtmlElement param:parameters){
-        	HtmlElement v=param.getElementsByAttribute("input", "name", "value").get(0);
-        	v.setAttribute("value", v.getAttribute("value")+"1");
+            HtmlInput v = (HtmlInput) param.getElementsByAttribute("input", "name", "value").get(0);
+            v.setValue(v.getValue() + "1");
         }
         submit(forms.get(0));
         
@@ -184,8 +185,8 @@ public class ManualConditionTest {
         assertEquals(parameters.size(), condition.getParameterDefinitions().size());
         
         for(HtmlElement param:parameters){
-        	HtmlElement v=param.getElementsByAttribute("input", "name", "value").get(0);
-        	v.setAttribute("value", v.getAttribute("value")+"2");
+            HtmlInput v = (HtmlInput) param.getElementsByAttribute("input", "name", "value").get(0);
+            v.setValue(v.getValue() + "2");
         }
         submit(form);
         

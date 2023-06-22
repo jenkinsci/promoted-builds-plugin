@@ -1,7 +1,7 @@
 package hudson.plugins.promoted_builds;
 
-import com.gargoylesoftware.htmlunit.html.HtmlImage;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlImage;
+import org.htmlunit.html.HtmlPage;
 import hudson.model.Cause.UserCause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;

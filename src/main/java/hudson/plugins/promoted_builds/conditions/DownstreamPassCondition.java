@@ -1,7 +1,5 @@
 package hudson.plugins.promoted_builds.conditions;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Util;
@@ -36,11 +34,12 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.kohsuke.stapler.export.Exported;
 
@@ -216,11 +215,11 @@ public class DownstreamPassCondition extends PromotionCondition {
         public AutoCompletionCandidates doAutoCompleteJobs(@QueryParameter String value, @AncestorInPath AbstractProject project) {
             List<AbstractProject> downstreams = project.getDownstreamProjects();
             List<Item> all = Jenkins.get().getItems(Item.class);
-            List<String> candidatesDownstreams = Lists.newArrayList();
-            List<String> candidatesOthers = Lists.newArrayList();
+            List<String> candidatesDownstreams = new ArrayList<>();
+            List<String> candidatesOthers = new ArrayList<>();
             for (Item i : all) {
                 if(! i.hasPermission(Item.READ)) continue;
-                Set<String> names = Sets.newLinkedHashSet();
+                Set<String> names = new LinkedHashSet<>();
                 names.add(i.getRelativeNameFrom(project));
                 names.add(i.getFullName());
                 for(String name : names) {
