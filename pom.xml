@@ -20,7 +20,6 @@
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     <jenkins.version>2.387.3</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
-    <spotbugs.threshold>Low</spotbugs.threshold>
     <hpi.compatibleSinceVersion>4.0</hpi.compatibleSinceVersion>
   </properties>
 
