@@ -63,7 +63,7 @@ public class PromotionProcessTest {
         String baseUrl = j.createWebClient().getContextPath() + "job/up/lastSuccessfulBuild";
         String artifactUrl = baseUrl + "/artifact/a.jar";
         down.getBuildersList().add(Functions.isWindows()
-                ? new BatchFile("powershell -command \"Invoke-WebRequest "+artifactUrl+" -OutFile a.jar\"\r\n"+
+                ? new BatchFile("curl -v -o a.jar "+artifactUrl+"\r\n"+
                         "set /a \"exitCode=BUILD_NUMBER%%2\"\r\n"+
                         "exit /b %exitCode%\r\n")
                 : new Shell("wget -N "+artifactUrl+" \\\n"+
