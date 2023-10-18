@@ -37,9 +37,11 @@ public class CopyListener extends ItemListener {
             if (subdirs != null) {
                 prop = ((Job<?,?>)item).getProperty(JobPropertyImpl.class);
                 for (File subdir : subdirs) try {
+                    File dest = prop.getRootDirFor(subdir.getName());
+                    Files.createDirectories(dest.toPath());
                     Files.copy(
                             new File(subdir, "config.xml").toPath(),
-                            new File(prop.getRootDirFor(subdir.getName()), "config.xml").toPath(),
+                            new File(dest, "config.xml").toPath(),
                             StandardCopyOption.REPLACE_EXISTING);
                 } catch (InvalidPathException | IOException e) {
                     Logger.getLogger(CopyListener.class.getName()).log(Level.WARNING,
