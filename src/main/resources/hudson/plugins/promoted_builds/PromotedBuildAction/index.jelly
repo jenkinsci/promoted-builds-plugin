@@ -28,7 +28,7 @@
                   <td>
                     <a href="${p.name}/promotionBuild/${attempt.number}/console">
                       <l:icon class="${attempt.iconColor.iconClassName} icon-sm"
-                       alt="${attempt.iconColor.description}"/> ${attempt.displayName} (${attempt.timestamp.time})
+                        alt="${attempt.iconColor.description}"/> ${attempt.displayName} (${attempt.timestamp.time})
                     </a> by ${attempt.userName}
                   </td>
                 </tr>
