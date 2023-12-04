@@ -129,12 +129,6 @@
       <artifactId>ssh-credentials</artifactId>
     </dependency>
     <dependency>
-      <groupId>hudson.plugins</groupId>
-      <artifactId>project-inheritance</artifactId>
-      <version>21.04.03</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>job-dsl</artifactId>
       <version>1.87</version>
