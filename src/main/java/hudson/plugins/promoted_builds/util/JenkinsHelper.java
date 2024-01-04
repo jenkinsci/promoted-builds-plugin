@@ -23,7 +23,7 @@
  */
 package hudson.plugins.promoted_builds.util;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -39,7 +39,7 @@ public class JenkinsHelper {
      * @deprecated Use {@link Jenkins#get()}
      */
     @Deprecated
-    @Nonnull
+    @NonNull
     @Restricted(NoExternalUse.class)
     public static Jenkins getInstance() throws IllegalStateException {
         Jenkins instance = Jenkins.getInstanceOrNull();

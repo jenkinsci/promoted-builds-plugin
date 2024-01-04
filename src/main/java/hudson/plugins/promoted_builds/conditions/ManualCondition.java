@@ -24,8 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import javax.servlet.ServletException;
 
@@ -251,7 +251,7 @@ public class ManualCondition extends PromotionCondition {
          * @return User name or {@link #MISSING_USER_ID_DISPLAY_STRING} if the user cannot be determined
          */
         @Exported
-        @Nonnull
+        @NonNull
         public String getUserName() {
             if (authenticationName == null)
                 return MISSING_USER_ID_DISPLAY_STRING;

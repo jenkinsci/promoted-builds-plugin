@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.63</version>
+    <version>4.76</version>
     <relativePath />
   </parent>
 
@@ -18,8 +18,8 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
-    <jenkins.version>2.361.4</jenkins.version>
-    <findbugs.effort>Max</findbugs.effort>
+    <jenkins.version>2.387.3</jenkins.version>
+    <spotbugs.effort>Max</spotbugs.effort>
     <hpi.compatibleSinceVersion>4.0</hpi.compatibleSinceVersion>
   </properties>
 
@@ -68,8 +68,8 @@
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.361.x</artifactId>
-        <version>2081.v85885a_d2e5c5</version>
+        <artifactId>bom-2.387.x</artifactId>
+        <version>2543.vfb_1a_5fb_9496d</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -80,7 +80,6 @@
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>maven-plugin</artifactId>
-      <version>3.12</version>
       <optional>true</optional>
       <exclusions>
         <exclusion>
@@ -108,7 +107,7 @@
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-core</artifactId>
+      <artifactId>hamcrest</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -130,15 +129,9 @@
       <artifactId>ssh-credentials</artifactId>
     </dependency>
     <dependency>
-      <groupId>hudson.plugins</groupId>
-      <artifactId>project-inheritance</artifactId>
-      <version>21.04.03</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>job-dsl</artifactId>
-      <version>1.74</version>
+      <version>1.87</version>
       <optional>true</optional>
       <exclusions>
         <exclusion>
@@ -160,21 +153,12 @@
       <!-- TODO: it is something insane, no? -->
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>parameterized-trigger</artifactId>
-      <version>2.33</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-auth</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <!-- Real Upper Bounds dependency issue,
-             See the discussion in https://github.com/jenkinsci/plugin-pom/pull/72 -->
-        <exclusion>
-          <groupId>org.jenkins-ci.plugins.icon-shim</groupId>
-          <artifactId>icon-set</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>

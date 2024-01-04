@@ -5,7 +5,7 @@ import hudson.model.AbstractProject;
 import hudson.model.InvisibleAction;
 import jenkins.model.Jenkins;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 /**
  * Remembers what build it's promoting. Attached to {@link Promotion}.

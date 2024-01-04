@@ -28,8 +28,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
@@ -118,7 +118,7 @@ public final class Status {
      * Gets the icon that should represent this promotion (that is potentially attempted but failed.)
      * @return Path to the SVG icon in resources or l:icon class name
      */
-    @Nonnull
+    @NonNull
     public String getIcon() {
         String baseName;
 
