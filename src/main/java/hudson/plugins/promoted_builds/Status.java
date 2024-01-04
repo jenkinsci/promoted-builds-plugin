@@ -116,11 +116,10 @@ public final class Status {
 
     /**
      * Gets the icon that should represent this promotion (that is potentially attempted but failed.)
-     * @param size size of the icon, will be used in the icon path
-     * @return Path to the icon in resources
+     * @return Path to the SVG icon in resources or l:icon class name
      */
     @NonNull
-    public String getIcon(String size) {
+    public String getIcon() {
         String baseName;
 
         PromotionProcess p = getProcess();
@@ -130,7 +129,7 @@ public final class Status {
         } else {
             Promotion l = getLast();
             if (l!=null && l.getResult()!= Result.SUCCESS) {
-              return Jenkins.RESOURCE_PATH+"/images/"+size+"/error.png";
+              return "icon-red";
             }
             baseName = p.getIcon();
         }

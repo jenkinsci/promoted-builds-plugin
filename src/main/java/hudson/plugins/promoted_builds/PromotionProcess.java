@@ -79,8 +79,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
     /**
      * The icon that represents this promotion process. This is the name of
-     * the GIF icon that can be found in ${rootURL}/plugin/promoted-builds/icons/16x16/
-     * and ${rootURL}/plugin/promoted-builds/icons/32x32/, e.g. <code>"star-gold"</code>.
+     * the SVG icon that can be found in ${rootURL}/plugin/promoted-builds/icons/,
+     * e.g. <code>"star-gold"</code>.
      */
     public String icon;
 

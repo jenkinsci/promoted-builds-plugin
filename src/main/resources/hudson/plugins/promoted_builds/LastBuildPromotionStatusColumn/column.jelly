@@ -1,8 +1,15 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core">
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout">
   <td>
     <j:forEach var="c" items="${it.getPromotionIcons(job)}">
-      <img src="${rootURL}${c}" border="0"/>
+      <j:choose>
+        <j:when test="${c == 'icon-red'}">
+          <l:icon class="icon-red icon-sm"/>
+        </j:when>
+        <j:otherwise>
+          <img src="${rootURL}${c}" border="0"/>
+        </j:otherwise>
+      </j:choose>
     </j:forEach>
   </td>
 </j:jelly>
