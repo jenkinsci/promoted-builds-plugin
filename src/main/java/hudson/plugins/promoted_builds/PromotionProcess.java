@@ -82,15 +82,18 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * the SVG icon that can be found in ${rootURL}/plugin/promoted-builds/icons/,
      * e.g. <code>"star-gold"</code>.
      */
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "Retain for API compatibillity")
     public String icon;
 
     /**
      * The label that promotion process can be run on.
      */
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "Retain for API compatibillity")
     public String assignedLabel;
     /**
      * Tells if this promotion should be hidden.
      */
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "Retain for API compatibillity")
     public String isVisible;
 
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
