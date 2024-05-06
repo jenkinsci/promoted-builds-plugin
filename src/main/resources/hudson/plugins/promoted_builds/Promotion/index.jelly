@@ -26,7 +26,7 @@
         <j:when test="${it.building}">
           <pre id="out"></pre>
           <div id="spinner">
-            <img src="${imagesURL}/spinner.gif" />
+            <l:progressAnimation/>
           </div>
           <t:progressiveText href="progressiveLog" idref="out" spinner="spinner" />
         </j:when>

@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.33</version>
+    <version>4.81</version>
     <relativePath />
   </parent>
 
@@ -13,15 +13,13 @@
   <packaging>hpi</packaging>
 
   <name>Jenkins promoted builds plugin</name>
-  <url>https://github.com/jenkinsci/promoted-builds-plugin</url>
+  <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
 
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
-    <gitHubRepo>jenkinsci/promoted-builds-plugin</gitHubRepo>
-    <bom>2.289.x</bom>
-    <jenkins.version>2.289.1</jenkins.version>
-    <java.level>8</java.level>
-    <findbugs.effort>Max</findbugs.effort>
+    <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
+    <jenkins.version>2.387.3</jenkins.version>
+    <spotbugs.effort>Max</spotbugs.effort>
     <hpi.compatibleSinceVersion>4.0</hpi.compatibleSinceVersion>
   </properties>
 
@@ -41,7 +39,7 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
+    <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
     <url>https://github.com/${gitHubRepo}</url>
     <tag>${scmTag}</tag>
@@ -70,15 +68,10 @@
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-${bom}</artifactId>
-        <version>987.v4ade2e49fe70</version>
+        <artifactId>bom-2.387.x</artifactId>
+        <version>2543.vfb_1a_5fb_9496d</version>
         <scope>import</scope>
         <type>pom</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.12.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -87,7 +80,6 @@
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>maven-plugin</artifactId>
-      <version>3.12</version>
       <optional>true</optional>
       <exclusions>
         <exclusion>
@@ -107,7 +99,6 @@
     <dependency>
       <groupId>com.sonyericsson.hudson.plugins.rebuild</groupId>
       <artifactId>rebuild</artifactId>
-      <version>1.33</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -116,7 +107,7 @@
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-core</artifactId>
+      <artifactId>hamcrest</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -138,15 +129,9 @@
       <artifactId>ssh-credentials</artifactId>
     </dependency>
     <dependency>
-      <groupId>hudson.plugins</groupId>
-      <artifactId>project-inheritance</artifactId>
-      <version>21.04.03</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>job-dsl</artifactId>
-      <version>1.74</version>
+      <version>1.87</version>
       <optional>true</optional>
       <exclusions>
         <exclusion>
@@ -162,28 +147,18 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>config-file-provider</artifactId>
-      <version>2.18</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <!-- TODO: it is something insane, no? -->
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>parameterized-trigger</artifactId>
-      <version>2.33</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-auth</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <!-- Real Upper Bounds dependency issue,
-             See the discussion in https://github.com/jenkinsci/plugin-pom/pull/72 -->
-        <exclusion>
-          <groupId>org.jenkins-ci.plugins.icon-shim</groupId>
-          <artifactId>icon-set</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>

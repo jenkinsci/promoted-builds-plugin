@@ -3,9 +3,8 @@ package hudson.plugins.promoted_builds.integrations.jobdsl;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-
-import com.google.common.base.Preconditions;
 
 import groovy.lang.Closure;
 import javaposse.jobdsl.dsl.Context;
@@ -54,8 +53,10 @@ public class PromotionsContext implements Context {
     public void promotion(Closure<?> promotionClosure) {
         PromotionContext promotionContext = new PromotionContext(dslEnvironment);
         executeInContext(promotionClosure, promotionContext);
-        Preconditions.checkNotNull(promotionContext.getName(), "promotion name cannot be null");
-        Preconditions.checkArgument(promotionContext.getName().length() > 0);
+        Objects.requireNonNull(promotionContext.getName(), "promotion name cannot be null");
+        if (promotionContext.getName().isEmpty()) {
+          throw new IllegalArgumentException("promotion name cannot be empty");
+        }
         names.add(promotionContext.getName());
         promotionContexts.put(promotionContext.getName(),promotionContext);
         

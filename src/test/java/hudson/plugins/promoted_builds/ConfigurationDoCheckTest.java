@@ -1,6 +1,6 @@
 package hudson.plugins.promoted_builds;
 
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlPage;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import hudson.tasks.JavadocArchiver;
@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import static com.gargoylesoftware.htmlunit.html.HtmlFormUtil.submit;
+import static org.htmlunit.html.HtmlFormUtil.submit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

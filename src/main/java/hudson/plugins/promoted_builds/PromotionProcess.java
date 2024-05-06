@@ -61,8 +61,8 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.logging.Logger;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * A dummy {@link AbstractProject} to carry out promotion operations.
@@ -79,18 +79,21 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
             new DescribableList<PromotionCondition, PromotionConditionDescriptor>(this);
     /**
      * The icon that represents this promotion process. This is the name of
-     * the GIF icon that can be found in ${rootURL}/plugin/promoted-builds/icons/16x16/
-     * and ${rootURL}/plugin/promoted-builds/icons/32x32/, e.g. <code>"star-gold"</code>.
+     * the SVG icon that can be found in ${rootURL}/plugin/promoted-builds/icons/,
+     * e.g. <code>"star-gold"</code>.
      */
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "Retain for API compatibillity")
     public String icon;
 
     /**
      * The label that promotion process can be run on.
      */
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "Retain for API compatibillity")
     public String assignedLabel;
     /**
      * Tells if this promotion should be hidden.
      */
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "Retain for API compatibillity")
     public String isVisible;
 
     private List<BuildStep> buildSteps = new ArrayList<BuildStep>();
@@ -337,7 +340,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      we return the gold icon for compatibility with previous releases
      * @return the icon file name for this promotion
      */
-    @Nonnull
+    @NonNull
     private static String getIcon(@CheckForNull String sIcon) {
         if ((sIcon == null) || sIcon.equals(""))
             return "star-gold";
@@ -350,7 +353,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @param build The build to be checked
      * @return List of generated promotion badges
      */
-    @Nonnull
+    @NonNull
     public List<PromotionBadge> getMetQualifications(AbstractBuild<?,?> build) {
         List<PromotionBadge> badges = new ArrayList<PromotionBadge>();
         for (PromotionCondition cond : conditions) {
@@ -367,7 +370,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @param build Build to be checked
      * @return List of unmet promotion conditions
      */
-    @Nonnull
+    @NonNull
     public List<PromotionCondition> getUnmetConditions(AbstractBuild<?,?> build) {
         List<PromotionCondition> unmetConditions = new ArrayList<PromotionCondition>();
 
@@ -514,7 +517,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         return super.scheduleBuild();
     }
 
-    public boolean scheduleBuild(@Nonnull AbstractBuild<?,?> build) {
+    public boolean scheduleBuild(@NonNull AbstractBuild<?,?> build) {
         return scheduleBuild(build,new UserCause());
     }
 
@@ -526,7 +529,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      *      Use {@link #scheduleBuild2(AbstractBuild, Cause)}
      */
     @Deprecated
-    public boolean scheduleBuild(@Nonnull AbstractBuild<?,?> build, @Nonnull Cause cause) {
+    public boolean scheduleBuild(@NonNull AbstractBuild<?,?> build, @NonNull Cause cause) {
         return scheduleBuild2(build,cause)!=null;
     }
 
@@ -538,7 +541,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @return Future result or {@code null} if the promotion cannot be scheduled
      */
     @CheckForNull
-    public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build,
+    public Future<Promotion> scheduleBuild2(@NonNull AbstractBuild<?,?> build,
             Cause cause, @CheckForNull List<ParameterValue> params) {
         List<Action> actions = new ArrayList<Action>();
         actions.add(Promotion.PromotionParametersAction.buildFor(build, params));
@@ -554,11 +557,11 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         throw HttpResponses.error(404, "Promotion processes may not be built directly");
     }
 
-    public Future<Promotion> scheduleBuild2(@Nonnull AbstractBuild<?,?> build, @Nonnull Cause cause) {
+    public Future<Promotion> scheduleBuild2(@NonNull AbstractBuild<?,?> build, @NonNull Cause cause) {
         return scheduleBuild2(build, cause, null);
     }
 
-    public boolean isInQueue(@Nonnull AbstractBuild<?,?> build) {
+    public boolean isInQueue(@NonNull AbstractBuild<?,?> build) {
         for (Item item : Jenkins.get().getQueue().getItems(this))
             if (item.getAction(PromotionTargetAction.class).resolve(this)==build)
                 return true;
@@ -652,7 +655,8 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
                         Messages.JobPropertyImpl_LabelString_InvalidBooleanExpression(e.getMessage()));
             }
             // TODO: if there's an atom in the expression that is empty, report it
-            if (Jenkins.get().getLabel(value).isEmpty())
+            Label label = Jenkins.get().getLabel(value);
+            if (label == null || label.isEmpty())
                 return FormValidation.warning(Messages.JobPropertyImpl_LabelString_NoMatch());
             return FormValidation.ok();
         }

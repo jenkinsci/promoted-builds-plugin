@@ -1,12 +1,15 @@
 package hudson.plugins.promoted_builds;
 
 import hudson.Extension;
-import hudson.Util;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.listeners.ItemListener;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,9 +37,13 @@ public class CopyListener extends ItemListener {
             if (subdirs != null) {
                 prop = ((Job<?,?>)item).getProperty(JobPropertyImpl.class);
                 for (File subdir : subdirs) try {
-                    Util.copyFile(new File(subdir, "config.xml"),
-                                  new File(prop.getRootDirFor(subdir.getName()), "config.xml"));
-                } catch (Exception e) {
+                    File dest = prop.getRootDirFor(subdir.getName());
+                    Files.createDirectories(dest.toPath());
+                    Files.copy(
+                            new File(subdir, "config.xml").toPath(),
+                            new File(dest, "config.xml").toPath(),
+                            StandardCopyOption.REPLACE_EXISTING);
+                } catch (InvalidPathException | IOException e) {
                     Logger.getLogger(CopyListener.class.getName()).log(Level.WARNING,
                         "Failed to copy/load promotion " + subdir + " into new job", e);
                 }

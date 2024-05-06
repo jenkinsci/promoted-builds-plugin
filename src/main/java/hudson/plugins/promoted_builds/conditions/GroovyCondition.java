@@ -15,7 +15,7 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedClasspathException
 import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedUsageException;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

@@ -8,7 +8,7 @@ import org.junit.rules.TestRule;
 import org.junit.runners.model.Statement;
 import org.jvnet.hudson.test.Issue;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * This is not a regular unit test: it validates the testing framework by making sure we can rely on it
