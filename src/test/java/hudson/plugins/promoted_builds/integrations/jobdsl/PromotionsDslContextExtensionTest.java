@@ -111,7 +111,7 @@ public class PromotionsDslContextExtensionTest {
 
         TopLevelItem item = j.jenkins.getItem("dynamic-dsl-test");
         File config = new File(item.getRootDir(), "promotions/Development/config.xml");
-        String content = Files.toString(config, Charset.forName("UTF-8"));
+        String content = Files.readString(config.toPath());
         assert content.contains("<javaposse.jobdsl.plugin.ExecuteDslScripts>");
     }
 
