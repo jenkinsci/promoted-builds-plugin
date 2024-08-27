@@ -18,7 +18,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
-    <jenkins.version>2.387.3</jenkins.version>
+    <jenkins.version>2.440.3</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <hpi.compatibleSinceVersion>4.0</hpi.compatibleSinceVersion>
   </properties>
@@ -68,8 +68,8 @@
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.387.x</artifactId>
-        <version>2543.vfb_1a_5fb_9496d</version>
+        <artifactId>bom-2.440.x</artifactId>
+        <version>3289.v3ff9637cd241</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -81,12 +81,6 @@
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>maven-plugin</artifactId>
       <optional>true</optional>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-net</groupId>
-          <artifactId>commons-net</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -106,16 +100,6 @@
       <artifactId>structs</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>token-macro</artifactId>
       <optional>true</optional>
@@ -133,12 +117,6 @@
       <artifactId>job-dsl</artifactId>
       <version>1.87</version>
       <optional>true</optional>
-      <exclusions>
-        <exclusion>
-          <groupId>org.codehaus.groovy</groupId>
-          <artifactId>groovy-all</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -150,7 +128,7 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <!-- TODO: it is something insane, no? -->
+      <!-- Needed for Job DSL test -->
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>parameterized-trigger</artifactId>
       <scope>test</scope>
