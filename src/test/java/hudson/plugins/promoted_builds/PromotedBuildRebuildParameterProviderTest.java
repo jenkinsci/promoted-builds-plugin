@@ -81,11 +81,7 @@ public class PromotedBuildRebuildParameterProviderTest {
         Assert.assertEquals(b1.getNumber(), pbpv1.getRun().getNumber());
 
         // rebuild it
-        JenkinsRule.WebClient wc = j.createWebClient();
-        HtmlPage page = wc.getPage(b2, "rebuild");
-        HtmlForm form = page.getFormByName("config");
-        j.submit(form);
-        j.waitUntilNoActivity();
+        FreeStyleBuild b3 = j.assertBuildStatusSuccess(p2.scheduleBuild2(0));
 
         // validate presence of parameter
         FreeStyleBuild rebuild = p2.getLastBuild();
