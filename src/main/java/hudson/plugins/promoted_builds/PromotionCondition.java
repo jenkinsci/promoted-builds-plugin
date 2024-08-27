@@ -29,6 +29,7 @@ public abstract class PromotionCondition implements ExtensionPoint, Describable<
      * @deprecated
      */
     @CheckForNull
+    @Deprecated
     public PromotionBadge isMet(AbstractBuild<?,?> build) {
         return null;
     }
