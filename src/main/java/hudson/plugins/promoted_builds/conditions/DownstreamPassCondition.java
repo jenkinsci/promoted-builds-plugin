@@ -153,6 +153,7 @@ public class DownstreamPassCondition extends PromotionCondition {
     /**
      * @deprecated use {@link #contains(hudson.model.ItemGroup, hudson.model.AbstractProject, hudson.EnvVars)} 
      */
+    @Deprecated
     public boolean contains(ItemGroup ctx, AbstractProject<?,?> job){
         return contains(ctx, job, null);
     }
@@ -181,6 +182,7 @@ public class DownstreamPassCondition extends PromotionCondition {
      * Short-cut for {@code getJobList().contains(job)}.
      * @deprecated use {@link #contains(hudson.model.ItemGroup, hudson.model.AbstractProject)}
      */
+    @Deprecated
     public boolean contains(AbstractProject<?,?> job) {
         return contains(Jenkins.get(), job);
     }

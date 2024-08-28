@@ -467,6 +467,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @deprecated
      *      Use {@link #promote2(AbstractBuild, Cause, Status)}
      */
+    @Deprecated
     public void promote(AbstractBuild<?,?> build, Cause cause, Status qualification) throws IOException {
         promote2(build,cause,qualification);
     }

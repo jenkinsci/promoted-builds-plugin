@@ -82,9 +82,9 @@ public class PromotedBuildRebuildParameterProviderTest {
 
         // rebuild it
         JenkinsRule.WebClient wc = j.createWebClient();
-        HtmlPage page = wc.getPage(b2, "rebuild");
-        HtmlForm form = page.getFormByName("config");
-        j.submit(form);
+        HtmlPage buildPage = wc.getPage(b2);
+        HtmlPage rebuildConfigPage = buildPage.getAnchorByText("Rebuild").click();
+        j.submit(rebuildConfigPage.getFormByName("config"));
         j.waitUntilNoActivity();
 
         // validate presence of parameter
