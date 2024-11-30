@@ -1,6 +1,5 @@
 package hudson.plugins.promoted_builds;
 
-import antlr.ANTLRException;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.BulkChange;
 import hudson.EnvVars;
@@ -249,7 +248,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         try {
             LabelExpression.parseExpression(assignedLabel);
             return assignedLabel;
-        } catch (ANTLRException e) {
+        } catch (IllegalArgumentException e) {
             // must be old label or host name that includes whitespace or other unsafe chars
             return LabelAtom.escape(assignedLabel);
         }
@@ -651,7 +650,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
                 return FormValidation.ok(); // nothing typed yet
             try {
                 Label.parseExpression(value);
-            } catch (ANTLRException e) {
+            } catch (IllegalArgumentException e) {
                 return FormValidation.error(e,
                         Messages.JobPropertyImpl_LabelString_InvalidBooleanExpression(e.getMessage()));
             }
