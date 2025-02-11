@@ -54,8 +54,8 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.HttpResponses;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
@@ -306,7 +306,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
     	return definitions;
     }
 
-    public void doRebuild(StaplerRequest req, StaplerResponse rsp) throws IOException {
+    public void doRebuild(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException {
         throw HttpResponses.error(404, "Promotions may not be rebuilt directly");
     }
 

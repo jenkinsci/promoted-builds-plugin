@@ -30,7 +30,7 @@ import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -209,7 +209,7 @@ public class DownstreamPassCondition extends PromotionCondition {
             return Messages.DownstreamPassCondition_DisplayName();
         }
 
-        public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public PromotionCondition newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             return new DownstreamPassCondition(
                     formData.getString("jobs"), formData.getBoolean("evenIfUnstable"));
         }

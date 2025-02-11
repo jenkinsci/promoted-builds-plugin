@@ -27,15 +27,15 @@ import java.util.concurrent.Future;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.acegisecurity.GrantedAuthority;
 import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.verb.POST;
 
@@ -194,7 +194,7 @@ public class ManualCondition extends PromotionCondition {
      * Web method to handle the approval action submitted by the user.
      */
     @POST
-    public void doApprove(StaplerRequest req, StaplerResponse rsp,
+    public void doApprove(StaplerRequest2 req, StaplerResponse2 rsp,
             @AncestorInPath PromotionProcess promotionProcess,
             @AncestorInPath AbstractBuild<?,?> build) throws IOException, ServletException {
 
@@ -304,7 +304,7 @@ public class ManualCondition extends PromotionCondition {
         }
 
         @Override
-        public ManualCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public ManualCondition newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             ManualCondition instance = new ManualCondition();
             instance.users = formData.getString("users");
             instance.parameterDefinitions = Descriptor.newInstancesFromHeteroList(req, formData, "parameters", ParameterDefinition.all());

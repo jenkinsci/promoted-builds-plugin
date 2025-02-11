@@ -54,7 +54,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.export.Exported;
 
 /**
@@ -85,7 +85,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
     }
 
     @Override
-    public PromotedBuildParameterValue createValue(StaplerRequest req, JSONObject jo) {
+    public PromotedBuildParameterValue createValue(StaplerRequest2 req, JSONObject jo) {
         PromotedBuildParameterValue value = req.bindJSON(PromotedBuildParameterValue.class, jo);
         value.setPromotionProcessName(promotionProcessName);
         value.setDescription(getDescription());
@@ -136,15 +136,15 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
      * Gets a list of promoted builds for the project.
      * @return List of {@link AbstractBuild}s, which have been promoted
      * @deprecated This method retrieves the base item for relative addressing from 
-     * the {@link StaplerRequest}. The relative addressing may be malfunctional if
-     * you use this method outside {@link StaplerRequest}s. 
+     * the {@link StaplerRequest2}. The relative addressing may be malfunctional if
+     * you use this method outside {@link StaplerRequest2}s. 
      * Use {@link #getRuns(hudson.model.Item)} instead
      */
     @NonNull
     @Deprecated
     public List getBuilds() {
         // Try to get ancestor from the object, otherwise pass null and disable the relative addressing
-        final StaplerRequest currentRequest = Stapler.getCurrentRequest();
+        final StaplerRequest2 currentRequest = Stapler.getCurrentRequest2();
         final Item item = currentRequest != null ? currentRequest.findAncestorObject(Item.class) : null;
         return getRuns(item);
     }
@@ -202,7 +202,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
         }
 
         @Override
-        public ParameterDefinition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public ParameterDefinition newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             return req.bindJSON(PromotedBuildParameterDefinition.class, formData);
         }
         

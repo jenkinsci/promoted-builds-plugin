@@ -10,7 +10,7 @@ import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 /**
  * {@link RedeployPublisher} altered for batch task.
@@ -37,7 +37,7 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
 
         @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
         @Override
-        public RedeployPublisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public RedeployPublisher newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             return req.bindJSON(RedeployBatchTaskPublisher.class,formData);
         }
     }

@@ -157,7 +157,7 @@ public class PromotionProcessTest {
                     .accumulate("conditions",new JSONObject()
                         .accumulate("hudson-plugins-promoted_builds-conditions-SelfPromotionCondition",
                                 new JSONObject().accumulate("evenIfUnstable", false)));
-            PromotionProcess p = PromotionProcess.fromJson(Stapler.getCurrentRequest(), o);
+            PromotionProcess p = PromotionProcess.fromJson(Stapler.getCurrentRequest2(), o);
             assertEquals("foo", p.getName());
             assertEquals("star-gold", p.getIcon());
             assertEquals(1, p.conditions.size());

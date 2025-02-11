@@ -10,7 +10,7 @@ import hudson.plugins.promoted_builds.PromotionConditionDescriptor;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.plugins.promoted_builds.Status;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,7 +95,7 @@ public class UpstreamPromotionCondition extends PromotionCondition {
             return Messages.UpstreamPromotionCondition_DisplayName();
         }
 
-        public PromotionCondition newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public PromotionCondition newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             return new UpstreamPromotionCondition(
                     formData.getString("promotions"));
         }

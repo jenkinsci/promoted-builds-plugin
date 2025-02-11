@@ -15,10 +15,10 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -386,7 +386,7 @@ public final class Status {
      * @throws ServletException Request handling error
      */
     @POST
-    public void doBuild(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+    public void doBuild(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException, ServletException {
         
         final PromotionProcess process = getProcess();
         if (process == null) {
