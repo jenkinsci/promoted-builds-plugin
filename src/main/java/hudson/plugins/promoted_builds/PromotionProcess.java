@@ -47,10 +47,10 @@ import jenkins.util.TimeDuration;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -118,7 +118,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
      * @throws IOException {@link PromotionProcess} creation issue
      * @return Parsed promotion process
      */
-    public static PromotionProcess fromJson(StaplerRequest req, JSONObject o) throws FormException, IOException {
+    public static PromotionProcess fromJson(StaplerRequest2 req, JSONObject o) throws FormException, IOException {
         String name = o.getString("name");
         try {
             Jenkins.checkGoodName(name);
@@ -140,7 +140,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
         super.doSetName(name);
     }
 
-    /*package*/ void configure(StaplerRequest req, JSONObject c) throws Descriptor.FormException, IOException {
+    /*package*/ void configure(StaplerRequest2 req, JSONObject c) throws Descriptor.FormException, IOException {
         // apply configuration
         conditions.rebuild(req,c.optJSONObject("conditions"), PromotionCondition.all());
 
@@ -553,7 +553,7 @@ public final class PromotionProcess extends AbstractProject<PromotionProcess,Pro
 
 
     @Override
-    public void doBuild(StaplerRequest req, StaplerResponse rsp, @QueryParameter TimeDuration delay) throws IOException, ServletException {
+    public void doBuild(StaplerRequest2 req, StaplerResponse2 rsp, @QueryParameter TimeDuration delay) throws IOException, ServletException {
         throw HttpResponses.error(404, "Promotion processes may not be built directly");
     }
 

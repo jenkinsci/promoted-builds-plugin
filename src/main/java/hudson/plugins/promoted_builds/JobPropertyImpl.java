@@ -17,7 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.Ancestor;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import hudson.Extension;
 import hudson.Util;
@@ -94,7 +94,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         this.activeProcessNames.addAll(activeProcessNames);
     }
 
-    private JobPropertyImpl(StaplerRequest req, JSONObject json) throws Descriptor.FormException, IOException {
+    private JobPropertyImpl(StaplerRequest2 req, JSONObject json) throws Descriptor.FormException, IOException {
         // a hack to get the owning AbstractProject.
         // this is needed here so that we can load items
         List<Ancestor> ancs = req.getAncestors();
@@ -416,7 +416,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
         }
 
         @Override
-        public JobPropertyImpl newInstance(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
+        public JobPropertyImpl newInstance(StaplerRequest2 req, JSONObject json) throws Descriptor.FormException {
             try {
                 if(json.has("promotions"))
                     return new JobPropertyImpl(req, json);

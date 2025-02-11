@@ -11,7 +11,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.export.ExportedBean;
 import org.kohsuke.stapler.interceptor.RequirePOST;
@@ -132,7 +132,7 @@ public class PromotedProjectAction implements ProminentProjectAction, PermalinkP
     }
 
     @RequirePOST
-    public HttpResponse doCreateProcess(@QueryParameter String name, StaplerRequest req) throws IOException {
+    public HttpResponse doCreateProcess(@QueryParameter String name, StaplerRequest2 req) throws IOException {
         property.createProcessFromXml(name, req.getInputStream());
         return HttpResponses.ok();
     }
