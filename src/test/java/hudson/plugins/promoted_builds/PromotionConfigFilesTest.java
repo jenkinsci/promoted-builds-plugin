@@ -7,27 +7,25 @@ import org.jenkinsci.plugins.configfiles.GlobalConfigFiles;
 import org.jenkinsci.plugins.configfiles.builder.ConfigFileBuildStep;
 import org.jenkinsci.plugins.configfiles.buildwrapper.ManagedFile;
 import org.jenkinsci.plugins.configfiles.custom.CustomConfig;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class PromotionConfigFilesTest {
+@WithJenkins
+class PromotionConfigFilesTest {
 
     private static final String CONFIG_ID = "ConfigFilesTestId";
 
-    @Rule
-    public JenkinsRule r = new JenkinsRule();
-
     @Test
-    public void testPromotionConfigFilesAreRetrievedFromParentJobContext() throws Exception {
+    void testPromotionConfigFilesAreRetrievedFromParentJobContext(JenkinsRule r) throws Exception {
         GlobalConfigFiles store = r.getInstance().getExtensionList(GlobalConfigFiles.class).get(GlobalConfigFiles.class);
-        Assert.assertTrue(store.getConfigs().isEmpty());
+        assertTrue(store.getConfigs().isEmpty());
 
         CustomConfig config = new CustomConfig(CONFIG_ID, "name", "comment", "content");
         store.save(config);

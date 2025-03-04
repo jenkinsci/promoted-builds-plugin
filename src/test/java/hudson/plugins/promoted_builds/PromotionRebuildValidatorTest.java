@@ -27,18 +27,18 @@ import com.sonyericsson.rebuild.RebuildAction;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.junit.Rule;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class PromotionRebuildValidatorTest {
-
-    @Rule
-    public JenkinsRule r = new JenkinsRule();
+@WithJenkins
+class PromotionRebuildValidatorTest {
 
     @Test
-    public void testPromotionsDoNotHaveRebuildActions() throws Exception {
+    void testPromotionsDoNotHaveRebuildActions(JenkinsRule r) throws Exception {
         FreeStyleProject p = r.createFreeStyleProject();
 
         // promote if the downstream passes

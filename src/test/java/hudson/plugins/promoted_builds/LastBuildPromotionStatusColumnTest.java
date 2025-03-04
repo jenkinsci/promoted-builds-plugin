@@ -31,37 +31,39 @@ import hudson.model.Result;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Future;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for {@link LastBuildPromotionStatusColumn}.
  * @author Oleg Nenashev
  */
-public class LastBuildPromotionStatusColumnTest {
-    
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
-    
+@WithJenkins
+class LastBuildPromotionStatusColumnTest {
+
+    private JenkinsRule j;
+
     private ListView view;
     private LastBuildPromotionStatusColumn column;
-    
-    @Before
-    public void initView() throws IOException {
+
+    @BeforeEach
+    void initView(JenkinsRule rule) throws IOException {
+        j = rule;
         view = new ListView("testView", j.jenkins);
         column = new LastBuildPromotionStatusColumn();
         view.getColumns().add(column);
         j.jenkins.addView(view);
     }
-    
+
     @Test
-    public void shouldDisplayStars() throws Exception {
+    void shouldDisplayStars() throws Exception {
         // Create project
         FreeStyleProject p = j.createFreeStyleProject();
         JobPropertyImpl base = new JobPropertyImpl(p);
@@ -69,20 +71,20 @@ public class LastBuildPromotionStatusColumnTest {
         PromotionProcess foo = base.addProcess("foo");
         foo.icon = "star-blue";
         view.add(p);
-        
+
         // Promote a build
         FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         Status status = foo.isMet(b1);
         Future<Promotion> y = foo.promote2(b1, new Cause.UserIdCause(), status);
         Promotion promotion = y.get();
         assertThat(promotion.getResult(), is(Result.SUCCESS));
-        
+
         // Check column contents
-        LastBuildPromotionStatusColumn retrieved = 
+        LastBuildPromotionStatusColumn retrieved =
                 view.getColumns().get(LastBuildPromotionStatusColumn.class);
-        assertEquals("Columns should be same", column, retrieved);
+        assertEquals(column, retrieved, "Columns should be same");
         List<String> promotionIcons = retrieved.getPromotionIcons(p);
-        assertEquals("Expected only 1 promotion icon", 1, promotionIcons.size());
-        assertTrue("Promotion should assign the blue star", promotionIcons.get(0).contains("star-blue"));
+        assertEquals(1, promotionIcons.size(), "Expected only 1 promotion icon");
+        assertTrue(promotionIcons.get(0).contains("star-blue"), "Promotion should assign the blue star");
     }
 }

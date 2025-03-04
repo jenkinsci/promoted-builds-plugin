@@ -30,31 +30,25 @@ import hudson.tasks.JavadocArchiver;
 import java.util.ArrayList;
 
 import org.jenkinsci.plugins.configfiles.buildwrapper.ConfigFileBuildWrapper;
-import org.jenkinsci.plugins.configfiles.buildwrapper.ManagedFile;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.hudson.test.recipes.LocalData;
 
-import static org.htmlunit.html.HtmlFormUtil.submit;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class ConfigurationRoundtripTest {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class ConfigurationRoundtripTest {
 
     /**
      * Configuration roundtrip test to detect data loss.
      */
     @Test
-    public void testRoundtrip() throws Exception {
+    void testRoundtrip(JenkinsRule j) throws Exception {
         FreeStyleProject down = j.createFreeStyleProject();
 
         FreeStyleProject p = j.createFreeStyleProject();
@@ -65,12 +59,12 @@ public class ConfigurationRoundtripTest {
         assertEquals(1,pp.getItems().size());
         proc.conditions.add(new DownstreamPassCondition(down.getName()));
         proc.getBuildSteps().add(new JavadocArchiver("somedir",true));
-        proc.getBuildWrappersList().add(new ConfigFileBuildWrapper(new ArrayList<ManagedFile>()));
+        proc.getBuildWrappersList().add(new ConfigFileBuildWrapper(new ArrayList<>()));
         proc.icon = "star-blue";
 
         // round trip
         JenkinsRule.WebClient wc = j.createWebClient();
-        submit(wc.getPage(p,"configure").getFormByName("config"));
+        j.submit(wc.getPage(p,"configure").getFormByName("config"));
 
         // assert that the configuration is still intact
         pp = p.getProperty(JobPropertyImpl.class);
@@ -91,7 +85,7 @@ public class ConfigurationRoundtripTest {
     @LocalData
     @Issue("JENKINS-17341")
     @Test
-    public void testLoad() throws Exception {
+    void testLoad(JenkinsRule j) {
         FreeStyleProject jProj = j.jenkins.getItemByFullName("j", FreeStyleProject.class);
         assertNotNull(jProj);
         Promotion p = jProj.getProperty(JobPropertyImpl.class).getItem("OK").getBuildByNumber(1);

@@ -27,29 +27,31 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockFolder;
 
-import static org.junit.Assert.*;
-import org.junit.Before;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.jvnet.hudson.test.TestExtension;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Tests for {@link ItemPathResolver}.
  * @author Oleg Nenashev
  */
-public class ItemPathResolverTest {
+@WithJenkins
+class ItemPathResolverTest {
 
-    @Rule
-    public final JenkinsRule rule = new JenkinsRule();
+    private JenkinsRule rule;
 
     private MockFolder folderA, folderB, folderC;
     private FreeStyleProject projectInTop, projectInC1, projectInC2;
 
-    @Before
-    public void setUpFolders() throws Exception {
+    @BeforeEach
+    void setUpFolders(JenkinsRule j) throws Exception {
+        rule = j;
         folderA = rule.createFolder("a");
         folderB = folderA.createProject(MockFolder.class, "b");
         folderC = folderB.createProject(MockFolder.class, "c");
@@ -60,7 +62,7 @@ public class ItemPathResolverTest {
     }
 
     @Test
-    public void shouldRetainTheLegacyBehaviorIfEnabled() throws Exception {
+    void shouldRetainTheLegacyBehaviorIfEnabled() throws Exception {
         assertsPath("prj", null, projectInTop);
 
         // FOO exists on both top level and within the folder
@@ -76,7 +78,7 @@ public class ItemPathResolverTest {
     }
 
     @Test
-    public void shouldProvideNewBehaviorByDefault() throws Exception {
+    void shouldProvideNewBehaviorByDefault() throws Exception {
         assertsPath("prj", null, projectInTop);
 
         // FOO exists on both top level and within the folder
@@ -92,12 +94,12 @@ public class ItemPathResolverTest {
     }
 
     @Test
-    public void shouldSupportBasicAddressing() throws Exception {
+    void shouldSupportBasicAddressing() {
         assertsPath("a", null, folderA);
     }
 
     @Test
-    public void shouldSupportAbsoluteAddressing() throws Exception {
+    void shouldSupportAbsoluteAddressing() {
         assertsPath("/a/b", null, folderB);
         assertsPath("/a/b/c", null, folderC);
         assertsPath("/prj", null, projectInTop);
@@ -108,7 +110,7 @@ public class ItemPathResolverTest {
     }
 
     @Test
-    public void shouldSupportAbsoluteAddressingWithRelativeBase() throws Exception {
+    void shouldSupportAbsoluteAddressingWithRelativeBase() {
         assertsPath("/a/b", folderB, folderB);
         assertsPath("/a/b/c", folderC, folderC);
         assertsPath("/prj", folderA, projectInTop);
@@ -119,7 +121,7 @@ public class ItemPathResolverTest {
     }
 
     @Test
-    public void shouldSupportRelative() throws Exception {
+    void shouldSupportRelative() {
         assertsPath("./b", folderA, folderB);
         assertsPath("./b/c", folderA, folderC);
         assertsPath("./b/./c", folderA, folderC);
@@ -132,7 +134,7 @@ public class ItemPathResolverTest {
     }
 
     @Test
-    public void shouldSupportRelativeWithoutPrefix() throws Exception {
+    void shouldSupportRelativeWithoutPrefix() {
         assertsPath("b", folderA, folderB);
         assertsPath("b/c", folderA, folderC);
         assertsPath("b/./c", folderA, folderC);
@@ -141,7 +143,7 @@ public class ItemPathResolverTest {
     }
 
     @Test
-    public void shouldSupportRelativeAddressingFromItems() throws Exception {
+    void shouldSupportRelativeAddressingFromItems() {
         assertsPath("./prjInC2", projectInC1, projectInC2);
         assertsPath(".", projectInC1, folderC);
         assertsPath("..", projectInC1, folderB);
@@ -151,7 +153,7 @@ public class ItemPathResolverTest {
     }
 
     private <T extends Item> void assertsPath(@NonNull String path, @CheckForNull Item base,
-            Item expected, @NonNull Class<T> clazz) throws Exception {
+            Item expected, @NonNull Class<T> clazz) {
         final Item res = ItemPathResolver.getByPath(path, base, clazz);
         if (expected != res) {
             StringBuilder errorDetails = new StringBuilder("Wrong result for clase='")
@@ -161,12 +163,12 @@ public class ItemPathResolverTest {
             } else {
                 errorDetails.append(" with NULL base element");
             }
-            assertEquals(errorDetails.toString(), expected, res);
+            assertEquals(expected, res, errorDetails.toString());
         }
     }
 
     @Test
-    public void shouldProperlyHandleEqualNames() throws Exception {
+    void shouldProperlyHandleEqualNames() throws Exception {
         final MockFolder folder = rule.createFolder("FOO");
         final FreeStyleProject prj = folder.createProject(FreeStyleProject.class, "FOO");
         assertsPath("/FOO/FOO", null, prj);
@@ -188,7 +190,7 @@ public class ItemPathResolverTest {
     }
 
     @Test
-    public void shouldCorrectlyResolveItemsWithEqualNames() throws Exception {
+    void shouldCorrectlyResolveItemsWithEqualNames() throws Exception {
 
         // FOO exists on both top level and within the folder
         final MockFolder folder = rule.createFolder("F");
@@ -202,12 +204,12 @@ public class ItemPathResolverTest {
     }
 
     private <T extends Item> void assertsPath(@NonNull String path, @CheckForNull Item base,
-            @NonNull T expected) throws Exception {
+            @NonNull T expected) {
         assertsPath(path, base, expected, expected.getClass());
     }
 
     private <T extends Item> void assertsPathIsNull(@NonNull String path, @CheckForNull Item base,
-            @NonNull Class<T> clazz) throws Exception {
+            @NonNull Class<T> clazz) {
         assertsPath(path, base, null, clazz);
     }
 

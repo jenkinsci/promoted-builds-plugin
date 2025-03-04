@@ -16,25 +16,19 @@ import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
 import java.io.IOException;
 import java.util.List;
 
-import org.junit.Rule;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import org.htmlunit.html.HtmlElement;
 import org.htmlunit.html.HtmlForm;
 import org.htmlunit.html.HtmlPage;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.htmlunit.html.HtmlFormUtil.submit;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Issue("JENKINS-22005")
-public class ManualConditionBug22005 {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class ManualConditionBug22005 {
 
 	private PromotionProcess createPromotionProcess(JobPropertyImpl parent, String name) throws IOException{
         PromotionProcess prom0 = parent.addProcess(name);
@@ -45,10 +39,10 @@ public class ManualConditionBug22005 {
         return prom0;
 	}
 
-	@Test
-	public void testPromotionProcess() throws Exception {
+    @Test
+    void testPromotionProcess(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
-        
+
         ExtensionList<Descriptor> list = j.jenkins.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(p);
@@ -59,27 +53,27 @@ public class ManualConditionBug22005 {
         ManualCondition prom1Condition=prom1.conditions.get(ManualCondition.class);
         PromotionProcess prom2=createPromotionProcess(base, "PROM2");
         ManualCondition prom2Condition=prom2.conditions.get(ManualCondition.class);
-        
+
         FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         Promotion p0b1=j.assertBuildStatusSuccess(prom0Condition.approve(b1, prom0));
         assertEquals(2,p0b1.getParameterValues().size());
         assertEquals(2,p0b1.getParameterDefinitionsWithValue().size());
-        
+
         Promotion p1b1=j.assertBuildStatusSuccess(prom1Condition.approve(b1, prom1));
         assertEquals(2,p1b1.getParameterValues().size());
         assertEquals(2,p1b1.getParameterDefinitionsWithValue().size());
-        
+
         Promotion p2b1=j.assertBuildStatusSuccess(prom2Condition.approve(b1, prom2));
         assertEquals(2,p2b1.getParameterValues().size());
         assertEquals(2,p2b1.getParameterDefinitionsWithValue().size());
-        
+
         List<ManualApproval> approvals=b1.getActions(ManualApproval.class);
         assertEquals(3, approvals.size());
-        
+
         PromotedBuildAction promBuildAction=b1.getAction(PromotedBuildAction.class);
         List<Status> statuses=promBuildAction.getPromotions();
         assertEquals(3, statuses.size());
-        
+
         for (Status status:statuses){
         	Promotion lastBuild=status.getLast();
         	List<ParameterDefinition> lastBuildParameters=lastBuild.getParameterDefinitionsWithValue();
@@ -88,9 +82,9 @@ public class ManualConditionBug22005 {
 	}
 
     @Test
-    public void testPromotionProcessViaWebClient() throws Exception {
+    void testPromotionProcessViaWebClient(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
-        
+
         ExtensionList<Descriptor> list = j.jenkins.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(p);
@@ -98,8 +92,8 @@ public class ManualConditionBug22005 {
         createPromotionProcess(base, "PROM0");
         createPromotionProcess(base, "PROM1");
         createPromotionProcess(base, "PROM2");
-        
-        
+
+
         FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         assertNull(b1.getAction(ManualApproval.class));
         HtmlPage page=j.createWebClient().getPage(b1, "promotion");
@@ -108,9 +102,9 @@ public class ManualConditionBug22005 {
         assertFalse(forms.isEmpty());
         assertEquals(3, forms.size());
         for (HtmlForm form:forms){
-        	submit(form);
+        	j.submit(form);
         }
-        
+
         //reload promotions page
         page=j.createWebClient().getPage(b1, "promotion");
         forms=ManualConditionTest.getFormsByName(page,"build");

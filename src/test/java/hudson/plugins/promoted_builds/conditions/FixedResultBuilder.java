@@ -1,5 +1,6 @@
 package hudson.plugins.promoted_builds.conditions;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
@@ -24,7 +25,7 @@ import java.io.IOException;
  */
 public class FixedResultBuilder extends Builder {
 
-    private Result buildResult;
+    private final Result buildResult;
 
     @DataBoundConstructor
     public FixedResultBuilder(Result buildResult) {
@@ -59,6 +60,7 @@ public class FixedResultBuilder extends Builder {
             return true;
         }
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return null;

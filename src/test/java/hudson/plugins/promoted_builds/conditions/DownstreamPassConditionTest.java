@@ -23,9 +23,9 @@
  */
 package hudson.plugins.promoted_builds.conditions;
 
-import static org.junit.Assert.*;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
@@ -37,15 +37,14 @@ import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.plugins.promoted_builds.Status;
 import hudson.tasks.BuildTrigger;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public final class DownstreamPassConditionTest {
-
-    @Rule
-    public JenkinsRule j =  new JenkinsRule();
+@WithJenkins
+class DownstreamPassConditionTest {
 
     @Test
     @Issue("JENKINS-7739")
-    public void shouldEvaluateUpstreamRecursively() throws Exception {
+    void shouldEvaluateUpstreamRecursively(JenkinsRule j) throws Exception {
         final FreeStyleProject job1 = j.createFreeStyleProject("job1");
         final FreeStyleProject job2 = j.createFreeStyleProject("job2");
         final FreeStyleProject job3 = j.createFreeStyleProject("job3");
@@ -67,15 +66,15 @@ public final class DownstreamPassConditionTest {
         final FreeStyleBuild run3 = j.assertBuildStatusSuccess(job3.getLastBuild());
         j.waitUntilNoActivity();
 
-        assertEquals("fingerprint relation", run3.getUpstreamRelationship(job1), -1);
-        assertFalse("no promotion process", process.getBuilds().isEmpty());
+        assertEquals(-1, run3.getUpstreamRelationship(job1), "fingerprint relation");
+        assertFalse(process.getBuilds().isEmpty(), "no promotion process");
 
         final PromotedBuildAction action = run1.getAction(PromotedBuildAction.class);
-        assertNotNull("no promoted action", action);
+        assertNotNull(action, "no promoted action");
 
         final Status promotion = action.getPromotion("promotion");
-        assertNotNull("promotion not found", promotion);
-        assertTrue("promotion not successful", promotion.isPromotionSuccessful());
+        assertNotNull(promotion, "promotion not found");
+        assertTrue(promotion.isPromotionSuccessful(), "promotion not successful");
     }
 
 }

@@ -1,22 +1,21 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
-import org.junit.Test;
-
 import com.thoughtworks.xstream.XStream;
 
 import hudson.util.XStream2;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.notNullValue;
 
-public class JobDslManualConditionConverterTest {
-    
+class JobDslManualConditionConverterTest {
+
     private static final XStream XSTREAM = new XStream2();
-    
+
     @Test
-    public void testShouldGenerateValidXml() throws Exception {
+    void testShouldGenerateValidXml() {
         //Given
         JobDslManualCondition mc = new JobDslManualCondition();
         mc.setUsers("testusers");

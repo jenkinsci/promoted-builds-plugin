@@ -17,29 +17,26 @@ import hudson.tasks.Recorder;
 import hudson.tasks.Shell;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import net.sf.json.JSONObject;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.Stapler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import static hudson.plugins.promoted_builds.util.ItemListenerHelper.fireItemListeners;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class PromotionProcessTest {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class PromotionProcessTest {
 
     @Test
-    public void test1() throws Exception {
+    void test1(JenkinsRule j) throws Exception {
         FreeStyleProject up = j.createFreeStyleProject("up");
         FreeStyleProject down = j.createFreeStyleProject();
 
@@ -65,9 +62,9 @@ public class PromotionProcessTest {
         down.getBuildersList().add(Functions.isWindows()
                 ? new BatchFile("curl --remote-name "+artifactUrl+"\r\n"+
                         "set /a \"exitCode=BUILD_NUMBER%%2\"\r\n"+
-                        "exit /b %exitCode%\r\n")
+                        "exit /b %exitCode%")
                 : new Shell("wget "+artifactUrl+" || curl --remote-name "+artifactUrl+"\n"+
-                        "expr $BUILD_NUMBER % 2 - 1\n") // expr exits with non-zero status if result is zero
+                        "expr $BUILD_NUMBER % 2 - 1") // expr exits with non-zero status if result is zero
         );
         down.getPublishersList().replaceBy(recorders);
 
@@ -100,7 +97,7 @@ public class PromotionProcessTest {
      * Tests a promotion induced by the pseudo upstream/downstream cause relationship
      */
     @Test
-    public void testPromotionWithoutFingerprint() throws Exception {
+    void testPromotionWithoutFingerprint(JenkinsRule j) throws Exception {
         FreeStyleProject up = j.createFreeStyleProject("up");
         FreeStyleProject down = j.createFreeStyleProject();
 
@@ -116,19 +113,21 @@ public class PromotionProcessTest {
 
         // this is the downstream job
         down.getBuildersList().add(Functions.isWindows()
-                ? new BatchFile("set /a \"exitCode=BUILD_NUMBER%%2\"\r\n"+
-                        "exit /b %exitCode%\r\n")
-                : new Shell("expr $BUILD_NUMBER % 2 - 1\n")  // expr exits with non-zero status if result is zero
+                ? new BatchFile("""
+										set /a "exitCode=BUILD_NUMBER%%2"
+										exit /b %exitCode%
+										""")
+                : new Shell("expr $BUILD_NUMBER % 2 - 1")  // expr exits with non-zero status if result is zero
         );
 
         // not yet promoted while the downstream is failing
         FreeStyleBuild up1 = j.assertBuildStatusSuccess(up.scheduleBuild2(0).get());
-        waitForCompletion(down,1);
+        waitForCompletion(j, down,1);
         assertEquals(0,proc.getBuilds().size());
 
         // do it one more time and this time it should work
         FreeStyleBuild up2 = j.assertBuildStatusSuccess(up.scheduleBuild2(0).get());
-        waitForCompletion(down,2);
+        waitForCompletion(j, down,2);
         assertEquals(1,proc.getBuilds().size());
 
         {// verify that it promoted the right stuff
@@ -139,7 +138,7 @@ public class PromotionProcessTest {
         }
     }
 
-    private void waitForCompletion(FreeStyleProject down, int n) throws Exception {
+    private void waitForCompletion(JenkinsRule j, FreeStyleProject down, int n) throws Exception {
         // wait for the build completion
         while (down.getBuildByNumber(n)==null)
             Thread.sleep(100);
@@ -148,7 +147,7 @@ public class PromotionProcessTest {
     }
 
     @Test
-    public void testCaptureXml() throws Exception {
+    void testCaptureXml(JenkinsRule j) throws Exception {
         j.executeOnServer(() -> {
             JSONObject o = new JSONObject()
                     .accumulate("name", "foo")
@@ -169,7 +168,7 @@ public class PromotionProcessTest {
     }
 
     @Test
-    public void testIsVisibleByDefault() throws Exception {
+    void testIsVisibleByDefault(JenkinsRule j) throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("project");
         JobPropertyImpl jobProperty = new JobPropertyImpl(project);
         project.addProperty(jobProperty);
@@ -178,7 +177,7 @@ public class PromotionProcessTest {
     }
 
     @Test
-    public void testIsVisibleFalseReturnsNotVisible() throws Exception{
+    void testIsVisibleFalseReturnsNotVisible(JenkinsRule j) throws Exception{
         FreeStyleProject project = j.createFreeStyleProject("project");
         JobPropertyImpl jobProperty = new JobPropertyImpl(project);
         project.addProperty(jobProperty);
@@ -188,7 +187,7 @@ public class PromotionProcessTest {
     }
 
     @Test
-    public void testIsVisibleTrueReturnsVisible() throws Exception{
+    void testIsVisibleTrueReturnsVisible(JenkinsRule j) throws Exception{
         FreeStyleProject project = j.createFreeStyleProject("project");
         JobPropertyImpl jobProperty = new JobPropertyImpl(project);
         project.addProperty(jobProperty);
@@ -198,9 +197,9 @@ public class PromotionProcessTest {
     }
 
     @Test
-    public void testIsVisibleResolvesDefaultParameterValue() throws Exception{
+    void testIsVisibleResolvesDefaultParameterValue(JenkinsRule j) throws Exception{
         FreeStyleProject project = j.createFreeStyleProject("project");
-        final List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        final List<ParameterDefinition> parameters = new ArrayList<>();
         ParametersDefinitionProperty parametersProperty = new ParametersDefinitionProperty(parameters);
         parameters.add(new StringParameterDefinition("Visibility", "false"));
         project.addProperty(parametersProperty);
@@ -212,9 +211,9 @@ public class PromotionProcessTest {
     }
 
     @Test
-    public void testIsVisibleResolvesDefaultParameterValueIndirectly() throws Exception{
+    void testIsVisibleResolvesDefaultParameterValueIndirectly(JenkinsRule j) throws Exception{
         FreeStyleProject project = j.createFreeStyleProject("project");
-        final List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        final List<ParameterDefinition> parameters = new ArrayList<>();
         ParametersDefinitionProperty parametersProperty = new ParametersDefinitionProperty(parameters);
         parameters.add(new StringParameterDefinition("IndirectVisibility", "false"));
         parameters.add(new StringParameterDefinition("Visibility", "${IndirectVisibility}"));
