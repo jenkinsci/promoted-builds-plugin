@@ -23,6 +23,7 @@
  */
 package hudson.plugins.promoted_builds.tokenmacro;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -31,7 +32,6 @@ import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.ParameterValue;
 import hudson.model.StringParameterDefinition;
 import hudson.model.StringParameterValue;
 import hudson.model.TaskListener;
@@ -46,30 +46,30 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
+
 import org.acegisecurity.context.SecurityContextHolder;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-import static org.junit.Assert.assertEquals;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockFolder;
 import org.jvnet.hudson.test.TestExtension;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for {@link PromotedEnvVarTokenMacro}.
  * @author Oleg Nenashev
  */
-public class PromotedEnvVarTokenMacroTest {
-
-    @Rule
-    public final JenkinsRule r = new JenkinsRule();
+@WithJenkins
+class PromotedEnvVarTokenMacroTest {
 
     @Test
-    public void testEnvironmentVariableExpansion() throws Exception {
+    void testEnvironmentVariableExpansion(JenkinsRule r) throws Exception {
         // Assemble
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         User u = User.get("foo");
@@ -79,41 +79,39 @@ public class PromotedEnvVarTokenMacroTest {
 
         MockFolder parent = r.createFolder("Folder");
         FreeStyleProject project = parent.createProject(FreeStyleProject.class, "Project");
-        
+
         JobPropertyImpl promotionProperty = new JobPropertyImpl(project);
         PromotionProcess promotionProcess = promotionProperty.addProcess("promo");
         promotionProcess.conditions.clear();
         ManualCondition manualCondition = new ManualCondition();
         manualCondition.getParameterDefinitions().add(new StringParameterDefinition("PROMOTION_PARAM", "defaultValue"));
         promotionProcess.conditions.add(manualCondition);
-        Action approvalAction = new ManualCondition.ManualApproval(promotionProcess.getName(), 
-                new LinkedList<ParameterValue>());
+        Action approvalAction = new ManualCondition.ManualApproval(promotionProcess.getName(),
+		        new LinkedList<>());
         TokenMacroExpressionRecorder recorder = new TokenMacroExpressionRecorder("${PROMOTION_ENV,var=\"PROMOTION_PARAM\"}");
         promotionProcess.getBuildSteps().add(recorder);
-        
+
         // Act & promote
         FreeStyleBuild build = project.scheduleBuild2(0).get();
         build.addAction(approvalAction);
-        build.save();     
-        Promotion promotion = promotionProcess.considerPromotion2(build, 
-                Arrays.asList((ParameterValue)new StringParameterValue("PROMOTION_PARAM", "FOO"))).get();      
+        build.save();
+        Promotion promotion = promotionProcess.considerPromotion2(build,
+		        List.of(new StringParameterValue("PROMOTION_PARAM", "FOO"))).get();
 
         // Check results
         EnvVars env = promotion.getEnvironment(TaskListener.NULL);
-        assertEquals("The PROMOTION_PARAM variable has not been injected"
-                , "FOO", env.get("PROMOTION_PARAM"));
-        assertEquals("The promotion variable value has not been resolved by the PROMOTION_PARAM macro"
-                , "FOO", recorder.getCaptured());
+        assertEquals("FOO", env.get("PROMOTION_PARAM"), "The PROMOTION_PARAM variable has not been injected");
+        assertEquals("FOO", recorder.getCaptured(), "The promotion variable value has not been resolved by the PROMOTION_PARAM macro");
     }
-    
+
     private static class TokenMacroExpressionRecorder extends Recorder {
 
         private final String expression;
-        private transient String captured; 
-        
+        private transient String captured;
+
         @DataBoundConstructor
         public TokenMacroExpressionRecorder(String expression) {
-            
+
             this.expression = expression;
         }
 
@@ -124,14 +122,14 @@ public class PromotedEnvVarTokenMacroTest {
         public String getExpression() {
             return expression;
         }
-        
+
         @Override
         public BuildStepMonitor getRequiredMonitorService() {
             return BuildStepMonitor.NONE;
         }
 
         @Override
-        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) 
+        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
                 throws InterruptedException, IOException {
             if (build instanceof Promotion) {
                 // TODO: It seems to be a bug in the test suite
@@ -139,9 +137,9 @@ public class PromotedEnvVarTokenMacroTest {
                 return performWithParentBuild(build, listener);
             }
             return false;
-        }     
-        
-        private boolean performWithParentBuild(AbstractBuild<?, ?> build, BuildListener listener) 
+        }
+
+        private boolean performWithParentBuild(AbstractBuild<?, ?> build, BuildListener listener)
                 throws InterruptedException, IOException {
             try {
                 captured = TokenMacro.expand(build, listener, expression);
@@ -150,7 +148,7 @@ public class PromotedEnvVarTokenMacroTest {
             }
             return true;
         }
-        
+
         @TestExtension("testEnvironmentVariableExpansion")
         public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
@@ -159,10 +157,11 @@ public class PromotedEnvVarTokenMacroTest {
                 return true;
             }
 
+            @NonNull
             @Override
             public String getDisplayName() {
                 return "Perform Token Macro expression using the parent build";
-            }   
+            }
         }
     }
 }

@@ -13,23 +13,21 @@ import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotedBuildAction;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.plugins.promoted_builds.PromotionProcess;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class SelfPromotionTest {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class SelfPromotionTest {
 
     @Test
-    public void testBasic() throws Exception {
+    void testBasic(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
         // promote if the downstream passes
@@ -68,7 +66,7 @@ public class SelfPromotionTest {
     }
 
     @Test
-    public void testUnstable() throws Exception {
+    void testUnstable(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
         // promote if the downstream passes
@@ -107,7 +105,7 @@ public class SelfPromotionTest {
     }
 
     @Test
-    public void testFailure() throws Exception {
+    void testFailure(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
 
         // promote if the downstream passes
@@ -136,18 +134,18 @@ public class SelfPromotionTest {
         Thread.sleep(1000);
 
         // verify that neither promotions happened
-        assertTrue("promo1 did not occur", promo1.getBuilds().isEmpty());
-        assertTrue("promo2 did not occur", promo2.getBuilds().isEmpty());
+        assertTrue(promo1.getBuilds().isEmpty(), "promo1 did not occur");
+        assertTrue(promo2.getBuilds().isEmpty(), "promo2 did not occur");
 
         PromotedBuildAction badge = (PromotedBuildAction) b.getBadgeActions().get(0);
         assertFalse(badge.contains(promo1));
         assertFalse(badge.contains(promo2));
     }
 
+    // @Issue("JENKINS-34826") // Can be reproduced in Jenkins 2.3 +
     @Issue("JENKINS-22679")
     @Test
-    // @Issue("JENKINS-34826") // Can be reproduced in Jenkins 2.3 +
-    public void testPromotionEnvironmentShouldIncludeTargetParameters() throws Exception {
+    void testPromotionEnvironmentShouldIncludeTargetParameters(JenkinsRule j) throws Exception {
         String paramName = "param";
 
         FreeStyleProject p = j.createFreeStyleProject();

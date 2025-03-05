@@ -5,27 +5,24 @@ import org.htmlunit.html.HtmlPage;
 import hudson.model.Cause.UserCause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.util.IOException2;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class PromotedBuildActionTest {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class PromotedBuildActionTest {
 
     @Test
-    public void testDeletedPromotionProcess() throws Exception {
+    void testDeletedPromotionProcess(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         JobPropertyImpl base = new JobPropertyImpl(p);
         p.addProperty(base);
@@ -44,14 +41,13 @@ public class PromotedBuildActionTest {
         HtmlPage page = j.createWebClient().getPage(p);
         List<?> candidates = page.getByXPath("//IMG");
         for (Object candidate : candidates) {
-            if (!(candidate instanceof HtmlImage)) {
+            if (!(candidate instanceof HtmlImage img)) {
                 continue;
-            } 
-            HtmlImage img = (HtmlImage)candidate;
-            try {
-                assertEquals("Failed to load " + img.getSrcAttribute(),
-                        200,
-                        img.getWebResponse(true).getStatusCode());
+            }
+	        try {
+                assertEquals(200,
+                        img.getWebResponse(true).getStatusCode(),
+                        "Failed to load " + img.getSrcAttribute());
             } catch (IOException e) {
                 throw new AssertionError("Failed to load " + img.getSrcAttribute());
             }

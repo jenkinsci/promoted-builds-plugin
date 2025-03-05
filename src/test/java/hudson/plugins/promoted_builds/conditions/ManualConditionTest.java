@@ -33,36 +33,28 @@ import hudson.model.StringParameterValue;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.acegisecurity.context.SecurityContext;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.htmlunit.html.HtmlFormUtil.submit;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
+@WithJenkins
 public class ManualConditionTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
-
 	public static List<HtmlForm> getFormsByName(HtmlPage page, String name){
-        List<HtmlForm> forms=new ArrayList<HtmlForm>();
+        List<HtmlForm> forms= new ArrayList<>();
         for (HtmlForm f:page.getForms()){
         	if (name.equals(f.getNameAttribute())){
         		forms.add(f);
@@ -70,84 +62,85 @@ public class ManualConditionTest {
         }
         return forms;
 	}
-	public static List<HtmlElement> getFormParameters(HtmlForm form){
+
+    public static List<HtmlElement> getFormParameters(HtmlForm form){
 		return form.getElementsByAttribute("div", "name", "parameter");
 	}
 
-	@Test
-    public void testManualPromotionProcess() throws Exception {
+    @Test
+    void testManualPromotionProcess(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
-        
+
         ExtensionList<Descriptor> list = j.jenkins.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(p);
         p.addProperty(base);
         PromotionProcess foo = base.addProcess("foo");
-        
+
         ManualCondition condition=new ManualCondition();
         condition.getParameterDefinitions().add(new StringParameterDefinition("bogus_string_param_1", "bogus_value_1", "Bog parameter"));
         condition.getParameterDefinitions().add(new StringParameterDefinition("bogus_string_param_2", "bogus_value_2", "Bog parameter"));
         foo.conditions.add(condition);
-        
+
         FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        
+
         // promote a build
-        
+
         List<ParameterValue> paramValues = condition.createDefaultValues();
         //try to add duplicate values
         paramValues.addAll(condition.createDefaultValues());
-        
+
         j.assertBuildStatusSuccess(condition.approve(b1, foo, paramValues));
         ManualApproval manualApproval=b1.getAction(ManualApproval.class);
         assertNotNull(manualApproval);
-        
+
         PromotedBuildAction statuses=b1.getAction(PromotedBuildAction.class);
         assertNotNull(statuses);
         assertNotNull(statuses.getPromotions());
         assertFalse(statuses.getPromotions().isEmpty());
     }
-    
-    @Issue("SECURITY-170")
-    @Test
+
     /**
      * Verify that the plugin is tolerant against SECURITY-170 in Manual conditions
      */
-    public void testManualPromotionProcessWithInvalidParam() throws Exception {
+    @Issue("SECURITY-170")
+    @Test
+    void testManualPromotionProcessWithInvalidParam(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         ExtensionList<Descriptor> list = j.jenkins.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(p);
         p.addProperty(base);
         PromotionProcess foo = base.addProcess("foo");
-        
+
         ManualCondition condition=new ManualCondition();
         condition.getParameterDefinitions().add(new StringParameterDefinition("FOO", "BAR", "Test parameter"));
         foo.conditions.add(condition);
-        
+
         FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        
-        // Promote a build. Also add one invalid parameter 
+
+        // Promote a build. Also add one invalid parameter
         List<ParameterValue> paramValues = condition.createDefaultValues();
         paramValues.add(new StringParameterValue("INVALID_PARAM", "hacked!"));
         j.assertBuildStatusSuccess(condition.approve(b1, foo, paramValues));
         ManualApproval manualApproval = b1.getAction(ManualApproval.class);
         assertNotNull(manualApproval);
         List<ParameterValue> parameterValues = manualApproval.badge.getParameterValues();
-        
+
         // Verify that the build succeeds && has no INVALID_PARAM
         PromotedBuildAction statuses=b1.getAction(PromotedBuildAction.class);
         assertNotNull(statuses);
         assertNotNull(statuses.getPromotions());
         assertFalse(statuses.getPromotions().isEmpty());
         Promotion pb = base.getItem("foo").getBuildByNumber(1);
-        assertNotNull("INVALID_PARAM should not be injected into the environment", 
-                pb.getEnvironment(TaskListener.NULL).get("INVALID_PARAM", null));
+        assertNotNull(pb.getEnvironment(TaskListener.NULL).get("INVALID_PARAM", null),
+                "INVALID_PARAM should not be injected into the environment");
     }
 
     @Test
-    public void testManualPromotionProcessViaWebClient() throws Exception {
+    void testManualPromotionProcessViaWebClient(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
-        
+
         ExtensionList<Descriptor> list = j.jenkins.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base =  new JobPropertyImpl(p);
@@ -157,7 +150,7 @@ public class ManualConditionTest {
         condition.getParameterDefinitions().add(new StringParameterDefinition("bogus_string_param_1", "bogus_value_1", "Bog parameter"));
         condition.getParameterDefinitions().add(new StringParameterDefinition("bogus_string_param_2", "bogus_value_2", "Bog parameter"));
         foo.conditions.add(condition);
-        
+
         FreeStyleBuild b1 = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         assertNull(b1.getAction(ManualApproval.class));
         HtmlPage page=j.createWebClient().getPage(b1, "promotion");
@@ -165,7 +158,7 @@ public class ManualConditionTest {
         List<HtmlForm> forms=getFormsByName(page, "approve");
         assertFalse(forms.isEmpty());
         assertEquals(1, forms.size());
-        
+
         HtmlForm form=forms.get(0);
         List<HtmlElement> parameters=getFormParameters(form);
         assertEquals(parameters.size(), condition.getParameterDefinitions().size());
@@ -173,14 +166,14 @@ public class ManualConditionTest {
             HtmlInput v = (HtmlInput) param.getElementsByAttribute("input", "name", "value").get(0);
             v.setValue(v.getValue() + "1");
         }
-        submit(forms.get(0));
-        
+        j.submit(forms.get(0));
+
         ManualApproval approval=b1.getAction(ManualApproval.class);
         assertNotNull(approval);
         SortedMap<Integer, Promotion> builds=foo.getBuildsAsMap();
         assertNotNull(builds);
         assertEquals(1, builds.size());
-        
+
         //Re-Execute approved promotion
         page=j.createWebClient().getPage(b1, "promotion");
         forms=getFormsByName(page,"build");
@@ -189,51 +182,50 @@ public class ManualConditionTest {
         form=forms.get(0);
         parameters=getFormParameters(form);
         assertEquals(parameters.size(), condition.getParameterDefinitions().size());
-        
+
         for(HtmlElement param:parameters){
             HtmlInput v = (HtmlInput) param.getElementsByAttribute("input", "name", "value").get(0);
             v.setValue(v.getValue() + "2");
         }
-        submit(form);
-        
+        j.submit(form);
+
         builds=foo.getBuildsAsMap();
         assertEquals(2, builds.size());
         List<ManualApproval> actions=b1.getActions(ManualApproval.class);
         assertEquals(1, actions.size());
-        
+
         PromotedBuildAction buildActions=b1.getAction(PromotedBuildAction.class);
         int buildIndex=1;
         String valueSufix="1";
-        List<Promotion> promotions=new ArrayList<Promotion>();
-        promotions.addAll(builds.values());
-        
+	    List<Promotion> promotions = new ArrayList<>(builds.values());
+
         Collections.reverse(promotions);
         for (Promotion build:promotions){
         	List<ParameterDefinition> values=build.getParameterDefinitionsWithValue();
                 assertEquals(values.size(), condition.getParameterDefinitions().size());
         	for (ParameterDefinition v:values){
-        		assertTrue(v instanceof StringParameterDefinition);
+                assertInstanceOf(StringParameterDefinition.class, v);
         		String pvalue=((StringParameterDefinition)v).getDefaultValue();
         		assertTrue(pvalue.endsWith(valueSufix));
         	}
         	buildIndex++;
         	valueSufix+=buildIndex;
         }
-        
+
         for (Status status:buildActions.getPromotions()){
-        	assertNotNull(status.getLast()!=null);
+        	assertNotNull(status.getLast());
         	List<ParameterDefinition> values=status.getLast().getParameterDefinitionsWithValue();
                 assertEquals(values.size(), condition.getParameterDefinitions().size());
         }
-        
+
     }
 
     @Test
     @Issue("SECURITY-190")
-    public void testManualPromotionPermissions() throws Exception {
+    void testManualPromotionPermissions(JenkinsRule j) throws Exception {
         enableSecurity(j);
         FreeStyleProject p = j.createFreeStyleProject();
-        PromotionProcess pp = addPromotionProcess(p, "foo");
+        PromotionProcess pp = addPromotionProcess(j, p, "foo");
         ManualCondition cond = new ManualCondition();
         pp.conditions.add(cond);
 
@@ -284,12 +276,13 @@ public class ManualConditionTest {
         }
     }
 
+    // TODO figure out a good way to test this with SECURITY-2293
     @Test
-    @Ignore // TODO figure out a good way to test this with SECURITY-2293
-    public void testManualPromotionPermissionsViaWebClient() throws Exception {
+    @Disabled
+    void testManualPromotionPermissionsViaWebClient(JenkinsRule j) throws Exception {
         enableSecurity(j);
         FreeStyleProject p = j.createFreeStyleProject();
-        PromotionProcess pp = addPromotionProcess(p, "foo");
+        PromotionProcess pp = addPromotionProcess(j, p, "foo");
         WebClient wc = j.createWebClient();
 
         FreeStyleBuild b = j.assertBuildStatusSuccess(p.scheduleBuild2(0));
@@ -340,7 +333,7 @@ public class ManualConditionTest {
             assertThat(pp.getBuildByNumber(4), nullValue());
         }
     }
-    
+
     private Promotion waitForBuildByNumber(PromotionProcess pp, int n) throws InterruptedException {
         for(int i = 0; i < 100; i++){
             Promotion promotion = pp.getBuildByNumber(n);
@@ -352,7 +345,7 @@ public class ManualConditionTest {
         throw new AssertionError("Timeout to retrieve the buildByNumber: " + n);
     }
 
-    private PromotionProcess addPromotionProcess(AbstractProject<?,?> owner, String name) throws Exception {
+    private PromotionProcess addPromotionProcess(JenkinsRule j, AbstractProject<?,?> owner, String name) throws Exception {
         ExtensionList<Descriptor> list = j.jenkins.getExtensionList(Descriptor.class);
         list.add(new JobPropertyImpl.DescriptorImpl(JobPropertyImpl.class));
         JobPropertyImpl base = new JobPropertyImpl(owner);

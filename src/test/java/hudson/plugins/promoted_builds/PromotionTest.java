@@ -35,25 +35,21 @@ import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.tasks.BatchFile;
 import hudson.tasks.Shell;
 import org.hamcrest.CoreMatchers;
-import org.junit.Test;
-import org.junit.Rule;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.net.URL;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class PromotionTest {
-
-    @Rule
-    public JenkinsRule r = new JenkinsRule();
+@WithJenkins
+class PromotionTest {
 
     @Test
-    public void testRebuildPromotionThrowsException() throws Exception {
+    void testRebuildPromotionThrowsException(JenkinsRule r) throws Exception {
         FreeStyleProject p = r.createFreeStyleProject("proj1");
 
         JobPropertyImpl promotion = new JobPropertyImpl(p);
@@ -78,7 +74,7 @@ public class PromotionTest {
                     , HttpMethod.POST)));
             fail("rebuilding a promotion directly should fail");
         } catch (FailingHttpStatusCodeException x) {
-            assertEquals("wrong status code", 404, x.getStatusCode());
+            assertEquals(404, x.getStatusCode(), "wrong status code");
             //TODO(oleg_nenashev): Another error will be returned since 2.107. As long as URL is rejected, we do not really care much
             // assertNotEquals("unexpected content", -1, x.getResponse().getContentAsString().indexOf("Promotions may not be rebuilt directly"));
         }
@@ -86,7 +82,7 @@ public class PromotionTest {
 
     @Test
     @Issue("JENKINS-59600")
-    public void testPromotionLog() throws Exception {
+    void testPromotionLog(JenkinsRule r) throws Exception {
         FreeStyleProject p = r.createFreeStyleProject("proj1");
 
         JobPropertyImpl promotion = new JobPropertyImpl(p);

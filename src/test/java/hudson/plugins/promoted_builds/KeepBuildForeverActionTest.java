@@ -14,30 +14,26 @@ import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.Fingerprinter;
 import hudson.tasks.Recorder;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import static hudson.plugins.promoted_builds.util.ItemListenerHelper.fireItemListeners;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class KeepBuildForeverActionTest {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class KeepBuildForeverActionTest {
 
     @Test
-    public void testCanMarkBuildKeepForever() throws Exception {
-        FreeStyleProject upJob = createProject("up");
+    void testCanMarkBuildKeepForever(JenkinsRule j) throws Exception {
+        FreeStyleProject upJob = createProject(j, "up");
         upJob.getBuildersList().add(successfulBuilder());
-        FreeStyleProject downJob = createProject("down");
+        FreeStyleProject downJob = createProject(j, "down");
         downJob.getBuildersList().add(successfulBuilder());
 
         PromotionProcess promotionJob = createDownstreamSuccessPromotion(upJob, downJob);
@@ -48,17 +44,17 @@ public class KeepBuildForeverActionTest {
 
         FreeStyleBuild upBuild = j.assertBuildStatusSuccess(upJob.scheduleBuild2(0).get());
         assertFalse(upBuild.isKeepLog());
-        
+
         j.assertBuildStatusSuccess(downJob.scheduleBuild2(0).get());
         waitForBuild(promotionJob, 1);
         assertTrue(upBuild.isKeepLog());
     }
 
     @Test
-    public void testDoesNotMarkBuildIfPromotionNotGoodEnough() throws Exception {
-        FreeStyleProject upJob = createProject("up");
+    void testDoesNotMarkBuildIfPromotionNotGoodEnough(JenkinsRule j) throws Exception {
+        FreeStyleProject upJob = createProject(j, "up");
         upJob.getBuildersList().add(successfulBuilder());
-        FreeStyleProject downJob = createProject("down");
+        FreeStyleProject downJob = createProject(j, "down");
         downJob.getBuildersList().add(successfulBuilder());
 
         PromotionProcess promotionJob = createDownstreamSuccessPromotion(upJob, downJob);
@@ -70,17 +66,17 @@ public class KeepBuildForeverActionTest {
 
         FreeStyleBuild upBuild = j.assertBuildStatusSuccess(upJob.scheduleBuild2(0).get());
         assertFalse(upBuild.isKeepLog());
-        
+
         j.assertBuildStatusSuccess(downJob.scheduleBuild2(0).get());
         waitForBuild(promotionJob, 1);
         assertFalse(upBuild.isKeepLog());
     }
 
     @Test
-    public void testDoesNotCareAboutResultOfOriginalBuild() throws Exception {
-        FreeStyleProject upJob = createProject("up");
+    void testDoesNotCareAboutResultOfOriginalBuild(JenkinsRule j) throws Exception {
+        FreeStyleProject upJob = createProject(j, "up");
         upJob.getBuildersList().add(new FixedResultBuilder(Result.FAILURE));
-        FreeStyleProject downJob = createProject("down");
+        FreeStyleProject downJob = createProject(j, "down");
         downJob.getBuildersList().add(successfulBuilder());
 
         PromotionProcess promotionJob = createDownstreamSuccessPromotion(upJob, downJob);
@@ -91,15 +87,15 @@ public class KeepBuildForeverActionTest {
 
         FreeStyleBuild upBuild = j.assertBuildStatus(Result.FAILURE, upJob.scheduleBuild2(0).get());
         assertFalse(upBuild.isKeepLog());
-        
+
         j.assertBuildStatusSuccess(downJob.scheduleBuild2(0).get());
         waitForBuild(promotionJob, 1);
         assertTrue(upBuild.isKeepLog());
     }
 
     @Test
-    public void testDoesNotMarkBuildIfBuildNotPromotion() throws Exception {
-        FreeStyleProject job = createProject("job");
+    void testDoesNotMarkBuildIfBuildNotPromotion(JenkinsRule j) throws Exception {
+        FreeStyleProject job = createProject(j, "job");
         job.getBuildersList().add(successfulBuilder());
         job.getPublishersList().add(new KeepBuildForeverAction());
 
@@ -111,9 +107,7 @@ public class KeepBuildForeverActionTest {
     }
 
     private void waitForBuild(final Job job, final int buildNumber) throws Exception {
-        waitFor(() -> {
-            return (job.getBuildByNumber(buildNumber) != null) && !job.getBuildByNumber(buildNumber).isBuilding();
-        }, 2000);
+        waitFor(() -> (job.getBuildByNumber(buildNumber) != null) && !job.getBuildByNumber(buildNumber).isBuilding(), 2000);
     }
 
     private void waitFor(final WaitCondition condition, long timeout) throws Exception {
@@ -141,13 +135,13 @@ public class KeepBuildForeverActionTest {
         promotionJob.conditions.add(new DownstreamPassCondition(downStream.getName()));
         return promotionJob;
     }
-    
-    private FreeStyleProject createProject(String name) throws Exception {
+
+    private FreeStyleProject createProject(JenkinsRule j, String name) throws Exception {
         FreeStyleProject project = j.createFreeStyleProject(name);
         project.getPublishersList().replaceBy(createFingerprinters());
         return project;
     }
-    
+
     private List<Recorder> createFingerprinters() {
         Recorder r1 = new ArtifactArchiver("*", null, false);
         Recorder r2 = new Fingerprinter("", true);
@@ -157,13 +151,13 @@ public class KeepBuildForeverActionTest {
     private FixedResultBuilder successfulBuilder() {
         return new FixedResultBuilder(Result.SUCCESS);
     }
-    
+
     public interface WaitCondition {
         boolean isMet();
     }
-    
+
     public static class FixedResultBuilder extends TestBuilder {
-        private Result buildResult;
+        private final Result buildResult;
         FixedResultBuilder(Result buildResult) {
             this.buildResult = buildResult;
         }
@@ -178,5 +172,5 @@ public class KeepBuildForeverActionTest {
             return true;
         }
     }
-    
+
 }

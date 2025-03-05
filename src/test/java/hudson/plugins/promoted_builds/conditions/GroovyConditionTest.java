@@ -5,17 +5,18 @@ import hudson.model.FreeStyleProject;
 import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class GroovyConditionTest {
-    @Rule
-    public JenkinsRule j =  new JenkinsRule();
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+@WithJenkins
+class GroovyConditionTest {
 
     @Test
-    public void testBooleanScript() throws Exception {
+    void testBooleanScript(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         final JobPropertyImpl property = new JobPropertyImpl(p);
 
@@ -29,12 +30,12 @@ public class GroovyConditionTest {
 
         final FreeStyleBuild build = j.buildAndAssertSuccess(p);
 
-        Assert.assertNotNull("Promotion was expected", promotionProcessTrue.isMet(build));
-        Assert.assertNull("Promotion was not expected", promotionProcessFalse.isMet(build));
+        assertNotNull(promotionProcessTrue.isMet(build), "Promotion was expected");
+        assertNull(promotionProcessFalse.isMet(build), "Promotion was not expected");
     }
 
     @Test
-    public void testMapScript() throws Exception {
+    void testMapScript(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         final JobPropertyImpl property = new JobPropertyImpl(p);
 
@@ -48,12 +49,12 @@ public class GroovyConditionTest {
 
         final FreeStyleBuild build = j.buildAndAssertSuccess(p);
 
-        Assert.assertNull("Promotion was not expected", promotionProcessEmptyMap.isMet(build));
-        Assert.assertNotNull("Promotion was expected", promotionProcessNonEmptyMap.isMet(build));
+        assertNull(promotionProcessEmptyMap.isMet(build), "Promotion was not expected");
+        assertNotNull(promotionProcessNonEmptyMap.isMet(build), "Promotion was expected");
     }
 
     @Test
-    public void testBinding() throws Exception {
+    void testBinding(JenkinsRule j) throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         final JobPropertyImpl property = new JobPropertyImpl(p);
 
@@ -75,6 +76,6 @@ public class GroovyConditionTest {
 
         final FreeStyleBuild build = j.buildAndAssertSuccess(p);
 
-        Assert.assertNotNull("Promotion was expected", promotionProcess.isMet(build));
+        assertNotNull(promotionProcess.isMet(build), "Promotion was expected");
     }
 }

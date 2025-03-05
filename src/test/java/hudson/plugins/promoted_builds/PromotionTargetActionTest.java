@@ -2,33 +2,35 @@ package hudson.plugins.promoted_builds;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.ParameterValue;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.plugins.promoted_builds.conditions.ManualCondition.ManualApproval;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
+import java.io.File;
 import java.util.Collections;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class PromotionTargetActionTest {
+@WithJenkins
+class PromotionTargetActionTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    @TempDir
+    private File tmp;
 
     /**
      * When a project is created, built, and renamed, then the old build is created,
      * that results in NPE.
      */
     @Test
-    public void test1() throws Exception {
+    void test1(JenkinsRule j) throws Exception {
         FreeStyleProject up = j.createFreeStyleProject("up");
-        up.setCustomWorkspace(j.createTmpDir().getPath());
+        up.setCustomWorkspace(tmp.getPath());
 
         // promote if the downstream passes
         JobPropertyImpl promotion = new JobPropertyImpl(up);
@@ -38,7 +40,7 @@ public class PromotionTargetActionTest {
 
         FreeStyleBuild b = j.assertBuildStatusSuccess(up.scheduleBuild2(0));
 
-        b.addAction(new ManualApproval(proc.getName(), Collections.<ParameterValue>emptyList()));
+        b.addAction(new ManualApproval(proc.getName(), Collections.emptyList()));
         b.save();
 
         // check for promotion

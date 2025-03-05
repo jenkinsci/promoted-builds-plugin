@@ -23,27 +23,25 @@
  */
 package hudson.plugins.promoted_builds;
 
-import org.htmlunit.html.HtmlForm;
 import org.htmlunit.html.HtmlPage;
 import hudson.model.*;
 import hudson.plugins.promoted_builds.conditions.SelfPromotionCondition;
 import hudson.plugins.promoted_builds.parameters.PromotedBuildParameterDefinition;
 import hudson.plugins.promoted_builds.parameters.PromotedBuildParameterValue;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Mads Mohr Christensen
  */
-public class PromotedBuildRebuildParameterProviderTest {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class PromotedBuildRebuildParameterProviderTest {
 
     @Test
-    public void testRebuild() throws Exception {
+    void testRebuild(JenkinsRule j) throws Exception {
         // job with promotion process
         FreeStyleProject p1 = j.createFreeStyleProject("promojob");
 
@@ -58,7 +56,7 @@ public class PromotedBuildRebuildParameterProviderTest {
         j.waitUntilNoActivity();
 
         // verify that promotion happened
-        Assert.assertSame(proc.getBuilds().getLastBuild().getTargetBuildOrFail(), b1);
+        assertSame(proc.getBuilds().getLastBuild().getTargetBuildOrFail(), b1);
 
         // job with parameter
         FreeStyleProject p2 = j.createFreeStyleProject("paramjob");
@@ -73,12 +71,12 @@ public class PromotedBuildRebuildParameterProviderTest {
 
         // validate presence of parameter
         ParametersAction a1 = b2.getAction(ParametersAction.class);
-        Assert.assertNotNull(a1);
-        Assert.assertFalse(a1.getParameters().isEmpty());
+        assertNotNull(a1);
+        assertFalse(a1.getParameters().isEmpty());
         ParameterValue v1 = a1.getParameter("var");
-        Assert.assertTrue(v1 instanceof PromotedBuildParameterValue);
+        assertInstanceOf(PromotedBuildParameterValue.class, v1);
         PromotedBuildParameterValue pbpv1 = (PromotedBuildParameterValue) v1;
-        Assert.assertEquals(b1.getNumber(), pbpv1.getRun().getNumber());
+        assertEquals(b1.getNumber(), pbpv1.getRun().getNumber());
 
         // rebuild it
         JenkinsRule.WebClient wc = j.createWebClient();
@@ -90,13 +88,13 @@ public class PromotedBuildRebuildParameterProviderTest {
         // validate presence of parameter
         FreeStyleBuild rebuild = p2.getLastBuild();
         j.assertBuildStatusSuccess(rebuild);
-        Assert.assertNotEquals(b2.getNumber(), rebuild.getNumber());
+        assertNotEquals(b2.getNumber(), rebuild.getNumber());
         ParametersAction a2 = rebuild.getAction(ParametersAction.class);
-        Assert.assertNotNull(a2);
-        Assert.assertFalse(a2.getParameters().isEmpty());
+        assertNotNull(a2);
+        assertFalse(a2.getParameters().isEmpty());
         ParameterValue v2 = a2.getParameter("var");
-        Assert.assertTrue(v2 instanceof PromotedBuildParameterValue);
+        assertInstanceOf(PromotedBuildParameterValue.class, v2);
         PromotedBuildParameterValue pbpv2 = (PromotedBuildParameterValue) v2;
-        Assert.assertEquals(b1.getNumber(), pbpv2.getRun().getNumber());
+        assertEquals(b1.getNumber(), pbpv2.getRun().getNumber());
     }
 }

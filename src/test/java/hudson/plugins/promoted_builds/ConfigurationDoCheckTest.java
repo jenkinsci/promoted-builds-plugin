@@ -4,26 +4,23 @@ import org.htmlunit.html.HtmlPage;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.promoted_builds.conditions.DownstreamPassCondition;
 import hudson.tasks.JavadocArchiver;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-import static org.htmlunit.html.HtmlFormUtil.submit;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Seiji Sogabe
  */
-public class ConfigurationDoCheckTest {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class ConfigurationDoCheckTest {
 
     @Issue("JENKINS-7972")
     @Test
-    public void testCheckProcessNameRequired() throws Exception {
+    void testCheckProcessNameRequired(JenkinsRule j) throws Exception {
         FreeStyleProject down = j.createFreeStyleProject();
 
         FreeStyleProject p = j.createFreeStyleProject();
@@ -39,14 +36,14 @@ public class ConfigurationDoCheckTest {
         JenkinsRule.WebClient client = j.createWebClient();
         client.getOptions().setThrowExceptionOnFailingStatusCode(false);
 
-        HtmlPage page = (HtmlPage) submit(client.getPage(p, "configure").getFormByName("config"));
+        HtmlPage page = j.submit(client.getPage(p, "configure").getFormByName("config"));
         assertTrue(page.getVisibleText().contains("No name is specified"));
 
     }
 
     @Issue("JENKINS-7972")
     @Test
-    public void testCheckInvalidProcessName() throws Exception {
+    void testCheckInvalidProcessName(JenkinsRule j) throws Exception {
         FreeStyleProject down = j.createFreeStyleProject();
 
         FreeStyleProject p = j.createFreeStyleProject();
@@ -62,7 +59,7 @@ public class ConfigurationDoCheckTest {
         JenkinsRule.WebClient client = j.createWebClient();
         client.getOptions().setThrowExceptionOnFailingStatusCode(false);
 
-        HtmlPage page = (HtmlPage) submit(client.getPage(p, "configure").getFormByName("config"));
+        HtmlPage page = j.submit(client.getPage(p, "configure").getFormByName("config"));
         assertTrue(page.getVisibleText().contains("unsafe character"));
 
     }

@@ -39,19 +39,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import jenkins.model.Jenkins;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.junit.Rule;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /** Verifies use of REST API to manipulate promotions. */
 @Issue("JENKINS-8963")
-public class RemoteApiTest {
+@WithJenkins
+class RemoteApiTest {
 
-    @Rule public JenkinsRule r = new JenkinsRule();
-
-    @Test public void getAndModify() throws Exception {
+    @Test
+    void getAndModify(JenkinsRule r) throws Exception {
         FreeStyleProject p = r.createFreeStyleProject("p");
         JobPropertyImpl promotion = new JobPropertyImpl(p);
         p.addProperty(promotion);
@@ -59,8 +60,8 @@ public class RemoteApiTest {
         proc.conditions.add(new SelfPromotionCondition(true));
         JenkinsRule.WebClient wc = r.createWebClient();
         String xml = wc.goToXml("job/p/promotion/process/promo/config.xml").asXml().replaceAll("\\s*\\n\\s*","");
-        assertTrue(xml, xml.contains("SelfPromotionCondition"));
-        assertTrue(xml, xml.contains("<evenIfUnstable>true</evenIfUnstable>"));
+        assertTrue(xml.contains("SelfPromotionCondition"), xml);
+        assertTrue(xml.contains("<evenIfUnstable>true</evenIfUnstable>"), xml);
         WebRequest req = new WebRequest(wc.createCrumbedUrl("job/p/promotion/process/promo/config.xml"), HttpMethod.POST);
         req.setEncodingType(null);
         req.setRequestBody(xml.replace("<evenIfUnstable>true</evenIfUnstable>", "<evenIfUnstable>false</evenIfUnstable>"));
@@ -69,13 +70,14 @@ public class RemoteApiTest {
         assertFalse(proc.conditions.get(SelfPromotionCondition.class).isEvenIfUnstable());
     }
 
-    @Test public void acl() throws Exception {
+    @Test
+    void acl(JenkinsRule r) throws Exception {
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         ProjectMatrixAuthorizationStrategy pmas = new ProjectMatrixAuthorizationStrategy();
         r.jenkins.setAuthorizationStrategy(pmas);
         pmas.add(Jenkins.READ, "anonymous");
         FreeStyleProject p = r.createFreeStyleProject("p");
-        Map<Permission,Set<String>> perms = new HashMap<Permission,Set<String>>();
+        Map<Permission,Set<String>> perms = new HashMap<>();
         perms.put(Item.READ, Collections.singleton("alice"));
         perms.put(Item.CONFIGURE, Collections.singleton("alice"));
         perms.put(Item.DISCOVER, Collections.singleton("bob"));
@@ -92,7 +94,8 @@ public class RemoteApiTest {
         wc.goToXml("job/p/promotion/process/promo/config.xml");
     }
 
-    @Test public void delete() throws Exception {
+    @Test
+    void delete(JenkinsRule r) throws Exception {
         FreeStyleProject p = r.createFreeStyleProject("p");
         JobPropertyImpl promotion = new JobPropertyImpl(p);
         p.addProperty(promotion);
@@ -105,7 +108,8 @@ public class RemoteApiTest {
         assertEquals(0, promotion.getActiveItems().size());
     }
 
-    @Test public void create() throws Exception {
+    @Test
+    void create(JenkinsRule r) throws Exception {
         FreeStyleProject p = r.createFreeStyleProject("p");
         JobPropertyImpl promotion = new JobPropertyImpl(p);
         p.addProperty(promotion);
@@ -117,7 +121,7 @@ public class RemoteApiTest {
         req.setRequestBody("<hudson.plugins.promoted__builds.PromotionProcess><conditions><hudson.plugins.promoted__builds.conditions.SelfPromotionCondition><evenIfUnstable>true</evenIfUnstable></hudson.plugins.promoted__builds.conditions.SelfPromotionCondition></conditions></hudson.plugins.promoted__builds.PromotionProcess>");
         wc.getPage(req);
         assertEquals(1, promotion.getItems().size());
-        assertEquals("not yet in use", 0, promotion.getActiveItems().size());
+        assertEquals(0, promotion.getActiveItems().size(), "not yet in use");
         PromotionProcess proc = promotion.getItem("promo");
         assertNotNull(proc);
         assertTrue(proc.conditions.get(SelfPromotionCondition.class).isEvenIfUnstable());
