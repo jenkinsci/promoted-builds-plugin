@@ -39,7 +39,7 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
         public RedeployPublisher newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             // Javadoc of Descriptor.newInstance() states that req is always non-null, but legacy
             // requirements cause it to retain the Nullable annotation
-            // Silence spotbuts by handling null
+            // Silence spotbugs by handling null
             if (req == null) {
                 throw new FormException("Unexpected null req passed to newInstance", "unknown field");
             }
