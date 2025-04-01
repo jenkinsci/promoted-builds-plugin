@@ -51,8 +51,6 @@ public class ItemPathResolver {
      * {@link #getByPath(java.lang.String, hudson.model.Item, java.lang.Class)}
      */
     @Restricted(NoExternalUse.class)
-    @SuppressFBWarnings(value = "MS_SHOULD_BE_FINAL", 
-            justification = "We want to allow modifying it from Groovy scripts as a last resort")
     private static boolean ENABLE_LEGACY_RESOLUTION_AGAINST_ROOT =
             Boolean.getBoolean(ItemPathResolver.class+".enableResolutionAgainstRoot");
     
@@ -204,7 +202,6 @@ public class ItemPathResolver {
          * @return true if the manager made a decision. null by default
          */
         @CheckForNull
-        @SuppressFBWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "Third state for the logic")
         public Boolean isEnableLegacyItemPathResolutionMode() {
             return null;
         }  

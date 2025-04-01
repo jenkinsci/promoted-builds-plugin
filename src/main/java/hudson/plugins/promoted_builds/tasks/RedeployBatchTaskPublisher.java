@@ -35,9 +35,14 @@ public class RedeployBatchTaskPublisher extends RedeployPublisher {
             return jobType== PromotionProcess.class;
         }
 
-        @SuppressFBWarnings("NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
         @Override
         public RedeployPublisher newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
+            // Javadoc of Descriptor.newInstance() states that req is always non-null, but legacy
+            // requirements cause it to retain the Nullable annotation
+            // Silence spotbuts by handling null
+            if (req == null) {
+                throw new FormException("Unexpected null req passed to newInstance", "unknown field");
+            }
             return req.bindJSON(RedeployBatchTaskPublisher.class,formData);
         }
     }
