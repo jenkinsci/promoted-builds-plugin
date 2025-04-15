@@ -39,7 +39,7 @@
       <badge reference="../../hudson.plugins.promoted__builds.PromotedBuildAction/statuses/hudson.plugins.promoted__builds.Status/badges/hudson.plugins.promoted__builds.conditions.ManualCondition_-Badge"/>
     </hudson.plugins.promoted__builds.conditions.ManualCondition_-ManualApproval>
   </actions>
-  <number>2</number>
+  <timestamp>1349672341000</timestamp>
   <result>SUCCESS</result>
   <duration>39</duration>
   <charset>UTF-8</charset>

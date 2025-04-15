@@ -6,7 +6,7 @@
       <number>2</number>
     </hudson.plugins.promoted__builds.PromotionTargetAction>
   </actions>
-  <number>1</number>
+  <timestamp>1349672411000</timestamp>
   <result>SUCCESS</result>
   <duration>109</duration>
   <charset>UTF-8</charset>
