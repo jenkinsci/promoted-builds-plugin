@@ -34,8 +34,6 @@ import hudson.tasks.BuildTrigger;
 
 import jenkins.model.Jenkins;
 
-import org.apache.commons.lang.StringUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -144,7 +142,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         SimpleDateFormat format = null;
         TimeZone tz = null;
 
-        if (dateFormat != null && !StringUtils.isBlank(dateFormat)) {
+        if (dateFormat != null && !dateFormat.isBlank()) {
             try {
                 format = new SimpleDateFormat(dateFormat);
             } catch (IllegalArgumentException e1) {
@@ -156,7 +154,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
             format =  new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
         }
 
-        if (timeZone !=null && !StringUtils.isBlank(timeZone)) {
+        if (timeZone !=null && !timeZone.isBlank()) {
             try {
                 tz = TimeZone.getTimeZone(timeZone);
             } catch (IllegalArgumentException e2) {

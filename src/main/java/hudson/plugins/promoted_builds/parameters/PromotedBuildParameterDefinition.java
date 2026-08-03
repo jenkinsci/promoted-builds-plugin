@@ -47,7 +47,6 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.AncestorInPath;
@@ -216,7 +215,7 @@ public class PromotedBuildParameterDefinition extends SimpleParameterDefinition 
             
             project.checkPermission(Item.CONFIGURE);
 
-            if (StringUtils.isNotBlank(value)) {
+            if (value != null && !value.isBlank()) {
                 // JENKINS-25011: also look for jobs in folders.
                 final AbstractProject p = ItemPathResolver.getByPath(value, project, AbstractProject.class);
                 if (p==null) {
