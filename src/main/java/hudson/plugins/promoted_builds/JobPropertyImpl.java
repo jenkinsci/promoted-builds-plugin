@@ -1,5 +1,6 @@
 package hudson.plugins.promoted_builds;
 
+import java.util.Objects;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -13,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jenkins.security.MasterToSlaveCallable;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.Ancestor;
@@ -333,7 +333,7 @@ public final class JobPropertyImpl extends JobProperty<AbstractProject<?,?>> imp
             return null;
         }
         for (PromotionProcess c : processes) {
-            if( StringUtils.equals( c.getName(),name))
+            if( Objects.equals( c.getName(),name))
                 return c;
         }
         return null;

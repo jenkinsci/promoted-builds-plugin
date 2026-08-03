@@ -1,12 +1,12 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
+import java.util.Objects;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
-import org.apache.commons.lang.ObjectUtils;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter;
@@ -112,8 +112,8 @@ public class JobDslPromotionProcessConverter extends ReflectionConverter {
         Map<?,?> attributes = node.attributes();
         if (attributes != null) {
             for (Map.Entry<?,?> entry : attributes.entrySet()) {
-                String key = ObjectUtils.toString(entry.getKey());
-                String value = ObjectUtils.toString(entry.getValue());
+                String key = Objects.toString(entry.getKey(), "");
+                String value = Objects.toString(entry.getValue(), "");
                 writer.addAttribute(key, value);
             }
         }

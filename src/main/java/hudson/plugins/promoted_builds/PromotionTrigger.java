@@ -10,7 +10,6 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.ListBoxModel.Option;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -74,7 +73,7 @@ public class PromotionTrigger extends Trigger<AbstractProject> {
             }
             project.checkPermission(Item.CONFIGURE);
 
-            if (StringUtils.isNotBlank(value)) {
+            if (value != null && !value.isBlank()) {
                 AbstractProject p = Jenkins.get().getItem(value,project,AbstractProject.class);
                 if(p==null) {
                     AbstractProject nearest = AbstractProject.findNearest(value, project.getParent());
