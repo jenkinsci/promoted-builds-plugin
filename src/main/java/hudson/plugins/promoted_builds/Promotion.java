@@ -60,11 +60,11 @@ import hudson.init.Initializer;
 import org.kohsuke.accmod.restrictions.DoNotUse;
 
 /**
- * Records a promotion process.
+ * Records a promotion process for {@link AbstractProject}s.
  *
  * @author Kohsuke Kawaguchi
  */
-public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
+public class Promotion extends AbstractBuild<PromotionProcess,Promotion> implements PromotionRun {
 
     public Promotion(PromotionProcess job) throws IOException {
         super(job);
@@ -129,6 +129,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
 
         // Augment environment with target build's information
         String rootUrl = Jenkins.get().getRootUrl();
+        //TODO: Refactor to Run
         AbstractBuild<?, ?> target = getTargetBuildOrFail();
         if(rootUrl!=null)
             e.put("PROMOTED_URL",rootUrl+target.getUrl());
@@ -178,7 +179,7 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         }
 
         // Allow the promotion status to contribute to build environment
-        getStatus().buildEnvVars(this, e);
+        getStatus().buildEnvVars(this, e, listener);
 
         return e;
     }
@@ -255,6 +256,21 @@ public class Promotion extends AbstractBuild<PromotionProcess,Promotion> {
         return User.getUnknown().getId();
     }
 
+    @Nonnull
+    @Override
+    public Run<?, ?> getPromotedRun() {
+        return getTarget();
+    }
+
+
+    @Nonnull
+    @Override
+    public Run<?, ?> getPromotionRun() {
+        return this;
+    }
+
+    //TODO: move to a default method
+    @Override
     public List<ParameterValue> getParameterValues(){
       List<ParameterValue> values=new ArrayList<ParameterValue>();
       ParametersAction parametersAction=getParametersActions(this);
