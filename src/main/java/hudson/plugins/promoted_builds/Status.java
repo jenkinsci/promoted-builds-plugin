@@ -9,6 +9,8 @@ import hudson.model.Cause.UserCause;
 import hudson.model.ParameterDefinition;
 import hudson.model.ParameterValue;
 import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.util.Iterators;
 import net.sf.json.JSONArray;
@@ -147,17 +149,29 @@ public final class Status {
         return _parent != null ? _parent.owner : null;
     }
 
+
+
     /**
      * Called by {@link Promotion} to allow status to contribute environment variables.
      *
-     * @param build
-     *      The calling build. Never null.
+     * @param run
+     *      The calling run
      * @param env
      *      Environment variables should be added to this map.
      */
+    public void buildEnvVars(Run<?,?> run, EnvVars env, TaskListener listener) {
+        for (PromotionBadge badge : badges) {
+            badge.buildEnvVars(run, env, listener);
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #buildEnvVars(Run, EnvVars, TaskListener)}
+     */
+    @Deprecated
     public void buildEnvVars(AbstractBuild<?,?> build, EnvVars env) {
         for (PromotionBadge badge : badges) {
-            badge.buildEnvVars(build, env);
+            badge.buildEnvVars(build, env, TaskListener.NULL);
         }
     }
 
