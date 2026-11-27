@@ -4,6 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -89,7 +92,13 @@ public class PromotionsExtensionPoint extends ContextExtensionPoint {
                     createUpdate = "Updated";
                 }
                 try {
-                    InputStream in = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+                    byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
+                    // Rewriting an unchanged promotion would reload the item for nothing
+                    if (!created && configXml.isFile() && Arrays.equals(bytes, Files.readAllBytes(configXml.toPath()))) {
+                        LOGGER.log(Level.FINE, String.format("Promotion with name %s for %s is unchanged", name, item.getName()));
+                        continue;
+                    }
+                    InputStream in = new ByteArrayInputStream(bytes);
                     IOUtils.copy(in, configXml);
                     LOGGER.log(Level.INFO, String.format(createUpdate + " promotion with name %s for %s", name, item.getName()));
                     update = true;

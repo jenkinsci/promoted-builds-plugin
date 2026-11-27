@@ -1,9 +1,14 @@
 package hudson.plugins.promoted_builds.integrations.jobdsl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.model.FreeStyleBuild;
+import hudson.plugins.promoted_builds.JobPropertyImpl;
+import hudson.plugins.promoted_builds.PromotionProcess;
+import hudson.plugins.promoted_builds.conditions.ManualCondition;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.TopLevelItem;
@@ -94,6 +99,49 @@ class PromotionsDslContextExtensionTest {
 
         assertTrue(Pattern.compile("<buildWrappers>\\s+<hudson\\.plugins\\.timestamper\\.TimestamperBuildWrapper/>\\s+</buildWrappers>")
                 .matcher(content).find());
+    }
+
+    @Test
+    void testShouldNotRewriteUnchangedPromotions(JenkinsRule j) throws Exception {
+        // Given
+        String dsl = FileUtils.readFileToString(new File("src/test/resources/example-dsl.groovy"), StandardCharsets.UTF_8);
+        FreeStyleProject seedJob = j.createFreeStyleProject();
+        seedJob.getBuildersList().add(createScript(dsl));
+        j.assertBuildStatusSuccess(seedJob.scheduleBuild2(0));
+
+        FreeStyleProject job = j.jenkins.getItemByFullName("test-job", FreeStyleProject.class);
+        PromotionProcess process = job.getProperty(JobPropertyImpl.class).getItem("Development");
+        File config = new File(job.getRootDir(), "promotions/Development/config.xml");
+        long lastModified = System.currentTimeMillis() - 3_600_000L;
+        assertTrue(config.setLastModified(lastModified));
+
+        // When
+        j.assertBuildStatusSuccess(seedJob.scheduleBuild2(0));
+
+        // Then
+        assertEquals(lastModified, config.lastModified(), "the unchanged promotion was rewritten");
+        job = j.jenkins.getItemByFullName("test-job", FreeStyleProject.class);
+        assertSame(process, job.getProperty(JobPropertyImpl.class).getItem("Development"), "the job was reloaded");
+    }
+
+    @Test
+    void testShouldRewriteChangedPromotions(JenkinsRule j) throws Exception {
+        // Given
+        String dsl = FileUtils.readFileToString(new File("src/test/resources/example-dsl.groovy"), StandardCharsets.UTF_8);
+        FreeStyleProject seedJob = j.createFreeStyleProject();
+        seedJob.getBuildersList().add(createScript(dsl));
+        j.assertBuildStatusSuccess(seedJob.scheduleBuild2(0));
+
+        // When
+        seedJob.getBuildersList().replace(createScript(dsl.replace("manual('tester')", "manual('reviewer')")));
+        j.assertBuildStatusSuccess(seedJob.scheduleBuild2(0));
+
+        // Then
+        FreeStyleProject job = j.jenkins.getItemByFullName("test-job", FreeStyleProject.class);
+        File config = new File(job.getRootDir(), "promotions/Development/config.xml");
+        assertTrue(Files.readString(config.toPath(), StandardCharsets.UTF_8).contains("reviewer"));
+        ManualCondition condition = job.getProperty(JobPropertyImpl.class).getItem("Development").conditions.get(ManualCondition.class);
+        assertEquals("reviewer", condition.getUsers(), "the job wasn't reloaded");
     }
 
     @Test
